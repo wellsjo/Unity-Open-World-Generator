@@ -23,9 +23,6 @@ public class MapPreview : MonoBehaviour
     public int editorPreviewLOD;
     public bool autoUpdate;
 
-
-
-
     public void DrawMapInEditor()
     {
         textureData.ApplyToMaterial(terrainMaterial);
@@ -45,10 +42,6 @@ public class MapPreview : MonoBehaviour
             DrawTexture(TextureGenerator.TextureFromHeightMap(new HeightMap(FalloffGenerator.GenerateFalloffMap(meshSettings.numVertsPerLine), 0, 1)));
         }
     }
-
-
-
-
 
     public void DrawTexture(Texture2D texture)
     {

@@ -3,8 +3,13 @@ using UnityEngine;
 public static class HeightMapGenerator
 {
     static float[,] falloffMap;
+    static int heightMapCounter = 0;
+
     public static HeightMap GenerateHeightMap(int width, int height, HeightMapSettings settings, Vector2 sampleCentre)
     {
+        Debug.Log("GenerateHeightMap");
+        Debug.Log(++heightMapCounter);
+
         float[,] values = Noise.GenerateNoiseMap(width, height, settings.noiseSettings, sampleCentre);
 
         AnimationCurve heightCurve_threadsafe = new AnimationCurve(settings.heightCurve.keys);

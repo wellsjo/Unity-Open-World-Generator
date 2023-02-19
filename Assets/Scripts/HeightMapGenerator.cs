@@ -3,13 +3,9 @@ using UnityEngine;
 public static class HeightMapGenerator
 {
     static float[,] falloffMap;
-    static int heightMapCounter = 0;
 
-    public static HeightMap GenerateHeightMap(int width, int height, HeightMapSettings settings, Vector2 sampleCentre)
+    public static HeightMap GenerateHeightMap(int width, int height, HeightMapSettings settings, Vector2 sampleCentre, bool useFalloff)
     {
-        Debug.Log("GenerateHeightMap");
-        Debug.Log(++heightMapCounter);
-
         float[,] values = Noise.GenerateNoiseMap(width, height, settings.noiseSettings, sampleCentre);
 
         AnimationCurve heightCurve_threadsafe = new AnimationCurve(settings.heightCurve.keys);
@@ -17,11 +13,11 @@ public static class HeightMapGenerator
         float minValue = float.MaxValue;
         float maxValue = float.MinValue;
 
-        if (settings.useFalloff)
+        if (useFalloff)
         {
             if (falloffMap == null)
             {
-                falloffMap = FalloffGenerator.GenerateFalloffMap(width);
+                falloffMap = FalloffGenerator.GenerateFalloffMap(width, height);
             }
         }
 
@@ -29,7 +25,7 @@ public static class HeightMapGenerator
         {
             for (int j = 0; j < height; j++)
             {
-                values[i, j] *= heightCurve_threadsafe.Evaluate(values[i, j] - (settings.useFalloff ? falloffMap[i, j] : 0)) * settings.heightMultiplier;
+                values[i, j] *= heightCurve_threadsafe.Evaluate(values[i, j] - (useFalloff ? falloffMap[i, j] : 0)) * settings.heightMultiplier;
 
                 if (values[i, j] > maxValue)
                 {
@@ -52,11 +48,15 @@ public struct HeightMap
     public readonly float[,] values;
     public readonly float minValue;
     public readonly float maxValue;
+    public readonly int width;
+    public readonly int height;
 
     public HeightMap(float[,] values, float minValue, float maxValue)
     {
         this.values = values;
         this.minValue = minValue;
         this.maxValue = maxValue;
+        this.width = values.GetLength(0);
+        this.height = values.GetLength(1);
     }
 }

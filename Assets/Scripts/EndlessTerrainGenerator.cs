@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TerrainGenerator : MonoBehaviour
+// Procedurally generate terrain based on various settings and the viewer's position. When the viewer moves,
+// We calculate the changed terrain chunks in view / out of view, then update them if necessary.
+public class EndlessTerrainGenerator : MonoBehaviour
 {
 
     const float viewerMoveThresholdForChunkUpdate = 25f;
@@ -13,6 +15,7 @@ public class TerrainGenerator : MonoBehaviour
 
     public MeshSettings meshSettings;
     public HeightMapSettings heightMapSettings;
+    public InfiniteMapSettings infiniteMapSettings;
     public TextureData textureSettings;
 
     public Transform viewer;
@@ -40,6 +43,8 @@ public class TerrainGenerator : MonoBehaviour
         UpdateVisibleChunks();
     }
 
+    // Chek if the player has moved, if so update the collision mesh
+    // Check to see if the player has moved past the threshold; if so, update the visible chunks
     void Update()
     {
         viewerPosition = new Vector2(viewer.position.x, viewer.position.z);
@@ -84,7 +89,7 @@ public class TerrainGenerator : MonoBehaviour
                     }
                     else
                     {
-                        TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial);
+                        TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial, infiniteMapSettings.useFalloffPerChunk);
                         terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
                         newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
                         newChunk.Load();

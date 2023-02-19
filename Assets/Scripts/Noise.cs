@@ -8,8 +8,9 @@ public static class Noise
     public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, NoiseSettings settings, Vector2 sampleCentre)
     {
         float[,] noiseMap = new float[mapWidth, mapHeight];
+        Debug.Log("GenerateNoiseMap");
 
-        System.Random prng = new System.Random(settings.seed);
+        System.Random rng = new System.Random(settings.seed);
         Vector2[] octaveOffsets = new Vector2[settings.octaves];
 
         float maxPossibleHeight = 0;
@@ -18,8 +19,11 @@ public static class Noise
 
         for (int i = 0; i < settings.octaves; i++)
         {
-            float offsetX = prng.Next(-100000, 100000) + settings.offset.x + sampleCentre.x;
-            float offsetY = prng.Next(-100000, 100000) - settings.offset.y - sampleCentre.y;
+            // this range -100000,100000 gives best random numbers from testing
+            // adding and subtracting the center makes the tiles not repeat
+            float offsetX = rng.Next(-100000, 100000) + settings.offset.x + sampleCentre.x;
+            float offsetY = rng.Next(-100000, 100000) - settings.offset.y - sampleCentre.y;
+
             octaveOffsets[i] = new Vector2(offsetX, offsetY);
 
             maxPossibleHeight += amplitude;

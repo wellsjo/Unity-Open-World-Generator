@@ -3,13 +3,22 @@ using UnityEngine;
 public class MapPreview : MonoBehaviour
 {
 
+    public enum DrawMode { NoiseMap, Terrain };
+    public DrawMode drawMode;
+    public enum MapSize { Fixed, Infinite }
+    public MapSize mapSize;
+
+    [Range(0, MeshSettings.numSupportedLODs - 1)]
+    public int editorPreviewLOD;
+    public bool autoUpdate;
+
     public Renderer textureRender;
     public MeshFilter meshFilter;
     public MeshRenderer meshRenderer;
 
+    public InfiniteMapSettings infiniteMapSettings;
+    public FixedMapSettings fixedMapSettings;
 
-    public enum DrawMode { NoiseMap, Mesh, FalloffMap };
-    public DrawMode drawMode;
 
     public MeshSettings meshSettings;
     public HeightMapSettings heightMapSettings;
@@ -17,30 +26,44 @@ public class MapPreview : MonoBehaviour
 
     public Material terrainMaterial;
 
-
-
-    [Range(0, MeshSettings.numSupportedLODs - 1)]
-    public int editorPreviewLOD;
-    public bool autoUpdate;
-
     public void DrawMapInEditor()
     {
         textureData.ApplyToMaterial(terrainMaterial);
         textureData.UpdateMeshHeights(terrainMaterial, heightMapSettings.minHeight, heightMapSettings.maxHeight);
-        HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, Vector2.zero);
+        if (mapSize == MapSize.Fixed)
+        {
+            if (drawMode == DrawMode.NoiseMap)
+            {
+                // TODO fix bug where width/height are limited to mesh width
+                HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(fixedMapSettings.width, fixedMapSettings.height, heightMapSettings, Vector2.zero, fixedMapSettings.useFalloff);
+                Texture2D texture = TextureGenerator.TextureFromHeightMap(heightMap);
+                DrawTexture(texture);
+            }
+            else if (drawMode == DrawMode.Terrain)
+            {
+                // TODO draw each possible terrain chunk based on the map size
+                //int mapSize = (int)Mathf.Ceil(meshSettings.meshWorldSize);
+                //HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(mapSize, mapSize, heightMapSettings, Vector2.zero);
+                //MeshData meshData = MeshGenerator.GenerateHeightMapMesh(heightMap);
+                //DrawMesh(meshData);
+            }
+        }
+        else if (mapSize == MapSize.Infinite)
+        {
+            if (drawMode == DrawMode.NoiseMap)
+            {
+                HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, Vector2.zero, infiniteMapSettings.useFalloffPerChunk);
+                Texture2D texture = TextureGenerator.TextureFromHeightMap(heightMap);
+                DrawTexture(texture);
+            }
+            else if (drawMode == DrawMode.Terrain)
+            {
+                HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, Vector2.zero, infiniteMapSettings.useFalloffPerChunk);
+                MeshData meshData = MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, editorPreviewLOD);
+                DrawMesh(meshData);
+            }
+        }
 
-        if (drawMode == DrawMode.NoiseMap)
-        {
-            DrawTexture(TextureGenerator.TextureFromHeightMap(heightMap));
-        }
-        else if (drawMode == DrawMode.Mesh)
-        {
-            DrawMesh(MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, editorPreviewLOD));
-        }
-        else if (drawMode == DrawMode.FalloffMap)
-        {
-            DrawTexture(TextureGenerator.TextureFromHeightMap(new HeightMap(FalloffGenerator.GenerateFalloffMap(meshSettings.numVertsPerLine), 0, 1)));
-        }
     }
 
     public void DrawTexture(Texture2D texture)
@@ -93,7 +116,16 @@ public class MapPreview : MonoBehaviour
             textureData.OnValuesUpdated -= OnTextureValuesUpdated;
             textureData.OnValuesUpdated += OnTextureValuesUpdated;
         }
-
+        if (infiniteMapSettings != null)
+        {
+            infiniteMapSettings.OnValuesUpdated -= OnValuesUpdated;
+            infiniteMapSettings.OnValuesUpdated += OnValuesUpdated;
+        }
+        if (fixedMapSettings != null)
+        {
+            fixedMapSettings.OnValuesUpdated -= OnValuesUpdated;
+            fixedMapSettings.OnValuesUpdated += OnValuesUpdated;
+        }
     }
 
 }

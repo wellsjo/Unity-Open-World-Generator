@@ -2,17 +2,19 @@ using UnityEngine;
 
 public static class MeshGenerator
 {
-
-
+    public static MeshData GenerateHeightMapMesh(HeightMap heightMap)
+    {
+        MeshData meshData = MeshData.FromHeightMap(heightMap);
+        return meshData;
+    }
     public static MeshData GenerateTerrainMesh(float[,] heightMap, MeshSettings meshSettings, int levelOfDetail)
     {
-
         int skipIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
         int numVertsPerLine = meshSettings.numVertsPerLine;
 
         Vector2 topLeft = new Vector2(-1, 1) * meshSettings.meshWorldSize / 2f;
 
-        MeshData meshData = new MeshData(numVertsPerLine, skipIncrement, meshSettings.useFlatShading);
+        MeshData meshData = MeshData.Procedural(numVertsPerLine, skipIncrement, meshSettings.useFlatShading);
 
         int[,] vertexIndicesMap = new int[numVertsPerLine, numVertsPerLine];
         int meshVertexIndex = 0;
@@ -109,24 +111,67 @@ public class MeshData
 
     bool useFlatShading;
 
-    public MeshData(int numVertsPerLine, int skipIncrement, bool useFlatShading)
+    public MeshData(Vector3[] vertices_, int[] triangles_, Vector2[] uvs_)
     {
-        this.useFlatShading = useFlatShading;
-
+        vertices = vertices_;
+        triangles = triangles_;
+        uvs = uvs_;
+    }
+    public static MeshData Procedural(int numVertsPerLine, int skipIncrement, bool useFlatShading)
+    {
         int numMeshEdgeVertices = (numVertsPerLine - 2) * 4 - 4;
         int numEdgeConnectionVertices = (skipIncrement - 1) * (numVertsPerLine - 5) / skipIncrement * 4;
         int numMainVerticesPerLine = (numVertsPerLine - 5) / skipIncrement + 1;
         int numMainVertices = numMainVerticesPerLine * numMainVerticesPerLine;
 
-        vertices = new Vector3[numMeshEdgeVertices + numEdgeConnectionVertices + numMainVertices];
-        uvs = new Vector2[vertices.Length];
+        Vector3[] vertices = new Vector3[numMeshEdgeVertices + numEdgeConnectionVertices + numMainVertices];
+        Vector2[] uvs = new Vector2[vertices.Length];
 
         int numMeshEdgeTriangles = 8 * (numVertsPerLine - 4);
         int numMainTriangles = (numMainVerticesPerLine - 1) * (numMainVerticesPerLine - 1) * 2;
-        triangles = new int[(numMeshEdgeTriangles + numMainTriangles) * 3];
+        int[] triangles = new int[(numMeshEdgeTriangles + numMainTriangles) * 3];
 
-        outOfMeshVertices = new Vector3[numVertsPerLine * 4 - 4];
-        outOfMeshTriangles = new int[24 * (numVertsPerLine - 2)];
+        MeshData meshData = new MeshData(vertices, triangles, uvs);
+        meshData.useFlatShading = useFlatShading;
+        meshData.outOfMeshVertices = new Vector3[numVertsPerLine * 4 - 4];
+        meshData.outOfMeshTriangles = new int[24 * (numVertsPerLine - 2)];
+
+        return meshData;
+    }
+
+    public static MeshData FromHeightMap(HeightMap heightMap)
+    {
+        int width = heightMap.height;
+        int height = heightMap.width;
+        float topLeftX = (width - 1) / -2f;
+        float topLeftZ = (height - 1) / 2f;
+
+        Vector3[] vertices = new Vector3[width * height];
+        Vector2[] uvs = new Vector2[width * height];
+        int[] triangles = new int[(width - 1) * (height - 1) * 6];
+
+        MeshData meshData = new MeshData(vertices, triangles, uvs);
+        int vertexIndex = 0;
+
+        for (int y = 0; y < height; y++)
+        {
+            for (int x = 0; x < width; x++)
+            {
+
+                meshData.vertices[vertexIndex] = new Vector3(topLeftX + x, heightMap.values[x, y], topLeftZ - y);
+                meshData.uvs[vertexIndex] = new Vector2(x / (float)width, y / (float)height);
+
+                if (x < width - 1 && y < height - 1)
+                {
+                    meshData.AddTriangle(vertexIndex, vertexIndex + width + 1, vertexIndex + width);
+                    meshData.AddTriangle(vertexIndex + width + 1, vertexIndex, vertexIndex + 1);
+                }
+
+                vertexIndex++;
+            }
+        }
+
+        return meshData;
     }
 
     public void AddVertex(Vector3 vertexPosition, Vector2 uv, int vertexIndex)

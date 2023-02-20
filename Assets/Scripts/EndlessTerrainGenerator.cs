@@ -16,6 +16,7 @@ public class EndlessTerrainGenerator : MonoBehaviour
     public MeshSettings meshSettings;
     public HeightMapSettings heightMapSettings;
     public InfiniteMapSettings infiniteMapSettings;
+    public FixedMapSettings fixedMapSettings;
     public TextureData textureSettings;
 
     public Transform viewer;

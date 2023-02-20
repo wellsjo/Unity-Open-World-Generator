@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Fixed Map Settings
   m_EditorClassIdentifier: 
   autoUpdate: 1
-  width: 256
-  height: 256
-  useFalloff: 0
+  width: 20
+  height: 20
+  useFalloff: 1
   heightMapSettings: {fileID: 11400000, guid: 6119638c2fc221b4c88ea848089a701d, type: 2}

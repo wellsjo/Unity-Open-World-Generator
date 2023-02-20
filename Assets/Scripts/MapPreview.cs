@@ -3,7 +3,7 @@ using UnityEngine;
 public class MapPreview : MonoBehaviour
 {
 
-    public enum DrawMode { NoiseMap, Terrain };
+    public enum DrawMode { NoiseMap, Preview, TerrainGenerator };
     public DrawMode drawMode;
     public enum MapSize { Fixed, Infinite }
     public MapSize mapSize;
@@ -39,13 +39,12 @@ public class MapPreview : MonoBehaviour
                 Texture2D texture = TextureGenerator.TextureFromHeightMap(heightMap);
                 DrawTexture(texture);
             }
-            else if (drawMode == DrawMode.Terrain)
+            else if (drawMode == DrawMode.TerrainGenerator)
             {
                 // TODO draw each possible terrain chunk based on the map size
-                //int mapSize = (int)Mathf.Ceil(meshSettings.meshWorldSize);
-                //HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(mapSize, mapSize, heightMapSettings, Vector2.zero);
-                //MeshData meshData = MeshGenerator.GenerateHeightMapMesh(heightMap);
-                //DrawMesh(meshData);
+                HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(fixedMapSettings.width, fixedMapSettings.height, heightMapSettings, Vector2.zero, fixedMapSettings.useFalloff);
+                MeshData meshData = MeshGenerator.GenerateHeightMapMesh(heightMap);
+                DrawMesh(meshData);
             }
         }
         else if (mapSize == MapSize.Infinite)
@@ -56,7 +55,7 @@ public class MapPreview : MonoBehaviour
                 Texture2D texture = TextureGenerator.TextureFromHeightMap(heightMap);
                 DrawTexture(texture);
             }
-            else if (drawMode == DrawMode.Terrain)
+            else if (drawMode == DrawMode.TerrainGenerator)
             {
                 HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, Vector2.zero, infiniteMapSettings.useFalloffPerChunk);
                 MeshData meshData = MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, editorPreviewLOD);

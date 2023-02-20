@@ -71,9 +71,11 @@ public class TerrainChunk
 
     }
 
+    // TerrainChunk loads a new height map with only the number of vertices per mesh, then requests mesh data for it
     public void Load()
     {
-        ThreadedDataRequester.RequestData(() => HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, sampleCentre, this.useFalloff), OnHeightMapReceived);
+        HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, sampleCentre, this.useFalloff);
+        ThreadedDataRequester.RequestData(() => heightMap, OnHeightMapReceived);
     }
 
     void OnHeightMapReceived(object heightMapObject)
@@ -92,7 +94,7 @@ public class TerrainChunk
         }
     }
 
-
+    // Update the level of detail for the terrain chunk (or hide it)
     public void UpdateTerrainChunk()
     {
         if (heightMapReceived)
@@ -139,10 +141,7 @@ public class TerrainChunk
             {
 
                 SetVisible(visible);
-                if (onVisibilityChanged != null)
-                {
-                    onVisibilityChanged(this, visible);
-                }
+                onVisibilityChanged?.Invoke(this, visible);
             }
         }
     }
@@ -209,7 +208,8 @@ class LODMesh
     public void RequestMesh(HeightMap heightMap, MeshSettings meshSettings)
     {
         hasRequestedMesh = true;
-        ThreadedDataRequester.RequestData(() => MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, lod), OnMeshDataReceived);
+        MeshData meshData = MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, lod);
+        ThreadedDataRequester.RequestData(() => meshData, OnMeshDataReceived);
     }
 
 }

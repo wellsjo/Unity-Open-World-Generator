@@ -13,6 +13,16 @@ public class MapSettings : UpdatableData
     public NoiseSettings noiseSettings;
     public float heightMultiplier;
     public AnimationCurve heightCurve;
+    public LODInfo[] detailLevels;
+
+    public Vector2 range
+    {
+        get
+        {
+            int r = (int)Mathf.Floor((float)fixedSize / 2);
+            return new Vector2(-r, r);
+        }
+    }
 
     public float minHeight
     {
@@ -39,4 +49,21 @@ public class MapSettings : UpdatableData
     }
 #endif
 
+}
+
+[System.Serializable]
+public struct LODInfo
+{
+    [Range(0, MeshSettings.numSupportedLODs - 1)]
+    public int lod;
+    public float visibleDstThreshold;
+
+
+    public float sqrVisibleDstThreshold
+    {
+        get
+        {
+            return visibleDstThreshold * visibleDstThreshold;
+        }
+    }
 }

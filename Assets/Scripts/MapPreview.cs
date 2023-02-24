@@ -24,72 +24,30 @@ public class MapPreview : MonoBehaviour
         textureData.ApplyToMaterial(terrainMaterial);
         textureData.UpdateMeshHeights(terrainMaterial, mapSettings.minHeight, mapSettings.maxHeight);
 
-        if (mapSettings.borderType == Map.BorderType.Fixed)
+        if (drawMode == Map.DrawMode.NoiseMap)
         {
-            int heightMapSize = meshSettings.numVertsPerLine * mapSettings.fixedSize;
-
-            if (drawMode == Map.DrawMode.NoiseMap)
+            int heightMapSize;
+            if (mapSettings.borderType == Map.BorderType.Infinite)
             {
-                HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(heightMapSize, heightMapSize, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
-                Texture2D texture = TextureGenerator.TextureFromHeightMap(heightMap);
-                DrawTexture(texture);
+                heightMapSize = meshSettings.numVertsPerLine;
             }
-            else if (drawMode == Map.DrawMode.Preview)
+            else
             {
-                // TODO check if it is 250 or less
-                // TODO remove this, it's not good because it requires using the max mesh size
-                HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(heightMapSize, heightMapSize, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
-                SimpleMeshData meshData = MeshGenerator.GenerateTerrainMesh(heightMap.values);
-                DrawSimpleMesh(meshData);
+                heightMapSize = meshSettings.numVertsPerLine * mapSettings.fixedSize;
             }
-            else if (drawMode == Map.DrawMode.TerrainGenerator)
-            {
-                Debug.Log("verts per line");
-                Debug.Log(meshSettings.numVertsPerLine);
-                //HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(heightMapSize, heightMapSize, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
-                //MeshGenerator.GenerateTerrainChunkMesh();
-
-                // Maybe show noise map here?
-            }
+            HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(heightMapSize, heightMapSize, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
+            Texture2D texture = TextureGenerator.TextureFromHeightMap(heightMap);
+            DrawTexture(texture);
         }
-        else if (mapSettings.borderType == Map.BorderType.Infinite)
+        else if (drawMode == Map.DrawMode.Preview)
         {
-            if (drawMode == Map.DrawMode.NoiseMap)
-            {
-                HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
-                Texture2D texture = TextureGenerator.TextureFromHeightMap(heightMap);
-                DrawTexture(texture);
-            }
-            else if (drawMode == Map.DrawMode.Preview)
-            {
-                // Render 9 chunks instead of 1
-                /*                HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine * 9, meshSettings.numVertsPerLine * 9, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
-                                for (int x = -1; x <= 1; x++)
-                                {
-                                    for (int y = -1; y <= 1; y++)
-                                    {
-                                        int indexX = (x + 1) * meshSettings.numVertsPerLine;
-                                        int indexY = (y + 1) * meshSettings.numVertsPerLine;
-                                        float[,] heightMapValues = new float[meshSettings.numVertsPerLine, meshSettings.numVertsPerLine];
-                                        for (int i = 0; i < meshSettings.numVertsPerLine; i++)
-                                        {
-                                            for (int j = 0; j < meshSettings.numVertsPerLine; j++)
-                                            {
-                                                heightMapValues[i, j] = heightMap.values[indexX + i, indexY + j];
-                                            }
-                                        }
-
-                                        MeshData meshData = MeshGenerator.GenerateTerrainChunkMesh(heightMapValues, meshSettings, editorPreviewLOD);
-                                        DrawMesh(meshData);
-                                    }
-                                }*/
-            }
-            else if (drawMode == Map.DrawMode.TerrainGenerator)
-            {
-                HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
-                MeshData meshData = MeshGenerator.GenerateTerrainChunkMesh(heightMap.values, meshSettings, editorPreviewLOD);
-                DrawMesh(meshData);
-            }
+            MeshGenerator.GeneratePreview(meshSettings, mapSettings);
+        }
+        else if (drawMode == Map.DrawMode.TerrainGenerator)
+        {
+            HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
+            MeshData meshData = MeshGenerator.GenerateTerrainChunkMesh(heightMap.values, meshSettings, editorPreviewLOD);
+            DrawMesh(meshData);
         }
 
     }
@@ -138,13 +96,13 @@ public class MapPreview : MonoBehaviour
 
         if (meshSettings != null)
         {
-            //meshSettings.OnValuesUpdated -= OnValuesUpdated;
-            //meshSettings.OnValuesUpdated += OnValuesUpdated;
+            meshSettings.OnValuesUpdated -= OnValuesUpdated;
+            meshSettings.OnValuesUpdated += OnValuesUpdated;
         }
         if (mapSettings != null)
         {
-            //mapSettings.OnValuesUpdated -= OnValuesUpdated;
-            //mapSettings.OnValuesUpdated += OnValuesUpdated;
+            mapSettings.OnValuesUpdated -= OnValuesUpdated;
+            mapSettings.OnValuesUpdated += OnValuesUpdated;
         }
         if (textureData != null)
         {

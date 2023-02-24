@@ -16,15 +16,6 @@ public static class HeightMapGenerator
         float minValue = float.MaxValue;
         float maxValue = float.MinValue;
 
-        // TODO fix this
-        // if (useFalloff)
-        //{
-        // if (falloffMap == null)
-        // {
-        float[,] falloffMap = FalloffGenerator.GenerateFalloffMap(width, height);
-        //}
-        //}
-
         for (int i = 0; i < width; i++)
         {
             for (int j = 0; j < height; j++)
@@ -66,6 +57,7 @@ public struct HeightMap
     }
 }
 
+// Never got this working, but keep around just in case
 public class FixedHeightMap
 {
     // Large, fixed height map to take subsections of on request

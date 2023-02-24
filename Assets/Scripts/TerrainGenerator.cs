@@ -10,13 +10,10 @@ public class TerrainGenerator : MonoBehaviour
     const float sqrViewerMoveThresholdForChunkUpdate = viewerMoveThresholdForChunkUpdate * viewerMoveThresholdForChunkUpdate;
 
     public int colliderLODIndex;
-    public LODInfo[] detailLevels;
 
     public MeshSettings meshSettings;
     public MapSettings mapSettings;
     public TextureData textureSettings;
-
-    FixedHeightMap fixedHeightMap;
 
     public Transform viewer;
     public Material mapMaterial;
@@ -35,21 +32,9 @@ public class TerrainGenerator : MonoBehaviour
         textureSettings.ApplyToMaterial(mapMaterial);
         textureSettings.UpdateMeshHeights(mapMaterial, mapSettings.minHeight, mapSettings.maxHeight);
 
-        float maxViewDst = detailLevels[detailLevels.Length - 1].visibleDstThreshold;
+        float maxViewDst = mapSettings.detailLevels[mapSettings.detailLevels.Length - 1].visibleDstThreshold;
         meshWorldSize = meshSettings.meshWorldSize;
         chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / meshWorldSize);
-
-        if (mapSettings.borderType == Map.BorderType.Fixed)
-        {
-            fixedHeightMap = new FixedHeightMap(
-                mapSettings.fixedSize,
-                meshSettings.numVertsPerLine,
-                mapSettings.noiseSettings,
-                mapSettings.heightCurve,
-                mapSettings.heightMultiplier,
-                mapSettings.useFalloff
-            );
-        }
 
         UpdateVisibleChunks();
     }
@@ -103,37 +88,14 @@ public class TerrainGenerator : MonoBehaviour
                     }
                     else
                     {
-                        //Debug.Log("EndlessTerrainChunk");
-                        //Debug.Log(viewedChunkCoord.ToString());
-
-                        TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial);
+                        TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, meshSettings, mapSettings.detailLevels, colliderLODIndex, transform, viewer, mapMaterial);
 
                         terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
                         newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
 
-                        // For infinite we generate a height map for every new chunk
-                        if (mapSettings.borderType == Map.BorderType.Infinite)
-                        {
-                            Debug.Log("Loading Infinite Terrain Chunk");
-                            newChunk.LoadInfiniteTerrain(mapSettings);
-                        }
-                        else if (mapSettings.borderType == Map.BorderType.Fixed)
-                        {
-                            if (fixedHeightMap.ChunkCoordInRange(viewedChunkCoord))
-                            {
-                                //Debug.Log("Loading Fixed Chunk Coord");
-                                //Debug.Log(viewedChunkCoord.ToString());
-                                newChunk.LoadFromHeightMapValues(
-                                    fixedHeightMap.GetHeightMapForChunkCoord(viewedChunkCoord)
-                                );
-                            }
-                            else
-                            {
-                                //Debug.Log("Chunk Coord Not In Range");
-                                //Debug.Log(viewedChunkCoord.ToString());
-                            }
+                        Debug.Log("Loading Infinite Terrain Chunk");
+                        newChunk.LoadInfiniteTerrain(mapSettings);
 
-                        }
                     }
                 }
 
@@ -155,19 +117,3 @@ public class TerrainGenerator : MonoBehaviour
 
 }
 
-[System.Serializable]
-public struct LODInfo
-{
-    [Range(0, MeshSettings.numSupportedLODs - 1)]
-    public int lod;
-    public float visibleDstThreshold;
-
-
-    public float sqrVisibleDstThreshold
-    {
-        get
-        {
-            return visibleDstThreshold * visibleDstThreshold;
-        }
-    }
-}

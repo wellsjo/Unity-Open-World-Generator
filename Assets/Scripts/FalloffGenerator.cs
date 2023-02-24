@@ -5,6 +5,7 @@ public static class FalloffGenerator
 
     public static float[,] GenerateFalloffMap(int width, int height)
     {
+        Debug.Log("GenerateFalloffMap");
         float[,] map = new float[width, height];
 
         for (int i = 0; i < width; i++)

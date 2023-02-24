@@ -27,6 +27,7 @@ public class MeshSettings : UpdatableData
         }
     }
 
+    // Size of a terrain chunk
     public float meshWorldSize
     {
         get

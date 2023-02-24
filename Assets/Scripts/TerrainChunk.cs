@@ -25,28 +25,33 @@ public class TerrainChunk
     int previousLODIndex = -1;
     bool hasSetCollider;
     float maxViewDst;
-    bool useFalloff;
 
-    HeightMapSettings heightMapSettings;
     MeshSettings meshSettings;
     Transform viewer;
 
-    public TerrainChunk(Vector2 coord, HeightMapSettings heightMapSettings, MeshSettings meshSettings, LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Transform viewer, Material material, bool useFalloff)
+    // A piece of terrain which also is aware of the user's position
+    public TerrainChunk(
+        Vector2 coord,
+        MeshSettings meshSettings,
+        LODInfo[] detailLevels,
+        int colliderLODIndex,
+        Transform parent,
+        Transform viewer,
+        Material material
+    )
     {
         this.coord = coord;
         this.detailLevels = detailLevels;
         this.colliderLODIndex = colliderLODIndex;
-        this.heightMapSettings = heightMapSettings;
         this.meshSettings = meshSettings;
         this.viewer = viewer;
-        this.useFalloff = useFalloff;
 
         sampleCentre = coord * meshSettings.meshWorldSize / meshSettings.meshScale;
         Vector2 position = coord * meshSettings.meshWorldSize;
         bounds = new Bounds(position, Vector2.one * meshSettings.meshWorldSize);
 
 
-        meshObject = new GameObject("Terrain Chunk");
+        meshObject = new GameObject(string.Format("Terrain Chunk {0}", coord.ToString()));
         meshRenderer = meshObject.AddComponent<MeshRenderer>();
         meshFilter = meshObject.AddComponent<MeshFilter>();
         meshCollider = meshObject.AddComponent<MeshCollider>();
@@ -71,15 +76,36 @@ public class TerrainChunk
 
     }
 
-    // TerrainChunk loads a new height map with only the number of vertices per mesh, then requests mesh data for it
-    public void Load()
+    // TerrainChunk loads a new height map with only the number of vertices per mesh, then requests mesh data for it.
+    // This is used for infinite terrain.
+    public void LoadInfiniteTerrain(MapSettings heightMapSettings)
     {
-        HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, sampleCentre, this.useFalloff);
+        // TODO generate the height map in the threaded data requester
+        HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(
+            meshSettings.numVertsPerLine,
+            meshSettings.numVertsPerLine,
+            heightMapSettings.noiseSettings,
+            heightMapSettings.heightCurve,
+            heightMapSettings.heightMultiplier,
+            sampleCentre,
+            false
+        );
+        this.LoadFromHeightMapValues(heightMap);
+    }
+
+    public void LoadFromHeightMapValues(HeightMap heightMap)
+    {
         ThreadedDataRequester.RequestData(() => heightMap, OnHeightMapReceived);
     }
 
     void OnHeightMapReceived(object heightMapObject)
     {
+        if (heightMapObject == null)
+        {
+            Debug.Log("Height Map Null");
+            return;
+        }
+
         this.heightMap = (HeightMap)heightMapObject;
         heightMapReceived = true;
 
@@ -94,55 +120,54 @@ public class TerrainChunk
         }
     }
 
-    // Update the level of detail for the terrain chunk (or hide it)
+    // Show, update the level of detail, or hide the terrain chunk based on the viewer's position
     public void UpdateTerrainChunk()
     {
-        if (heightMapReceived)
+        if (!heightMapReceived)
         {
-            float viewerDstFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance(viewerPosition));
+            Debug.LogWarning("height map not received");
+            return;
+        }
 
-            bool wasVisible = IsVisible();
-            bool visible = viewerDstFromNearestEdge <= maxViewDst;
+        float viewerDstFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance(viewerPosition));
+        bool wasVisible = IsVisible();
+        bool visible = viewerDstFromNearestEdge <= maxViewDst;
 
-            if (visible)
+        if (visible)
+        {
+            int lodIndex = 0;
+
+            for (int i = 0; i < detailLevels.Length - 1; i++)
             {
-                int lodIndex = 0;
-
-                for (int i = 0; i < detailLevels.Length - 1; i++)
+                if (viewerDstFromNearestEdge > detailLevels[i].visibleDstThreshold)
                 {
-                    if (viewerDstFromNearestEdge > detailLevels[i].visibleDstThreshold)
-                    {
-                        lodIndex = i + 1;
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    lodIndex = i + 1;
                 }
-
-                if (lodIndex != previousLODIndex)
+                else
                 {
-                    LODMesh lodMesh = lodMeshes[lodIndex];
-                    if (lodMesh.hasMesh)
-                    {
-                        previousLODIndex = lodIndex;
-                        meshFilter.mesh = lodMesh.mesh;
-                    }
-                    else if (!lodMesh.hasRequestedMesh)
-                    {
-                        lodMesh.RequestMesh(heightMap, meshSettings);
-                    }
+                    break;
                 }
-
-
             }
 
-            if (wasVisible != visible)
+            if (lodIndex != previousLODIndex)
             {
-
-                SetVisible(visible);
-                onVisibilityChanged?.Invoke(this, visible);
+                LODMesh lodMesh = lodMeshes[lodIndex];
+                if (lodMesh.hasMesh)
+                {
+                    previousLODIndex = lodIndex;
+                    meshFilter.mesh = lodMesh.mesh;
+                }
+                else if (!lodMesh.hasRequestedMesh)
+                {
+                    lodMesh.RequestMesh(this.heightMap, meshSettings);
+                }
             }
+        }
+
+        if (wasVisible != visible)
+        {
+            SetVisible(visible);
+            onVisibilityChanged?.Invoke(this, visible);
         }
     }
 
@@ -208,7 +233,7 @@ class LODMesh
     public void RequestMesh(HeightMap heightMap, MeshSettings meshSettings)
     {
         hasRequestedMesh = true;
-        MeshData meshData = MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, lod);
+        MeshData meshData = MeshGenerator.GenerateTerrainChunkMesh(heightMap.values, meshSettings, lod);
         ThreadedDataRequester.RequestData(() => meshData, OnMeshDataReceived);
     }
 

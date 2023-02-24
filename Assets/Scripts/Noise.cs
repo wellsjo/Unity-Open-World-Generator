@@ -68,6 +68,7 @@ public static class Noise
                 }
                 noiseMap[x, y] = noiseHeight;
 
+                // TODO go back and figure out why we have a local mode
                 if (settings.normalizeMode == NormalizeMode.Global)
                 {
                     float normalizedHeight = (noiseMap[x, y] + 1) / (maxPossibleHeight / 0.9f);
@@ -76,6 +77,7 @@ public static class Noise
             }
         }
 
+        // This seems useless
         if (settings.normalizeMode == NormalizeMode.Local)
         {
             for (int y = 0; y < mapHeight; y++)

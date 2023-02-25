@@ -116,12 +116,11 @@ public class TerrainGenerator : MonoBehaviour
     public static void GeneratePreview(TextureData textureData, MeshSettings meshSettings, MapSettings mapSettings, Material mapMaterial, Transform parent)
     {
         // Clear out the old display
-        foreach (Transform obj in parent)
+        while (parent.childCount > 0)
         {
-            GameObject.DestroyImmediate(obj.gameObject);
+            DestroyImmediate(parent.GetChild(0).gameObject);
         }
 
-        Debug.Log("Generate Preview");
         Vector2 range = mapSettings.range;
         for (int x = (int)range.x; x <= range.y; x++)
         {
@@ -131,11 +130,11 @@ public class TerrainGenerator : MonoBehaviour
 
                 // Remove any existing chunks
                 string gameObjectName = string.Format("Preview Terrain Chunk {0}", chunkCoord.ToString());
-                GameObject existingChunk = GameObject.Find(gameObjectName);
-                if (existingChunk != null)
-                {
-                    DestroyImmediate(existingChunk);
-                }
+                //GameObject existingChunk = GameObject.Find(gameObjectName);
+                //if (existingChunk != null)
+                //{
+                //    DestroyImmediate(existingChunk);
+                //}
 
                 // Make a new terrain chunk under the Terrain Preview parent
                 GameObject meshObject = new GameObject(gameObjectName);

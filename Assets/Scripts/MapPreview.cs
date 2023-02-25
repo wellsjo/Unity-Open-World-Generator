@@ -28,6 +28,7 @@ public class MapPreview : MonoBehaviour
         textureData.UpdateMeshHeights(terrainMaterial, mapSettings.minHeight, mapSettings.maxHeight);
         previewTerrain.SetActive(false);
         previewTexture.gameObject.SetActive(false);
+        previewMeshFilter.gameObject.SetActive(false);
 
         if (drawMode == Map.DrawMode.NoiseMap)
         {

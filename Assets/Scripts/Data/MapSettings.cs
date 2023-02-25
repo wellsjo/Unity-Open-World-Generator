@@ -15,6 +15,8 @@ public class MapSettings : UpdatableData
     public AnimationCurve heightCurve;
     public LODInfo[] detailLevels;
 
+    public const int MaxFixedSize = 11;
+
     public Vector2 range
     {
         get
@@ -44,10 +46,36 @@ public class MapSettings : UpdatableData
         }
     }
 
+    // Make sure fixed size is an odd square if border type is fixed
+    // and make sure it's not too big.
+    private void ValidateValues()
+    {
+        if (borderType == Map.BorderType.Infinite)
+        {
+            fixedSize = -1;
+        }
+        else if (fixedSize % 2 != 1)
+        {
+            if (fixedSize > 1)
+            {
+                fixedSize--;
+            }
+            else
+            {
+                fixedSize = 3;
+            }
+        }
+        else if (fixedSize > MaxFixedSize)
+        {
+            fixedSize = MaxFixedSize;
+        }
+    }
+
 #if UNITY_EDITOR
 
     protected override void OnValidate()
     {
+        this.ValidateValues();
         noiseSettings.ValidateValues();
         base.OnValidate();
     }

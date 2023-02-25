@@ -78,15 +78,6 @@ public class MapPreview : MonoBehaviour
         previewMeshFilter.gameObject.SetActive(true);
     }
 
-    //public void DrawSimpleMesh(SimpleMeshData meshData, Texture2D texture)
-    public void DrawSimpleMesh(SimpleMeshData meshData)
-    {
-        previewMeshFilter.sharedMesh = meshData.CreateMesh();
-        previewTexture.gameObject.SetActive(false);
-        previewMeshFilter.gameObject.SetActive(true);
-        //meshRenderer.sharedMaterial.mainTexture = texture;
-    }
-
     void OnValuesUpdated()
     {
         if (!Application.isPlaying)

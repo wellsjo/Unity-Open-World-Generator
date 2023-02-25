@@ -10,7 +10,7 @@ public static class HeightMapGenerator
         //Debug.LogFormat("GenerateHeightMap {0}", sampleCentre);
         float[,] values = Noise.GenerateNoiseMap(width, height, noiseSettings, sampleCentre);
 
-        AnimationCurve heightCurve_threadsafe = new AnimationCurve(heightCurve.keys);
+        AnimationCurve heightCurve_threadsafe = new(heightCurve.keys);
 
         float minValue = float.MaxValue;
         float maxValue = float.MinValue;
@@ -118,13 +118,4 @@ public class FixedHeightMap
         return new HeightMap(values, heightMap.minValue, heightMap.maxValue);
     }
 
-    public bool ChunkCoordInRange(Vector2 chunkCoord)
-    {
-        return (
-            chunkCoord.x >= this.chunkRange.x
-            && chunkCoord.x <= this.chunkRange.y
-            && chunkCoord.y >= this.chunkRange.x
-            && chunkCoord.y <= this.chunkRange.y
-        );
-    }
 }

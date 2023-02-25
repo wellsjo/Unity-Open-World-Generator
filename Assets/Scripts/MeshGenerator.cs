@@ -2,37 +2,37 @@ using UnityEngine;
 
 public static class MeshGenerator
 {
-    public static SimpleMeshData GenerateTerrainMesh(float[,] heightMap)
-    {
-        int width = heightMap.GetLength(0);
-        int height = heightMap.GetLength(1);
-        float topLeftX = (width - 1) / -2f;
-        float topLeftZ = (height - 1) / 2f;
+    //public static SimpleMeshData GenerateTerrainMesh(float[,] heightMap)
+    //{
+    //    int width = heightMap.GetLength(0);
+    //    int height = heightMap.GetLength(1);
+    //    float topLeftX = (width - 1) / -2f;
+    //    float topLeftZ = (height - 1) / 2f;
 
-        SimpleMeshData meshData = new SimpleMeshData(width, height);
-        int vertexIndex = 0;
+    //    SimpleMeshData meshData = new SimpleMeshData(width, height);
+    //    int vertexIndex = 0;
 
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
+    //    for (int y = 0; y < height; y++)
+    //    {
+    //        for (int x = 0; x < width; x++)
+    //        {
 
-                meshData.vertices[vertexIndex] = new Vector3(topLeftX + x, heightMap[x, y], topLeftZ - y);
-                meshData.uvs[vertexIndex] = new Vector2(x / (float)width, y / (float)height);
+    //            meshData.vertices[vertexIndex] = new Vector3(topLeftX + x, heightMap[x, y], topLeftZ - y);
+    //            meshData.uvs[vertexIndex] = new Vector2(x / (float)width, y / (float)height);
 
-                if (x < width - 1 && y < height - 1)
-                {
-                    meshData.AddTriangle(vertexIndex, vertexIndex + width + 1, vertexIndex + width);
-                    meshData.AddTriangle(vertexIndex + width + 1, vertexIndex, vertexIndex + 1);
-                }
+    //            if (x < width - 1 && y < height - 1)
+    //            {
+    //                meshData.AddTriangle(vertexIndex, vertexIndex + width + 1, vertexIndex + width);
+    //                meshData.AddTriangle(vertexIndex + width + 1, vertexIndex, vertexIndex + 1);
+    //            }
 
-                vertexIndex++;
-            }
-        }
+    //            vertexIndex++;
+    //        }
+    //    }
 
-        return meshData;
+    //    return meshData;
 
-    }
+    //}
     // This function is limited to drawing over pre-defined mesh sizes (loops over vertsPerLine)
     public static MeshData GenerateTerrainChunkMesh(float[,] heightMap, MeshSettings meshSettings, int levelOfDetail)
     {
@@ -163,41 +163,6 @@ public class MeshData
         meshData.useFlatShading = useFlatShading;
         meshData.outOfMeshVertices = new Vector3[numVertsPerLine * 4 - 4];
         meshData.outOfMeshTriangles = new int[24 * (numVertsPerLine - 2)];
-
-        return meshData;
-    }
-
-    // TODO (wells) this might not be used
-    public static MeshData FromHeightMap(HeightMap heightMap)
-    {
-        int width = heightMap.height;
-        int height = heightMap.width;
-        float topLeftX = (width - 1) / -2f;
-        float topLeftZ = (height - 1) / 2f;
-
-        Vector3[] vertices = new Vector3[width * height];
-        Vector2[] uvs = new Vector2[width * height];
-        int[] triangles = new int[(width - 1) * (height - 1) * 6];
-
-        MeshData meshData = new MeshData(vertices, triangles, uvs);
-        int vertexIndex = 0;
-
-        for (int y = 0; y < height; y++)
-        {
-            for (int x = 0; x < width; x++)
-            {
-                meshData.vertices[vertexIndex] = new Vector3(topLeftX + x, heightMap.values[x, y], topLeftZ - y);
-                meshData.uvs[vertexIndex] = new Vector2(x / (float)width, y / (float)height);
-
-                if (x < width - 1 && y < height - 1)
-                {
-                    meshData.AddTriangle(vertexIndex, vertexIndex + width + 1, vertexIndex + width);
-                    meshData.AddTriangle(vertexIndex + width + 1, vertexIndex, vertexIndex + 1);
-                }
-
-                vertexIndex++;
-            }
-        }
 
         return meshData;
     }
@@ -342,42 +307,6 @@ public class MeshData
         {
             mesh.normals = bakedNormals;
         }
-        return mesh;
-    }
-
-
-}
-
-public class SimpleMeshData
-{
-    public Vector3[] vertices;
-    public int[] triangles;
-    public Vector2[] uvs;
-
-    int triangleIndex;
-
-    public SimpleMeshData(int meshWidth, int meshHeight)
-    {
-        vertices = new Vector3[meshWidth * meshHeight];
-        uvs = new Vector2[meshWidth * meshHeight];
-        triangles = new int[(meshWidth - 1) * (meshHeight - 1) * 6];
-    }
-
-    public void AddTriangle(int a, int b, int c)
-    {
-        triangles[triangleIndex] = a;
-        triangles[triangleIndex + 1] = b;
-        triangles[triangleIndex + 2] = c;
-        triangleIndex += 3;
-    }
-
-    public Mesh CreateMesh()
-    {
-        Mesh mesh = new Mesh();
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.uv = uvs;
-        mesh.RecalculateNormals();
         return mesh;
     }
 

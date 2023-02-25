@@ -77,6 +77,11 @@ public class TerrainGenerator : MonoBehaviour
             for (int xOffset = -chunksVisibleInViewDst; xOffset <= chunksVisibleInViewDst; xOffset++)
             {
                 Vector2 viewedChunkCoord = new Vector2(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
+                if (!ChunkCoordInRange(viewedChunkCoord))
+                {
+                    continue;
+                }
+
                 if (!alreadyUpdatedChunkCoords.Contains(viewedChunkCoord))
                 {
                     if (terrainChunkDictionary.ContainsKey(viewedChunkCoord))
@@ -101,6 +106,23 @@ public class TerrainGenerator : MonoBehaviour
         }
     }
 
+    private bool ChunkCoordInRange(Vector2 chunkCoord)
+    {
+        if (mapSettings.borderType == Map.BorderType.Fixed)
+        {
+            Vector2 range = mapSettings.range;
+            return (
+                chunkCoord.x >= range.x
+                && chunkCoord.x <= range.y
+                && chunkCoord.y >= range.x
+                && chunkCoord.y <= range.y
+            );
+        }
+
+        return true;
+    }
+
+
     void OnTerrainChunkVisibilityChanged(TerrainChunk chunk, bool isVisible)
     {
         if (isVisible)
@@ -121,20 +143,20 @@ public class TerrainGenerator : MonoBehaviour
             DestroyImmediate(parent.GetChild(0).gameObject);
         }
 
-        Vector2 range = mapSettings.range;
+        // Default to something reasonable for infinite view
+        // TODO make this a map preview option
+        Vector2 range = new Vector2(-3, 3);
+        if (mapSettings.borderType == Map.BorderType.Fixed)
+        {
+            range = mapSettings.range;
+        }
+
         for (int x = (int)range.x; x <= range.y; x++)
         {
             for (int y = (int)range.x; y <= range.y; y++)
             {
                 Vector2 chunkCoord = new Vector2(x, y);
-
-                // Remove any existing chunks
                 string gameObjectName = string.Format("Preview Terrain Chunk {0}", chunkCoord.ToString());
-                //GameObject existingChunk = GameObject.Find(gameObjectName);
-                //if (existingChunk != null)
-                //{
-                //    DestroyImmediate(existingChunk);
-                //}
 
                 // Make a new terrain chunk under the Terrain Preview parent
                 GameObject meshObject = new GameObject(gameObjectName);

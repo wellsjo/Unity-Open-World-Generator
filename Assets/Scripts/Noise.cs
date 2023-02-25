@@ -8,7 +8,6 @@ public static class Noise
     public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, NoiseSettings settings, Vector2 sampleCentre)
     {
         float[,] noiseMap = new float[mapWidth, mapHeight];
-        Debug.Log("GenerateNoiseMap");
 
         System.Random rng = new System.Random(settings.seed);
         Vector2[] octaveOffsets = new Vector2[settings.octaves];

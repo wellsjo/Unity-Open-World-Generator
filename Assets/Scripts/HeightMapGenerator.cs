@@ -7,8 +7,7 @@ public static class HeightMapGenerator
 
     public static HeightMap GenerateHeightMap(int width, int height, NoiseSettings noiseSettings, AnimationCurve heightCurve, float heightMultiplier, Vector2 sampleCentre, bool useFalloff)
     {
-        Debug.Log("Generate Height Map");
-        Debug.Log(width);
+        Debug.LogFormat("GenerateHeightMap {0}", sampleCentre);
         float[,] values = Noise.GenerateNoiseMap(width, height, noiseSettings, sampleCentre);
 
         AnimationCurve heightCurve_threadsafe = new AnimationCurve(heightCurve.keys);

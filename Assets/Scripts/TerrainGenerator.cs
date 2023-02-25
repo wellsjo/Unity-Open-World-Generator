@@ -62,9 +62,6 @@ public class TerrainGenerator : MonoBehaviour
 
     void UpdateVisibleChunks()
     {
-        Debug.Log("UpdateVisibleChunks");
-        Debug.Log(visibleTerrainChunks.Count);
-
         HashSet<Vector2> alreadyUpdatedChunkCoords = new HashSet<Vector2>();
         for (int i = visibleTerrainChunks.Count - 1; i >= 0; i--)
         {
@@ -94,7 +91,7 @@ public class TerrainGenerator : MonoBehaviour
                         newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
 
                         Debug.Log("Loading Infinite Terrain Chunk");
-                        newChunk.LoadInfiniteTerrain(mapSettings);
+                        newChunk.LoadHeightMapThreaded(mapSettings);
 
                     }
                 }
@@ -113,6 +110,36 @@ public class TerrainGenerator : MonoBehaviour
         {
             visibleTerrainChunks.Remove(chunk);
         }
+    }
+
+    public static void GeneratePreview(TextureData textureData, MeshSettings meshSettings, MapSettings mapSettings, Material mapMaterial, Transform parent)
+    {
+        Debug.Log("Generate Preview");
+        Vector2 range = mapSettings.range;
+        for (int x = (int)range.x; x <= range.y; x++)
+        {
+            for (int y = (int)range.x; y <= range.y; y++)
+            {
+                Vector2 chunkCoord = new Vector2(x, y);
+                Debug.LogFormat("Terrain Chunk {0}", chunkCoord);
+                TerrainChunk newChunk = new TerrainChunk(chunkCoord, meshSettings, mapSettings.detailLevels, 0, parent, null, mapMaterial);
+
+                Vector2 sampleCenter = chunkCoord * meshSettings.meshWorldSize / meshSettings.meshScale;
+
+                HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(
+                    meshSettings.numVertsPerLine,
+                    meshSettings.numVertsPerLine,
+                    mapSettings.noiseSettings,
+                    mapSettings.heightCurve,
+                    mapSettings.heightMultiplier,
+                    sampleCenter,
+                    false
+                );
+                newChunk.LoadFromHeightMap(heightMap);
+                newChunk.SetVisible(true);
+            }
+        }
+
     }
 
 }

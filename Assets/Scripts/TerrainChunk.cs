@@ -78,7 +78,7 @@ public class TerrainChunk
 
     // TerrainChunk loads a new height map with only the number of vertices per mesh, then requests mesh data for it.
     // This is used for infinite terrain.
-    public void LoadInfiniteTerrain(MapSettings heightMapSettings)
+    public void LoadHeightMapThreaded(MapSettings heightMapSettings)
     {
         // TODO generate the height map in the threaded data requester
         HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(
@@ -90,12 +90,14 @@ public class TerrainChunk
             sampleCentre,
             false
         );
-        this.LoadFromHeightMapValues(heightMap);
+        ThreadedDataRequester.RequestData(() => heightMap, OnHeightMapReceived);
     }
 
-    public void LoadFromHeightMapValues(HeightMap heightMap)
+    public void LoadFromHeightMap(HeightMap heightMap)
     {
-        ThreadedDataRequester.RequestData(() => heightMap, OnHeightMapReceived);
+        MeshData meshData = MeshGenerator.GenerateTerrainChunkMesh(heightMap.values, meshSettings, 0);
+        Mesh mesh = meshData.CreateMesh();
+        meshFilter.mesh = mesh;
     }
 
     void OnHeightMapReceived(object heightMapObject)
@@ -106,6 +108,7 @@ public class TerrainChunk
             return;
         }
 
+        Debug.Log("Height Map Received");
         this.heightMap = (HeightMap)heightMapObject;
         heightMapReceived = true;
 
@@ -173,25 +176,27 @@ public class TerrainChunk
 
     public void UpdateCollisionMesh()
     {
-        if (!hasSetCollider)
+        if (hasSetCollider)
         {
-            float sqrDstFromViewerToEdge = bounds.SqrDistance(viewerPosition);
+            return;
+        }
 
-            if (sqrDstFromViewerToEdge < detailLevels[colliderLODIndex].sqrVisibleDstThreshold)
+        float sqrDstFromViewerToEdge = bounds.SqrDistance(viewerPosition);
+
+        if (sqrDstFromViewerToEdge < detailLevels[colliderLODIndex].sqrVisibleDstThreshold)
+        {
+            if (!lodMeshes[colliderLODIndex].hasRequestedMesh)
             {
-                if (!lodMeshes[colliderLODIndex].hasRequestedMesh)
-                {
-                    lodMeshes[colliderLODIndex].RequestMesh(heightMap, meshSettings);
-                }
+                lodMeshes[colliderLODIndex].RequestMesh(heightMap, meshSettings);
             }
+        }
 
-            if (sqrDstFromViewerToEdge < colliderGenerationDistanceThreshold * colliderGenerationDistanceThreshold)
+        if (sqrDstFromViewerToEdge < colliderGenerationDistanceThreshold * colliderGenerationDistanceThreshold)
+        {
+            if (lodMeshes[colliderLODIndex].hasMesh)
             {
-                if (lodMeshes[colliderLODIndex].hasMesh)
-                {
-                    meshCollider.sharedMesh = lodMeshes[colliderLODIndex].mesh;
-                    hasSetCollider = true;
-                }
+                meshCollider.sharedMesh = lodMeshes[colliderLODIndex].mesh;
+                hasSetCollider = true;
             }
         }
     }
@@ -234,6 +239,7 @@ class LODMesh
     {
         hasRequestedMesh = true;
         MeshData meshData = MeshGenerator.GenerateTerrainChunkMesh(heightMap.values, meshSettings, lod);
+        Debug.Log("RequestMeshData");
         ThreadedDataRequester.RequestData(() => meshData, OnMeshDataReceived);
     }
 

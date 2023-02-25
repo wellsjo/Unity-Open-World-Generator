@@ -14,8 +14,14 @@ public class ThreadedDataRequester : MonoBehaviour
         instance = FindObjectOfType<ThreadedDataRequester>();
     }
 
+    public static void SetInstance(ThreadedDataRequester instance_)
+    {
+        instance = instance_;
+    }
+
     public static void RequestData(Func<object> generateData, Action<object> callback)
     {
+        Debug.Log("Request Data");
         ThreadStart threadStart = delegate
         {
             instance.DataThread(generateData, callback);

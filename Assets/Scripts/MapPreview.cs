@@ -8,6 +8,7 @@ public class MapPreview : MonoBehaviour
     public int editorPreviewLOD;
     public bool autoUpdate;
 
+    public Transform previewTerrain;
     public Renderer textureRender;
     public MeshFilter meshFilter;
     public MeshRenderer meshRenderer;
@@ -41,7 +42,8 @@ public class MapPreview : MonoBehaviour
         }
         else if (drawMode == Map.DrawMode.Preview)
         {
-            MeshGenerator.GeneratePreview(meshSettings, mapSettings);
+            //GameObject previewTerrainParent = new GameObject("Preview Terrain");
+            TerrainGenerator.GeneratePreview(textureData, meshSettings, mapSettings, terrainMaterial, previewTerrain);
         }
         else if (drawMode == Map.DrawMode.TerrainGenerator)
         {

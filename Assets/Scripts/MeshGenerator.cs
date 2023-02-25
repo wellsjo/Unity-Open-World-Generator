@@ -122,20 +122,6 @@ public static class MeshGenerator
 
     }
 
-    public static void GeneratePreview(MeshSettings meshSettings, MapSettings mapSettings)
-    {
-        Vector2 range = mapSettings.range;
-        for (int x = (int)range.x; x < range.y; x++)
-        {
-            for (int y = (int)range.x; y < range.y; y++)
-            {
-                Vector2 chunkCoord = new Vector2(x, y);
-                HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
-                TerrainChunk newChunk = new TerrainChunk(chunkCoord, meshSettings, mapSettings.detailLevels, 0, transform, MapGenerator.viewer, mapMaterial);
-
-            }
-        }
-    }
 }
 
 public class MeshData

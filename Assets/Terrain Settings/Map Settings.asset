@@ -13,17 +13,17 @@ MonoBehaviour:
   m_Name: Map Settings
   m_EditorClassIdentifier: 
   autoUpdate: 1
-  borderType: 0
+  borderType: 1
   fixedSize: 3
-  useFalloff: 1
+  useFalloff: 0
   noiseSettings:
-    normalizeMode: 0
+    normalizeMode: 1
     scale: 16.56
-    octaves: 7
-    persistance: 0.57
+    octaves: 4
+    persistance: 0.566
     lacunarity: 1.96
-    seed: 0
-    offset: {x: 0, y: 0}
+    seed: 32
+    offset: {x: -0.05, y: 1.34}
   heightMultiplier: 26.3
   heightCurve:
     serializedVersion: 2
@@ -38,14 +38,26 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0.06663835
     - serializedVersion: 3
-      time: 1.1433105
-      value: 1.0707664
-      inSlope: 1.8505462
-      outSlope: 1.8505462
+      time: 1.1175146
+      value: 0.7346609
+      inSlope: 1.8339847
+      outSlope: 1.8339847
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.045277484
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1.5088736
+      value: 3.001634
+      inSlope: 4.8722453
+      outSlope: 4.8722453
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.05583086
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  detailLevels:
+  - lod: 0
+    visibleDstThreshold: 100

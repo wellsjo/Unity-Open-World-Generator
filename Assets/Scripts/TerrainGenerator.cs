@@ -85,7 +85,8 @@ public class TerrainGenerator : MonoBehaviour
                     }
                     else
                     {
-                        TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, meshSettings, mapSettings.detailLevels, colliderLODIndex, transform, viewer, mapMaterial);
+                        GameObject meshObject = new GameObject(string.Format("Terrain Chunk {0}", viewedChunkCoord.ToString()));
+                        TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, meshObject, meshSettings, mapSettings.detailLevels, colliderLODIndex, viewer, mapMaterial);
 
                         terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
                         newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
@@ -114,6 +115,12 @@ public class TerrainGenerator : MonoBehaviour
 
     public static void GeneratePreview(TextureData textureData, MeshSettings meshSettings, MapSettings mapSettings, Material mapMaterial, Transform parent)
     {
+        // Clear out the old display
+        foreach (Transform obj in parent)
+        {
+            GameObject.DestroyImmediate(obj.gameObject);
+        }
+
         Debug.Log("Generate Preview");
         Vector2 range = mapSettings.range;
         for (int x = (int)range.x; x <= range.y; x++)
@@ -121,8 +128,19 @@ public class TerrainGenerator : MonoBehaviour
             for (int y = (int)range.x; y <= range.y; y++)
             {
                 Vector2 chunkCoord = new Vector2(x, y);
-                Debug.LogFormat("Terrain Chunk {0}", chunkCoord);
-                TerrainChunk newChunk = new TerrainChunk(chunkCoord, meshSettings, mapSettings.detailLevels, 0, parent, null, mapMaterial);
+
+                // Remove any existing chunks
+                string gameObjectName = string.Format("Preview Terrain Chunk {0}", chunkCoord.ToString());
+                GameObject existingChunk = GameObject.Find(gameObjectName);
+                if (existingChunk != null)
+                {
+                    DestroyImmediate(existingChunk);
+                }
+
+                // Make a new terrain chunk under the Terrain Preview parent
+                GameObject meshObject = new GameObject(gameObjectName);
+                meshObject.transform.parent = parent;
+                TerrainChunk newChunk = new TerrainChunk(chunkCoord, meshObject, meshSettings, mapSettings.detailLevels, 0, null, mapMaterial);
 
                 Vector2 sampleCenter = chunkCoord * meshSettings.meshWorldSize / meshSettings.meshScale;
 
@@ -135,6 +153,7 @@ public class TerrainGenerator : MonoBehaviour
                     sampleCenter,
                     false
                 );
+
                 newChunk.LoadFromHeightMap(heightMap);
                 newChunk.SetVisible(true);
             }

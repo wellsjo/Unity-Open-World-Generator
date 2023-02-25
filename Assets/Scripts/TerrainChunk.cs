@@ -32,10 +32,11 @@ public class TerrainChunk
     // A piece of terrain which also is aware of the user's position
     public TerrainChunk(
         Vector2 coord,
+        GameObject meshObject,
         MeshSettings meshSettings,
         LODInfo[] detailLevels,
         int colliderLODIndex,
-        Transform parent,
+        //Transform parent,
         Transform viewer,
         Material material
     )
@@ -50,15 +51,15 @@ public class TerrainChunk
         Vector2 position = coord * meshSettings.meshWorldSize;
         bounds = new Bounds(position, Vector2.one * meshSettings.meshWorldSize);
 
-
-        meshObject = new GameObject(string.Format("Terrain Chunk {0}", coord.ToString()));
+        //meshObject = new GameObject(string.Format("Terrain Chunk {0}", coord.ToString()));
+        this.meshObject = meshObject;
         meshRenderer = meshObject.AddComponent<MeshRenderer>();
         meshFilter = meshObject.AddComponent<MeshFilter>();
         meshCollider = meshObject.AddComponent<MeshCollider>();
         meshRenderer.material = material;
 
         meshObject.transform.position = new Vector3(position.x, 0, position.y);
-        meshObject.transform.parent = parent;
+        //meshObject.transform.parent = parent;
         SetVisible(false);
 
         lodMeshes = new LODMesh[detailLevels.Length];

@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   autoUpdate: 1
   borderType: 1
-  fixedSize: 3
+  fixedSize: 5
   useFalloff: 0
   noiseSettings:
     normalizeMode: 1
-    scale: 16.56
+    scale: 16.14
     octaves: 4
     persistance: 0.566
     lacunarity: 1.96

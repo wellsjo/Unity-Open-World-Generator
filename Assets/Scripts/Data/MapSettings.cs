@@ -19,8 +19,12 @@ public class MapSettings : UpdatableData
     {
         get
         {
-            int r = (int)Mathf.Floor((float)fixedSize / 2);
-            return new Vector2(-r, r);
+            if (borderType == Map.BorderType.Fixed)
+            {
+                int r = (int)Mathf.Floor((float)fixedSize / 2);
+                return new Vector2(-r, r);
+            }
+            return new Vector2(-1, 1);
         }
     }
 

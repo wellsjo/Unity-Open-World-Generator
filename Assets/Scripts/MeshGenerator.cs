@@ -2,17 +2,15 @@ using UnityEngine;
 
 public static class MeshGenerator
 {
-
-
-    public static MeshData GenerateTerrainMesh(float[,] heightMap, MeshSettings meshSettings, int levelOfDetail)
+    // This function is limited to drawing over pre-defined mesh sizes (loops over vertsPerLine)
+    public static MeshData GetTerrainChunkMesh(float[,] heightMap, MeshSettings meshSettings, int levelOfDetail)
     {
-
         int skipIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
         int numVertsPerLine = meshSettings.numVertsPerLine;
 
         Vector2 topLeft = new Vector2(-1, 1) * meshSettings.meshWorldSize / 2f;
 
-        MeshData meshData = new MeshData(numVertsPerLine, skipIncrement, meshSettings.useFlatShading);
+        MeshData meshData = MeshData.Procedural(numVertsPerLine, skipIncrement, meshSettings.useFlatShading);
 
         int[,] vertexIndicesMap = new int[numVertsPerLine, numVertsPerLine];
         int meshVertexIndex = 0;
@@ -92,6 +90,7 @@ public static class MeshGenerator
         return meshData;
 
     }
+
 }
 
 public class MeshData
@@ -109,24 +108,32 @@ public class MeshData
 
     bool useFlatShading;
 
-    public MeshData(int numVertsPerLine, int skipIncrement, bool useFlatShading)
+    public MeshData(Vector3[] vertices_, int[] triangles_, Vector2[] uvs_)
     {
-        this.useFlatShading = useFlatShading;
-
+        vertices = vertices_;
+        triangles = triangles_;
+        uvs = uvs_;
+    }
+    public static MeshData Procedural(int numVertsPerLine, int skipIncrement, bool useFlatShading)
+    {
         int numMeshEdgeVertices = (numVertsPerLine - 2) * 4 - 4;
         int numEdgeConnectionVertices = (skipIncrement - 1) * (numVertsPerLine - 5) / skipIncrement * 4;
         int numMainVerticesPerLine = (numVertsPerLine - 5) / skipIncrement + 1;
         int numMainVertices = numMainVerticesPerLine * numMainVerticesPerLine;
 
-        vertices = new Vector3[numMeshEdgeVertices + numEdgeConnectionVertices + numMainVertices];
-        uvs = new Vector2[vertices.Length];
+        Vector3[] vertices = new Vector3[numMeshEdgeVertices + numEdgeConnectionVertices + numMainVertices];
+        Vector2[] uvs = new Vector2[vertices.Length];
 
         int numMeshEdgeTriangles = 8 * (numVertsPerLine - 4);
         int numMainTriangles = (numMainVerticesPerLine - 1) * (numMainVerticesPerLine - 1) * 2;
-        triangles = new int[(numMeshEdgeTriangles + numMainTriangles) * 3];
+        int[] triangles = new int[(numMeshEdgeTriangles + numMainTriangles) * 3];
 
-        outOfMeshVertices = new Vector3[numVertsPerLine * 4 - 4];
-        outOfMeshTriangles = new int[24 * (numVertsPerLine - 2)];
+        MeshData meshData = new MeshData(vertices, triangles, uvs);
+        meshData.useFlatShading = useFlatShading;
+        meshData.outOfMeshVertices = new Vector3[numVertsPerLine * 4 - 4];
+        meshData.outOfMeshTriangles = new int[24 * (numVertsPerLine - 2)];
+
+        return meshData;
     }
 
     public void AddVertex(Vector3 vertexPosition, Vector2 uv, int vertexIndex)

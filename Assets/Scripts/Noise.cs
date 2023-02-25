@@ -9,7 +9,7 @@ public static class Noise
     {
         float[,] noiseMap = new float[mapWidth, mapHeight];
 
-        System.Random prng = new System.Random(settings.seed);
+        System.Random rng = new System.Random(settings.seed);
         Vector2[] octaveOffsets = new Vector2[settings.octaves];
 
         float maxPossibleHeight = 0;
@@ -18,8 +18,11 @@ public static class Noise
 
         for (int i = 0; i < settings.octaves; i++)
         {
-            float offsetX = prng.Next(-100000, 100000) + settings.offset.x + sampleCentre.x;
-            float offsetY = prng.Next(-100000, 100000) - settings.offset.y - sampleCentre.y;
+            // this range -100000,100000 gives best random numbers from testing
+            // adding and subtracting the center makes the tiles not repeat
+            float offsetX = rng.Next(-100000, 100000) + settings.offset.x + sampleCentre.x;
+            float offsetY = rng.Next(-100000, 100000) - settings.offset.y - sampleCentre.y;
+
             octaveOffsets[i] = new Vector2(offsetX, offsetY);
 
             maxPossibleHeight += amplitude;
@@ -64,6 +67,7 @@ public static class Noise
                 }
                 noiseMap[x, y] = noiseHeight;
 
+                // TODO go back and figure out why we have a local mode
                 if (settings.normalizeMode == NormalizeMode.Global)
                 {
                     float normalizedHeight = (noiseMap[x, y] + 1) / (maxPossibleHeight / 0.9f);
@@ -72,6 +76,7 @@ public static class Noise
             }
         }
 
+        // This seems useless
         if (settings.normalizeMode == NormalizeMode.Local)
         {
             for (int y = 0; y < mapHeight; y++)

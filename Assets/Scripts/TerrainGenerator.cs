@@ -1,18 +1,18 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Procedurally generate terrain based on various settings and the viewer's position. When the viewer moves,
+// We calculate the changed terrain chunks in view / out of view, then update them if necessary.
 public class TerrainGenerator : MonoBehaviour
 {
 
     const float viewerMoveThresholdForChunkUpdate = 25f;
     const float sqrViewerMoveThresholdForChunkUpdate = viewerMoveThresholdForChunkUpdate * viewerMoveThresholdForChunkUpdate;
 
-
     public int colliderLODIndex;
-    public LODInfo[] detailLevels;
 
     public MeshSettings meshSettings;
-    public HeightMapSettings heightMapSettings;
+    public MapSettings mapSettings;
     public TextureData textureSettings;
 
     public Transform viewer;
@@ -29,17 +29,18 @@ public class TerrainGenerator : MonoBehaviour
 
     void Start()
     {
-
         textureSettings.ApplyToMaterial(mapMaterial);
-        textureSettings.UpdateMeshHeights(mapMaterial, heightMapSettings.minHeight, heightMapSettings.maxHeight);
+        textureSettings.UpdateMeshHeights(mapMaterial, mapSettings.minHeight, mapSettings.maxHeight);
 
-        float maxViewDst = detailLevels[detailLevels.Length - 1].visibleDstThreshold;
+        float maxViewDst = mapSettings.detailLevels[mapSettings.detailLevels.Length - 1].visibleDstThreshold;
         meshWorldSize = meshSettings.meshWorldSize;
         chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / meshWorldSize);
 
         UpdateVisibleChunks();
     }
 
+    // Chek if the player has moved, if so update the collision mesh
+    // Check to see if the player has moved past the threshold; if so, update the visible chunks
     void Update()
     {
         viewerPosition = new Vector2(viewer.position.x, viewer.position.z);
@@ -76,6 +77,11 @@ public class TerrainGenerator : MonoBehaviour
             for (int xOffset = -chunksVisibleInViewDst; xOffset <= chunksVisibleInViewDst; xOffset++)
             {
                 Vector2 viewedChunkCoord = new Vector2(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
+                if (!ChunkCoordInRange(viewedChunkCoord))
+                {
+                    continue;
+                }
+
                 if (!alreadyUpdatedChunkCoords.Contains(viewedChunkCoord))
                 {
                     if (terrainChunkDictionary.ContainsKey(viewedChunkCoord))
@@ -84,16 +90,38 @@ public class TerrainGenerator : MonoBehaviour
                     }
                     else
                     {
-                        TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial);
+                        GameObject meshObject = new GameObject(string.Format("Terrain Chunk {0}", viewedChunkCoord.ToString()));
+                        TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, meshObject, meshSettings, mapSettings.detailLevels, colliderLODIndex, viewer, mapMaterial);
+
                         terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
                         newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
-                        newChunk.Load();
+
+                        Debug.Log("Loading Infinite Terrain Chunk");
+                        newChunk.LoadHeightMapThreaded(mapSettings);
+
                     }
                 }
 
             }
         }
     }
+
+    private bool ChunkCoordInRange(Vector2 chunkCoord)
+    {
+        if (mapSettings.borderType == Map.BorderType.Fixed)
+        {
+            Vector2 range = mapSettings.range;
+            return (
+                chunkCoord.x >= range.x
+                && chunkCoord.x <= range.y
+                && chunkCoord.y >= range.x
+                && chunkCoord.y <= range.y
+            );
+        }
+
+        return true;
+    }
+
 
     void OnTerrainChunkVisibilityChanged(TerrainChunk chunk, bool isVisible)
     {
@@ -107,21 +135,52 @@ public class TerrainGenerator : MonoBehaviour
         }
     }
 
-}
-
-[System.Serializable]
-public struct LODInfo
-{
-    [Range(0, MeshSettings.numSupportedLODs - 1)]
-    public int lod;
-    public float visibleDstThreshold;
-
-
-    public float sqrVisibleDstThreshold
+    public static void GeneratePreview(TextureData textureData, MeshSettings meshSettings, MapSettings mapSettings, Material mapMaterial, Transform parent)
     {
-        get
+        // Clear out the old display
+        while (parent.childCount > 0)
         {
-            return visibleDstThreshold * visibleDstThreshold;
+            DestroyImmediate(parent.GetChild(0).gameObject);
         }
+
+        // Default to something reasonable for infinite view
+        // TODO make this a map preview option
+        Vector2 range = new Vector2(-3, 3);
+        if (mapSettings.borderType == Map.BorderType.Fixed)
+        {
+            range = mapSettings.range;
+        }
+
+        for (int x = (int)range.x; x <= range.y; x++)
+        {
+            for (int y = (int)range.x; y <= range.y; y++)
+            {
+                Vector2 chunkCoord = new Vector2(x, y);
+                string gameObjectName = string.Format("Preview Terrain Chunk {0}", chunkCoord.ToString());
+
+                // Make a new terrain chunk under the Terrain Preview parent
+                GameObject meshObject = new GameObject(gameObjectName);
+                meshObject.transform.parent = parent;
+                TerrainChunk newChunk = new TerrainChunk(chunkCoord, meshObject, meshSettings, mapSettings.detailLevels, 0, null, mapMaterial);
+
+                Vector2 sampleCenter = chunkCoord * meshSettings.meshWorldSize / meshSettings.meshScale;
+
+                HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(
+                    meshSettings.numVertsPerLine,
+                    meshSettings.numVertsPerLine,
+                    mapSettings.noiseSettings,
+                    mapSettings.heightCurve,
+                    mapSettings.heightMultiplier,
+                    sampleCenter,
+                    false
+                );
+
+                newChunk.LoadFromHeightMap(heightMap);
+                newChunk.SetVisible(true);
+            }
+        }
+
     }
+
 }
+

@@ -2,72 +2,81 @@ using UnityEngine;
 
 public class MapPreview : MonoBehaviour
 {
-
-    public Renderer textureRender;
-    public MeshFilter meshFilter;
-    public MeshRenderer meshRenderer;
-
-
-    public enum DrawMode { NoiseMap, Mesh, FalloffMap };
-    public DrawMode drawMode;
-
-    public MeshSettings meshSettings;
-    public HeightMapSettings heightMapSettings;
-    public TextureData textureData;
-
-    public Material terrainMaterial;
-
-
+    public Map.DrawMode drawMode;
 
     [Range(0, MeshSettings.numSupportedLODs - 1)]
     public int editorPreviewLOD;
     public bool autoUpdate;
 
+    // GameObject wrapper around a bunch of TerrainChunks used to preview map
+    public GameObject previewTerrain;
+    public Renderer previewTexture;
+    public MeshFilter previewMeshFilter;
+    public MeshRenderer previewMeshRenderer;
+
+    public MapSettings mapSettings;
+    public MeshSettings meshSettings;
+    public TextureData textureData;
+
+    public Material terrainMaterial;
 
 
-
+    // Update the preview, or prepare the terrain mesh for procedural generation
     public void DrawMapInEditor()
     {
         textureData.ApplyToMaterial(terrainMaterial);
-        textureData.UpdateMeshHeights(terrainMaterial, heightMapSettings.minHeight, heightMapSettings.maxHeight);
-        HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, Vector2.zero);
+        textureData.UpdateMeshHeights(terrainMaterial, mapSettings.minHeight, mapSettings.maxHeight);
+        previewTerrain.SetActive(false);
+        previewTexture.gameObject.SetActive(false);
+        previewMeshFilter.gameObject.SetActive(false);
 
-        if (drawMode == DrawMode.NoiseMap)
+        if (drawMode == Map.DrawMode.NoiseMap)
         {
-            DrawTexture(TextureGenerator.TextureFromHeightMap(heightMap));
+            previewTexture.gameObject.SetActive(true);
+
+            int heightMapSize;
+            if (mapSettings.borderType == Map.BorderType.Infinite)
+            {
+                heightMapSize = meshSettings.numVertsPerLine;
+            }
+            else
+            {
+                heightMapSize = meshSettings.numVertsPerLine * mapSettings.fixedSize;
+            }
+            HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(heightMapSize, heightMapSize, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
+            Texture2D texture = TextureGenerator.TextureFromHeightMap(heightMap);
+            DrawTexture(texture);
         }
-        else if (drawMode == DrawMode.Mesh)
+        else if (drawMode == Map.DrawMode.Terrain)
         {
-            DrawMesh(MeshGenerator.GenerateTerrainMesh(heightMap.values, meshSettings, editorPreviewLOD));
+            previewTerrain.SetActive(true);
+            TerrainGenerator.GeneratePreview(textureData, meshSettings, mapSettings, terrainMaterial, previewTerrain.transform);
         }
-        else if (drawMode == DrawMode.FalloffMap)
+        else if (drawMode == Map.DrawMode.Play)
         {
-            DrawTexture(TextureGenerator.TextureFromHeightMap(new HeightMap(FalloffGenerator.GenerateFalloffMap(meshSettings.numVertsPerLine), 0, 1)));
+            HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
+            MeshData meshData = MeshGenerator.GetTerrainChunkMesh(heightMap.values, meshSettings, editorPreviewLOD);
+            DrawMesh(meshData);
         }
+
     }
-
-
-
-
 
     public void DrawTexture(Texture2D texture)
     {
-        textureRender.sharedMaterial.mainTexture = texture;
-        textureRender.transform.localScale = new Vector3(texture.width, 1, texture.height) / 10f;
+        previewTexture.sharedMaterial.mainTexture = texture;
+        previewTexture.transform.localScale = new Vector3(texture.width, 1, texture.height) / 10f;
 
-        textureRender.gameObject.SetActive(true);
-        meshFilter.gameObject.SetActive(false);
+        previewTexture.gameObject.SetActive(true);
+        previewMeshFilter.gameObject.SetActive(false);
     }
 
     public void DrawMesh(MeshData meshData)
     {
-        meshFilter.sharedMesh = meshData.CreateMesh();
+        previewMeshFilter.sharedMesh = meshData.CreateMesh();
 
-        textureRender.gameObject.SetActive(false);
-        meshFilter.gameObject.SetActive(true);
+        previewTexture.gameObject.SetActive(false);
+        previewMeshFilter.gameObject.SetActive(true);
     }
-
-
 
     void OnValuesUpdated()
     {
@@ -90,17 +99,16 @@ public class MapPreview : MonoBehaviour
             meshSettings.OnValuesUpdated -= OnValuesUpdated;
             meshSettings.OnValuesUpdated += OnValuesUpdated;
         }
-        if (heightMapSettings != null)
+        if (mapSettings != null)
         {
-            heightMapSettings.OnValuesUpdated -= OnValuesUpdated;
-            heightMapSettings.OnValuesUpdated += OnValuesUpdated;
+            mapSettings.OnValuesUpdated -= OnValuesUpdated;
+            mapSettings.OnValuesUpdated += OnValuesUpdated;
         }
         if (textureData != null)
         {
             textureData.OnValuesUpdated -= OnTextureValuesUpdated;
             textureData.OnValuesUpdated += OnTextureValuesUpdated;
         }
-
     }
 
 }

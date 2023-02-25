@@ -24,11 +24,7 @@ public class MapPreview : MonoBehaviour
     // Update the preview, or prepare the terrain mesh for procedural generation
     public void DrawMapInEditor()
     {
-        textureData.ApplyToMaterial(terrainMaterial);
-        textureData.UpdateMeshHeights(terrainMaterial, mapSettings.minHeight, mapSettings.maxHeight);
-        previewTerrain.SetActive(false);
-        previewTexture.gameObject.SetActive(false);
-        previewMeshFilter.gameObject.SetActive(false);
+        this.Reset();
 
         if (drawMode == Map.DrawMode.NoiseMap)
         {
@@ -54,11 +50,25 @@ public class MapPreview : MonoBehaviour
         }
         else if (drawMode == Map.DrawMode.Play)
         {
+            textureData.ApplyToMaterial(terrainMaterial);
+            textureData.UpdateMeshHeights(terrainMaterial, mapSettings.minHeight, mapSettings.maxHeight);
             HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
             MeshData meshData = MeshGenerator.GetTerrainChunkMesh(heightMap.values, meshSettings, editorPreviewLOD);
             DrawMesh(meshData);
         }
 
+    }
+
+    // Reset all the preview objects, clear out memory
+    private void Reset()
+    {
+        previewTerrain.SetActive(false);
+        previewTexture.gameObject.SetActive(false);
+        previewMeshFilter.gameObject.SetActive(false);
+        while (previewTerrain.transform.childCount > 0)
+        {
+            DestroyImmediate(previewTerrain.transform.GetChild(0).gameObject);
+        }
     }
 
     public void DrawTexture(Texture2D texture)

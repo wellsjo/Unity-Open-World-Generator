@@ -5,7 +5,6 @@ using UnityEngine;
 // We calculate the changed terrain chunks in view / out of view, then update them if necessary.
 public class TerrainGenerator : MonoBehaviour
 {
-
     const float viewerMoveThresholdForChunkUpdate = 25f;
     const float sqrViewerMoveThresholdForChunkUpdate = viewerMoveThresholdForChunkUpdate * viewerMoveThresholdForChunkUpdate;
 
@@ -136,14 +135,14 @@ public class TerrainGenerator : MonoBehaviour
         }
     }
 
-    public static void GeneratePreview(TextureData textureData, MeshSettings meshSettings, MapSettings mapSettings, Material mapMaterial, Transform parent)
+    public static void GeneratePreview(
+        TextureData textureData,
+        MeshSettings meshSettings,
+        MapSettings mapSettings,
+        Material mapMaterial,
+        Transform terrainChunkParent
+    )
     {
-        // Clear out the old display
-        while (parent.childCount > 0)
-        {
-            DestroyImmediate(parent.GetChild(0).gameObject);
-        }
-
         // Default to something reasonable for infinite view
         // TODO make this a map preview option
         Vector2 range = new Vector2(-3, 3);
@@ -161,7 +160,7 @@ public class TerrainGenerator : MonoBehaviour
 
                 // Make a new terrain chunk under the Terrain Preview parent
                 GameObject meshObject = new GameObject(gameObjectName);
-                meshObject.transform.parent = parent;
+                meshObject.transform.parent = terrainChunkParent;
                 TerrainChunk newChunk = new TerrainChunk(chunkCoord, meshObject, meshSettings, mapSettings.detailLevels, 0, null, mapMaterial);
 
                 Vector2 sampleCenter = chunkCoord * meshSettings.meshWorldSize / meshSettings.meshScale;

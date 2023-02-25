@@ -36,7 +36,6 @@ public class TerrainChunk
         MeshSettings meshSettings,
         LODInfo[] detailLevels,
         int colliderLODIndex,
-        //Transform parent,
         Transform viewer,
         Material material
     )

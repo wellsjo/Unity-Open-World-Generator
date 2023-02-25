@@ -91,7 +91,8 @@ public class TerrainGenerator : MonoBehaviour
                     else
                     {
                         GameObject meshObject = new GameObject(string.Format("Terrain Chunk {0}", viewedChunkCoord.ToString()));
-                        TerrainChunk newChunk = new TerrainChunk(viewedChunkCoord, meshObject, meshSettings, mapSettings.detailLevels, colliderLODIndex, viewer, mapMaterial);
+                        meshObject.transform.parent = transform;
+                        TerrainChunk newChunk = new(viewedChunkCoord, meshObject, meshSettings, mapSettings.detailLevels, colliderLODIndex, viewer, mapMaterial);
 
                         terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
                         newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;

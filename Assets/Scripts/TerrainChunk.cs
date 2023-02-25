@@ -96,7 +96,7 @@ public class TerrainChunk
 
     public void LoadFromHeightMap(HeightMap heightMap)
     {
-        MeshData meshData = MeshGenerator.GenerateTerrainChunkMesh(heightMap.values, meshSettings, 0);
+        MeshData meshData = MeshGenerator.GetTerrainChunkMesh(heightMap.values, meshSettings, 0);
         Mesh mesh = meshData.CreateMesh();
         meshFilter.mesh = mesh;
     }
@@ -239,7 +239,7 @@ class LODMesh
     public void RequestMesh(HeightMap heightMap, MeshSettings meshSettings)
     {
         hasRequestedMesh = true;
-        MeshData meshData = MeshGenerator.GenerateTerrainChunkMesh(heightMap.values, meshSettings, lod);
+        MeshData meshData = MeshGenerator.GetTerrainChunkMesh(heightMap.values, meshSettings, lod);
         Debug.Log("RequestMeshData");
         ThreadedDataRequester.RequestData(() => meshData, OnMeshDataReceived);
     }

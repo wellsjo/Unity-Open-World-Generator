@@ -55,7 +55,7 @@ public class MapPreview : MonoBehaviour
         else if (drawMode == Map.DrawMode.Play)
         {
             HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
-            MeshData meshData = MeshGenerator.GenerateTerrainChunkMesh(heightMap.values, meshSettings, editorPreviewLOD);
+            MeshData meshData = MeshGenerator.GetTerrainChunkMesh(heightMap.values, meshSettings, editorPreviewLOD);
             DrawMesh(meshData);
         }
 

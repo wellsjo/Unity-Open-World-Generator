@@ -2,39 +2,8 @@ using UnityEngine;
 
 public static class MeshGenerator
 {
-    //public static SimpleMeshData GenerateTerrainMesh(float[,] heightMap)
-    //{
-    //    int width = heightMap.GetLength(0);
-    //    int height = heightMap.GetLength(1);
-    //    float topLeftX = (width - 1) / -2f;
-    //    float topLeftZ = (height - 1) / 2f;
-
-    //    SimpleMeshData meshData = new SimpleMeshData(width, height);
-    //    int vertexIndex = 0;
-
-    //    for (int y = 0; y < height; y++)
-    //    {
-    //        for (int x = 0; x < width; x++)
-    //        {
-
-    //            meshData.vertices[vertexIndex] = new Vector3(topLeftX + x, heightMap[x, y], topLeftZ - y);
-    //            meshData.uvs[vertexIndex] = new Vector2(x / (float)width, y / (float)height);
-
-    //            if (x < width - 1 && y < height - 1)
-    //            {
-    //                meshData.AddTriangle(vertexIndex, vertexIndex + width + 1, vertexIndex + width);
-    //                meshData.AddTriangle(vertexIndex + width + 1, vertexIndex, vertexIndex + 1);
-    //            }
-
-    //            vertexIndex++;
-    //        }
-    //    }
-
-    //    return meshData;
-
-    //}
     // This function is limited to drawing over pre-defined mesh sizes (loops over vertsPerLine)
-    public static MeshData GenerateTerrainChunkMesh(float[,] heightMap, MeshSettings meshSettings, int levelOfDetail)
+    public static MeshData GetTerrainChunkMesh(float[,] heightMap, MeshSettings meshSettings, int levelOfDetail)
     {
         int skipIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
         int numVertsPerLine = meshSettings.numVertsPerLine;

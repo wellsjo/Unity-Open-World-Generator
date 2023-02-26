@@ -77,19 +77,10 @@ public class TerrainChunk
 
     // TerrainChunk loads a new height map with only the number of vertices per mesh, then requests mesh data for it.
     // This is used for infinite terrain.
-    public void LoadHeightMapThreaded(MapSettings heightMapSettings)
+    public void LoadHeightMapThreaded(HeightMapGenerator heightMapGenerator, int size, Vector2 coord)
     {
-        // TODO generate the height map in the threaded data requester
-        HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(
-            meshSettings.numVertsPerLine,
-            meshSettings.numVertsPerLine,
-            heightMapSettings.noiseSettings,
-            heightMapSettings.heightCurve,
-            heightMapSettings.heightMultiplier,
-            sampleCentre,
-            heightMapSettings.seed
-        );
-        ThreadedDataRequester.RequestData(() => heightMap, OnHeightMapReceived);
+        Vector2 sampleCenter = coord * meshSettings.meshWorldSize / meshSettings.meshScale;
+        ThreadedDataRequester.RequestData(() => heightMapGenerator.BuildHeightMap(size, size, sampleCenter), OnHeightMapReceived);
     }
 
     public void LoadFromHeightMap(HeightMap heightMap)

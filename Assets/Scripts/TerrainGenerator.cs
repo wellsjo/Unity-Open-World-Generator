@@ -26,6 +26,7 @@ public class TerrainGenerator : MonoBehaviour
 
     Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
     List<TerrainChunk> visibleTerrainChunks = new List<TerrainChunk>();
+    HeightMapGenerator heightMapGenerator;
 
     void Start()
     {
@@ -35,6 +36,8 @@ public class TerrainGenerator : MonoBehaviour
         float maxViewDst = mapSettings.detailLevels[mapSettings.detailLevels.Length - 1].visibleDstThreshold;
         meshWorldSize = meshSettings.meshWorldSize;
         chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / meshWorldSize);
+
+        heightMapGenerator = new HeightMapGenerator(mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, mapSettings.seed);
 
         UpdateVisibleChunks();
     }
@@ -106,8 +109,7 @@ public class TerrainGenerator : MonoBehaviour
                         newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
 
                         Debug.Log("Loading Infinite Terrain Chunk");
-                        newChunk.LoadHeightMapThreaded(mapSettings);
-
+                        newChunk.LoadHeightMapThreaded(heightMapGenerator, meshSettings.numVertsPerLine, viewedChunkCoord);
                     }
                 }
 
@@ -152,6 +154,8 @@ public class TerrainGenerator : MonoBehaviour
         Transform terrainChunkParent
     )
     {
+        HeightMapGenerator heightMapGenerator = new HeightMapGenerator(mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, mapSettings.seed);
+
         // Default to something reasonable for infinite view
         // TODO make this a map preview option
         Vector2 range = new Vector2(-3, 3);
@@ -174,14 +178,14 @@ public class TerrainGenerator : MonoBehaviour
 
                 Vector2 sampleCenter = chunkCoord * meshSettings.meshWorldSize / meshSettings.meshScale;
 
-                HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(
+                HeightMap heightMap = heightMapGenerator.BuildHeightMap(
                     meshSettings.numVertsPerLine,
                     meshSettings.numVertsPerLine,
-                    mapSettings.noiseSettings,
-                    mapSettings.heightCurve,
-                    mapSettings.heightMultiplier,
-                    sampleCenter,
-                    mapSettings.seed
+                    //mapSettings.noiseSettings,
+                    //mapSettings.heightCurve,
+                    //mapSettings.heightMultiplier,
+                    sampleCenter
+                //mapSettings.seed
                 );
 
                 newChunk.LoadFromHeightMap(heightMap);

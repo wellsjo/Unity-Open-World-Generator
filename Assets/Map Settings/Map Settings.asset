@@ -16,46 +16,55 @@ MonoBehaviour:
   seed: 0
   borderType: 0
   fixedSize: 5
-  noiseSettings:
-    scale: 20.89
-    octaves: 3
-    persistance: 0.467
-    lacunarity: 1.96
-    offset: {x: 0, y: 0}
-  heightMultiplier: 24
   heightCurve:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: -0.047576904
-      value: 0
-      inSlope: 0.797666
-      outSlope: 0.797666
+      time: -0.4293213
+      value: -0.37826538
+      inSlope: 0.31915545
+      outSlope: 0.31915545
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0.06663835
+      outWeight: 0.2640336
     - serializedVersion: 3
-      time: 1.1175146
-      value: 0.7346609
-      inSlope: 1.8339847
-      outSlope: 1.8339847
-      tangentMode: 0
+      time: 0.7160044
+      value: 0.44454172
+      inSlope: 1.5088938
+      outSlope: 1.5088938
+      tangentMode: 34
       weightedMode: 0
       inWeight: 0.33333334
       outWeight: 0.33333334
     - serializedVersion: 3
-      time: 1.5088736
-      value: 3.001634
-      inSlope: 4.8722453
-      outSlope: 4.8722453
-      tangentMode: 0
+      time: 1.3973694
+      value: 2.011261
+      inSlope: 2.2993832
+      outSlope: 2.2993832
+      tangentMode: 34
       weightedMode: 0
-      inWeight: 0.05583086
+      inWeight: 0.33333334
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  heightMultiplier: 30
+  noiseSettings:
+    startingOffset: {x: 0, y: 0}
+    persistance: 0.6
+    octaves: 6
+    scale: 50
+    lacunarity: 2
+  meshSettings:
+    meshScale: 2
+    useFlatShading: 0
+    chunkSizeIndex: 1
+    flatshadedChunkSizeIndex: 0
   detailLevels:
   - lod: 0
     visibleDstThreshold: 100
+  - lod: 1
+    visibleDstThreshold: 300
+  - lod: 2
+    visibleDstThreshold: 600

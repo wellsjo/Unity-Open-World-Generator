@@ -1,19 +1,28 @@
 using UnityEngine;
 
-public static class HeightMapGenerator
+public class HeightMapGenerator
 {
-    public static HeightMap GenerateHeightMap(
-        int width, 
-        int height, 
-        NoiseSettings noiseSettings, 
-        AnimationCurve heightCurve, 
-        float heightMultiplier, 
-        Vector2 sampleCentre, 
-        int seed
+    NoiseGenerator noiseGenerator;
+    AnimationCurve heightCurve;
+    int heightMultiplier;
+    public HeightMapGenerator(NoiseSettings noiseSettings, AnimationCurve heightCurve, int heightMultiplier, int seed)
+    {
+
+        this.noiseGenerator = new NoiseGenerator(noiseSettings, seed);
+        this.heightCurve = heightCurve;
+        this.heightMultiplier = heightMultiplier;
+    }
+    public HeightMap BuildHeightMap(
+        int width,
+        int height,
+        //NoiseSettings noiseSettings,
+        //AnimationCurve heightCurve,
+        //float heightMultiplier,
+        Vector2 sampleCentre
+    //int seed
     )
     {
-        float[,] values = Noise.GenerateNoiseMap(width, height, noiseSettings, sampleCentre, seed);
-
+        float[,] values = noiseGenerator.BuildNoiseMap(width, height, sampleCentre);
         AnimationCurve heightCurve_threadsafe = new(heightCurve.keys);
 
         float minValue = float.MaxValue;

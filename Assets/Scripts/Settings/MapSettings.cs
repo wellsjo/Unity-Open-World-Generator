@@ -9,12 +9,12 @@ public class MapSettings : UpdatableData
     // number of terrain chunks to use per vertex
     // field is ignored if map border type is infinite
     public int fixedSize;
-    //public bool useFalloff;
-
+    public AnimationCurve heightCurve;
+    public int heightMultiplier;
     public NoiseSettings noiseSettings;
     public MeshSettings meshSettings;
-    public float heightMultiplier;
-    public AnimationCurve heightCurve;
+    // public float heightMultiplier;
+    // public AnimationCurve heightCurve;
     public LODInfo[] detailLevels;
 
     public const int MaxFixedSize = 11;
@@ -32,7 +32,8 @@ public class MapSettings : UpdatableData
     {
         get
         {
-            return heightMultiplier * heightCurve.Evaluate(0);
+            //return heightMultiplier * heightCurve.Evaluate(0);
+            return 0;
         }
     }
 
@@ -40,7 +41,8 @@ public class MapSettings : UpdatableData
     {
         get
         {
-            return heightMultiplier * heightCurve.Evaluate(1);
+            //return heightMultiplier * heightCurve.Evaluate(1);
+            return 1;
         }
     }
 
@@ -74,7 +76,7 @@ public class MapSettings : UpdatableData
     protected override void OnValidate()
     {
         this.ValidateValues();
-        noiseSettings.ValidateValues();
+        //noiseSettings.ValidateValues();
         base.OnValidate();
     }
 #endif
@@ -135,29 +137,4 @@ public class MeshSettings
     }
 
 
-}
-
-
-[System.Serializable]
-public class NoiseSettings
-{
-    //public Noise.NormalizeMode normalizeMode;
-
-    public float scale = 50;
-
-    public int octaves = 6;
-    [Range(0, 1)]
-    public float persistance = .6f;
-    public float lacunarity = 2;
-
-    //public int seed;
-    public Vector2 offset;
-
-    public void ValidateValues()
-    {
-        scale = Mathf.Max(scale, 0.01f);
-        octaves = Mathf.Max(octaves, 1);
-        lacunarity = Mathf.Max(lacunarity, 1);
-        persistance = Mathf.Clamp01(persistance);
-    }
 }

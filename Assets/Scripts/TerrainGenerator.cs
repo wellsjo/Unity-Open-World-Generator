@@ -13,7 +13,7 @@ public class TerrainGenerator : MonoBehaviour
     public BiomeSettings biomeSettings;
     public MapSettings mapSettings;
     public MeshSettings meshSettings;
-    public TextureData textureSettings;
+    public TextureSettings textureSettings;
 
     public Transform viewer;
     public Material mapMaterial;
@@ -147,7 +147,7 @@ public class TerrainGenerator : MonoBehaviour
     }
 
     public static void GeneratePreview(
-        TextureData textureData,
+        TextureSettings textureData,
         MeshSettings meshSettings,
         MapSettings mapSettings,
         Material mapMaterial,

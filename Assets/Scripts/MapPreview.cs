@@ -39,12 +39,21 @@ public class MapPreview : MonoBehaviour
             {
                 heightMapSize = meshSettings.numVertsPerLine * mapSettings.fixedSize;
             }
-            HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(heightMapSize, heightMapSize, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
+            HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(
+                heightMapSize,
+                heightMapSize,
+                mapSettings.noiseSettings,
+                mapSettings.heightCurve,
+                mapSettings.heightMultiplier,
+                Vector2.zero,
+                mapSettings.seed);
             Texture2D texture = TextureGenerator.TextureFromHeightMap(heightMap);
             DrawTexture(texture);
         }
         else if (drawMode == Map.DrawMode.Terrain)
         {
+            textureData.ApplyToMaterial(terrainMaterial);
+            textureData.UpdateMeshHeights(terrainMaterial, mapSettings.minHeight, mapSettings.maxHeight);
             previewTerrain.SetActive(true);
             TerrainGenerator.GeneratePreview(textureData, meshSettings, mapSettings, terrainMaterial, previewTerrain.transform);
         }
@@ -52,7 +61,14 @@ public class MapPreview : MonoBehaviour
         {
             textureData.ApplyToMaterial(terrainMaterial);
             textureData.UpdateMeshHeights(terrainMaterial, mapSettings.minHeight, mapSettings.maxHeight);
-            HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
+            HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(
+                meshSettings.numVertsPerLine,
+                meshSettings.numVertsPerLine,
+                mapSettings.noiseSettings,
+                mapSettings.heightCurve,
+                mapSettings.heightMultiplier,
+                Vector2.zero,
+                mapSettings.seed);
             MeshData meshData = MeshGenerator.GetTerrainChunkMesh(heightMap.values, meshSettings, editorPreviewLOD);
             DrawMesh(meshData);
         }

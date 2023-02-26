@@ -3,12 +3,13 @@ using UnityEngine;
 [CreateAssetMenu()]
 public class MapSettings : UpdatableData
 {
+    public int seed;
     public Map.BorderType borderType;
 
     // number of terrain chunks to use per vertex
     // field is ignored if map border type is infinite
     public int fixedSize;
-    public bool useFalloff;
+    //public bool useFalloff;
 
     public NoiseSettings noiseSettings;
     public float heightMultiplier;

@@ -3,13 +3,13 @@ using UnityEngine;
 public static class Noise
 {
 
-    public enum NormalizeMode { Local, Global };
+    //public enum NormalizeMode { Local, Global };
 
-    public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, NoiseSettings settings, Vector2 sampleCentre)
+    public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, NoiseSettings settings, Vector2 sampleCentre, int seed)
     {
         float[,] noiseMap = new float[mapWidth, mapHeight];
 
-        System.Random rng = new System.Random(settings.seed);
+        System.Random rng = new System.Random(seed);
         Vector2[] octaveOffsets = new Vector2[settings.octaves];
 
         float maxPossibleHeight = 0;
@@ -67,26 +67,25 @@ public static class Noise
                 }
                 noiseMap[x, y] = noiseHeight;
 
-                // TODO go back and figure out why we have a local mode
-                if (settings.normalizeMode == NormalizeMode.Global)
-                {
-                    float normalizedHeight = (noiseMap[x, y] + 1) / (maxPossibleHeight / 0.9f);
-                    noiseMap[x, y] = Mathf.Clamp(normalizedHeight, 0, int.MaxValue);
-                }
+                //if (settings.normalizeMode == NormalizeMode.Global)
+                //{
+                float normalizedHeight = (noiseMap[x, y] + 1) / (maxPossibleHeight / 0.9f);
+                noiseMap[x, y] = Mathf.Clamp(normalizedHeight, 0, int.MaxValue);
+                //}
             }
         }
 
-        // This seems useless
-        if (settings.normalizeMode == NormalizeMode.Local)
-        {
-            for (int y = 0; y < mapHeight; y++)
-            {
-                for (int x = 0; x < mapWidth; x++)
-                {
-                    noiseMap[x, y] = Mathf.InverseLerp(minLocalNoiseHeight, maxLocalNoiseHeight, noiseMap[x, y]);
-                }
-            }
-        }
+        // This seems useless, keep just in case
+        //if (settings.normalizeMode == NormalizeMode.Local)
+        //{
+        //    for (int y = 0; y < mapHeight; y++)
+        //    {
+        //        for (int x = 0; x < mapWidth; x++)
+        //        {
+        //            noiseMap[x, y] = Mathf.InverseLerp(minLocalNoiseHeight, maxLocalNoiseHeight, noiseMap[x, y]);
+        //        }
+        //    }
+        //}
 
         return noiseMap;
     }
@@ -96,7 +95,7 @@ public static class Noise
 [System.Serializable]
 public class NoiseSettings
 {
-    public Noise.NormalizeMode normalizeMode;
+    //public Noise.NormalizeMode normalizeMode;
 
     public float scale = 50;
 
@@ -105,7 +104,7 @@ public class NoiseSettings
     public float persistance = .6f;
     public float lacunarity = 2;
 
-    public int seed;
+    //public int seed;
     public Vector2 offset;
 
     public void ValidateValues()

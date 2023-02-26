@@ -10,8 +10,9 @@ public class TerrainGenerator : MonoBehaviour
 
     public int colliderLODIndex;
 
-    public MeshSettings meshSettings;
+    public BiomeSettings biomeSettings;
     public MapSettings mapSettings;
+    public MeshSettings meshSettings;
     public TextureData textureSettings;
 
     public Transform viewer;
@@ -89,9 +90,17 @@ public class TerrainGenerator : MonoBehaviour
                     }
                     else
                     {
-                        GameObject meshObject = new GameObject(string.Format("Terrain Chunk {0}", viewedChunkCoord.ToString()));
-                        meshObject.transform.parent = transform;
-                        TerrainChunk newChunk = new(viewedChunkCoord, meshObject, meshSettings, mapSettings.detailLevels, colliderLODIndex, viewer, mapMaterial);
+                        GameObject terrainObject = new GameObject(string.Format("Terrain Chunk {0}", viewedChunkCoord.ToString()));
+                        terrainObject.transform.parent = transform;
+                        TerrainChunk newChunk = new(
+                            viewedChunkCoord,
+                            terrainObject,
+                            meshSettings,
+                            mapSettings.detailLevels,
+                            colliderLODIndex,
+                            viewer,
+                            mapMaterial
+                        );
 
                         terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
                         newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
@@ -172,7 +181,7 @@ public class TerrainGenerator : MonoBehaviour
                     mapSettings.heightCurve,
                     mapSettings.heightMultiplier,
                     sampleCenter,
-                    false
+                    mapSettings.seed
                 );
 
                 newChunk.LoadFromHeightMap(heightMap);

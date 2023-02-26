@@ -50,7 +50,6 @@ public class TerrainChunk
         Vector2 position = coord * meshSettings.meshWorldSize;
         bounds = new Bounds(position, Vector2.one * meshSettings.meshWorldSize);
 
-        //meshObject = new GameObject(string.Format("Terrain Chunk {0}", coord.ToString()));
         this.meshObject = meshObject;
         meshRenderer = meshObject.AddComponent<MeshRenderer>();
         meshFilter = meshObject.AddComponent<MeshFilter>();
@@ -58,7 +57,6 @@ public class TerrainChunk
         meshRenderer.material = material;
 
         meshObject.transform.position = new Vector3(position.x, 0, position.y);
-        //meshObject.transform.parent = parent;
         SetVisible(false);
 
         lodMeshes = new LODMesh[detailLevels.Length];
@@ -66,6 +64,7 @@ public class TerrainChunk
         {
             lodMeshes[i] = new LODMesh(detailLevels[i].lod);
             lodMeshes[i].updateCallback += UpdateTerrainChunk;
+            // TODO this seems like a bug, should be i < colliderLODIndex
             if (i == colliderLODIndex)
             {
                 lodMeshes[i].updateCallback += UpdateCollisionMesh;
@@ -88,7 +87,7 @@ public class TerrainChunk
             heightMapSettings.heightCurve,
             heightMapSettings.heightMultiplier,
             sampleCentre,
-            false
+            heightMapSettings.seed
         );
         ThreadedDataRequester.RequestData(() => heightMap, OnHeightMapReceived);
     }

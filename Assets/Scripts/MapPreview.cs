@@ -122,8 +122,8 @@ public class MapPreview : MonoBehaviour
 
         if (meshSettings != null)
         {
-            meshSettings.OnValuesUpdated -= OnValuesUpdated;
-            meshSettings.OnValuesUpdated += OnValuesUpdated;
+            //meshSettings.OnValuesUpdated -= OnValuesUpdated;
+            //meshSettings.OnValuesUpdated += OnValuesUpdated;
         }
         if (mapSettings != null)
         {

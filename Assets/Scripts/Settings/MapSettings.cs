@@ -144,7 +144,6 @@ public class TextureSettings
     const int textureSize = 512;
     const TextureFormat textureFormat = TextureFormat.RGB565;
 
-
     public Layer[] layers;
 
     float savedMinHeight;
@@ -152,7 +151,6 @@ public class TextureSettings
 
     public void ApplyToMaterial(Material material)
     {
-
         material.SetInt("layerCount", layers.Length);
         material.SetColorArray("baseColours", layers.Select(x => x.tint).ToArray());
         material.SetFloatArray("baseStartHeights", layers.Select(x => x.startHeight).ToArray());
@@ -198,6 +196,5 @@ public class TextureSettings
         public float blendStrength;
         public float textureScale;
     }
-
 
 }

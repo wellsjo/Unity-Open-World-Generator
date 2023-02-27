@@ -15,14 +15,10 @@ public class HeightMapGenerator
     public HeightMap BuildHeightMap(
         int width,
         int height,
-        //NoiseSettings noiseSettings,
-        //AnimationCurve heightCurve,
-        //float heightMultiplier,
-        Vector2 sampleCentre
-    //int seed
+        Vector2 sampleCenter
     )
     {
-        float[,] values = noiseGenerator.BuildNoiseMap(width, height, sampleCentre);
+        float[,] values = noiseGenerator.BuildNoiseMap(width, height, sampleCenter);
         AnimationCurve heightCurve_threadsafe = new(heightCurve.keys);
 
         float minValue = float.MaxValue;

@@ -82,7 +82,7 @@ public class MapSettings : UpdatableData
 
 }
 
-[System.Serializable]
+[System.Serializable()]
 public struct LODInfo
 {
     [Range(0, MeshSettings.numSupportedLODs - 1)]

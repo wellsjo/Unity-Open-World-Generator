@@ -44,11 +44,7 @@ public class MapPreview : MonoBehaviour
             HeightMap heightMap = heightMapGenerator.BuildHeightMap(
                 heightMapSize,
                 heightMapSize,
-                //mapSettings.noiseSettings,
-                //mapSettings.heightCurve,
-                //mapSettings.heightMultiplier,
                 Vector2.zero
-            //mapSettings.seed
             );
             Texture2D texture = TextureGenerator.TextureFromHeightMap(heightMap);
             DrawTexture(texture);
@@ -58,7 +54,13 @@ public class MapPreview : MonoBehaviour
             mapSettings.textureSettings.ApplyToMaterial(terrainMaterial);
             mapSettings.textureSettings.UpdateMeshHeights(terrainMaterial, mapSettings.minHeight, mapSettings.maxHeight);
             previewTerrain.SetActive(true);
-            TerrainGenerator.GeneratePreview(mapSettings.textureSettings, mapSettings.meshSettings, mapSettings, terrainMaterial, previewTerrain.transform);
+            TerrainGenerator.GeneratePreview(
+                mapSettings.textureSettings,
+                mapSettings.meshSettings,
+                mapSettings,
+                terrainMaterial,
+                previewTerrain.transform
+            );
         }
         else if (drawMode == Map.DrawMode.Play)
         {
@@ -67,11 +69,7 @@ public class MapPreview : MonoBehaviour
             HeightMap heightMap = heightMapGenerator.BuildHeightMap(
                 mapSettings.meshSettings.numVertsPerLine,
                 mapSettings.meshSettings.numVertsPerLine,
-                //mapSettings.noiseSettings,
-                //mapSettings.heightCurve,
-                //mapSettings.heightMultiplier,
                 Vector2.zero
-            //mapSettings.seed
             );
             MeshData meshData = MeshGenerator.GetTerrainChunkMesh(heightMap.values, mapSettings.meshSettings, editorPreviewLOD);
             DrawMesh(meshData);
@@ -112,11 +110,6 @@ public class MapPreview : MonoBehaviour
         }
     }
 
-    // void OnTextureValuesUpdated()
-    // {
-    //     mapSettings.textureSettings.ApplyToMaterial(terrainMaterial);
-    // }
-
     void OnValidate()
     {
 
@@ -125,11 +118,6 @@ public class MapPreview : MonoBehaviour
             mapSettings.OnValuesUpdated -= OnValuesUpdated;
             mapSettings.OnValuesUpdated += OnValuesUpdated;
         }
-        // if (textureData != null)
-        // {
-        //     textureData.OnValuesUpdated -= OnTextureValuesUpdated;
-        //     textureData.OnValuesUpdated += OnTextureValuesUpdated;
-        // }
     }
 
 }

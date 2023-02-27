@@ -1,3 +1,4 @@
+using Palmmedia.ReportGenerator.Core;
 using UnityEngine;
 
 public class NoiseGenerator
@@ -18,9 +19,9 @@ public class NoiseGenerator
     {
         float[,] noiseMap = new float[width, height];
 
-        System.Random rng = new System.Random(seed);
+        System.Random rng = new(seed);
         // TODO remove after determinig if different
-        Debug.LogFormat("RNG {0}", rng);
+        //Debug.LogFormat("RNG {0}", rng);
 
         Vector2[] octaveOffsets = new Vector2[noiseSettings.octaves];
 
@@ -79,7 +80,7 @@ public class NoiseGenerator
                 }
                 noiseMap[x, y] = noiseHeight;
 
-                float normalizedHeight = (noiseMap[x, y] + 1) / (maxPossibleHeight);
+                float normalizedHeight = (noiseMap[x, y] + 1) / (maxPossibleHeight / 0.9f);
                 noiseMap[x, y] = Mathf.Clamp(normalizedHeight, 0, int.MaxValue);
             }
         }

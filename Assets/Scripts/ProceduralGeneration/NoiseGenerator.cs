@@ -1,34 +1,32 @@
+using System;
 using Palmmedia.ReportGenerator.Core;
 using UnityEngine;
 
 public class NoiseGenerator
 {
-    NoiseSettings noiseSettings;
+    private BiomeSettings biomeSettings;
     private int seed;
-    public NoiseGenerator(NoiseSettings noiseSettings, int seed)
+    public NoiseGenerator(BiomeSettings biomeSettings, int seed)
     {
-        this.noiseSettings = noiseSettings;
+        this.biomeSettings = biomeSettings;
         this.seed = seed;
     }
 
     public float[,] BuildNoiseMap(
         int width,
         int height,
-        Vector2 offset
+        Vector2 offset,
+        NoiseSettings noiseSettings
     )
     {
         float[,] noiseMap = new float[width, height];
 
         System.Random rng = new(seed);
-        // TODO remove after determinig if different
-        //Debug.LogFormat("RNG {0}", rng);
 
         Vector2[] octaveOffsets = new Vector2[noiseSettings.octaves];
 
         float maxPossibleHeight = 0;
         float amplitude = 1;
-        float frequency = 1;
-
         for (int i = 0; i < noiseSettings.octaves; i++)
         {
             // this range -100000,100000 gives best random numbers from testing
@@ -55,7 +53,7 @@ public class NoiseGenerator
             {
 
                 amplitude = 1;
-                frequency = 1;
+                float frequency = 1;
                 float noiseHeight = 0;
 
                 for (int i = 0; i < noiseSettings.octaves; i++)
@@ -93,41 +91,9 @@ public class NoiseGenerator
 [System.Serializable]
 public class NoiseSettings
 {
-    //public NoiseLayer[] noiseLayers;
     public Vector2 startingOffset;
     public float persistance;
-    //public float amplitude;
     public int octaves;
     public float scale;
     public float lacunarity;
-}
-
-/// <summary>
-/// Noise layer.
-/// </summary>
-[System.Serializable]
-public class NoiseLayer
-{
-    // Multiplier for noise.
-    [SerializeField]
-    private float noisePower = 1;
-    // Noise offset.
-    //[SerializeField]
-    //private Vector2 noiseOffset;
-    // Noise scale.
-    [SerializeField]
-    private float noiseScale = 1;
-    /// <summary>
-    /// Evalate value for X and Y coords.
-    /// </summary>
-    /// <returns>Returns value from noise.</returns>
-    /// <param name="x">The x coordinate (0.0-1.0).</param>
-    /// <param name="y">The y coordinate (0.0-1.0).</param>
-    public float Evalate(float x, float y, Vector2 offset)
-    {
-        // Adding elevation from perlin noise.
-        float noiseXCoord = offset.x + x * noiseScale;
-        float noiseYCoord = y * noiseScale - offset.y;
-        return (Mathf.PerlinNoise(noiseXCoord, noiseYCoord) - 0.5f) * noisePower;
-    }
 }

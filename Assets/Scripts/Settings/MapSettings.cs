@@ -11,9 +11,7 @@ public class MapSettings : UpdatableData
     // number of terrain chunks to use per vertex
     // field is ignored if map border type is infinite
     public int fixedSize;
-    public AnimationCurve heightCurve;
-    public int heightMultiplier;
-    public NoiseSettings noiseSettings;
+    public BiomeSettings biomeSettings;
     public MeshSettings meshSettings;
     public TextureSettings textureSettings;
     public LODInfo[] detailLevels;
@@ -29,19 +27,39 @@ public class MapSettings : UpdatableData
         }
     }
 
-    public float minHeight
+    public float MinHeight
     {
         get
         {
-            return heightMultiplier * heightCurve.Evaluate(0);
+            float minHeight = float.MaxValue;
+            for (int i = 0; i < biomeSettings.biomes.Length; i++)
+            {
+                Biome biome = biomeSettings.biomes[i];
+                float minHeightForBiome = biome.heightMultiplier * biome.heightCurve.Evaluate(0);
+                if (minHeightForBiome < minHeight)
+                {
+                    minHeight = minHeightForBiome;
+                }
+            }
+            return minHeight;
         }
     }
 
-    public float maxHeight
+    public float MaxHeight
     {
         get
         {
-            return heightMultiplier * heightCurve.Evaluate(1);
+            float maxHeight = float.MinValue;
+            for (int i = 0; i < biomeSettings.biomes.Length; i++)
+            {
+                Biome biome = biomeSettings.biomes[i];
+                float maxHeightForBiome = biome.heightMultiplier * biome.heightCurve.Evaluate(0);
+                if (maxHeightForBiome > maxHeight)
+                {
+                    maxHeight = maxHeightForBiome;
+                }
+            }
+            return maxHeight;
         }
     }
 

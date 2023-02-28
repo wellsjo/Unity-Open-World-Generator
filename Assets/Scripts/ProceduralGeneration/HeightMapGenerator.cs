@@ -1,16 +1,14 @@
 using UnityEngine;
 
-public class HeightMapGenerator
+public class BiomeGenerator
 {
-    NoiseGenerator noiseGenerator;
-    AnimationCurve heightCurve;
-    int heightMultiplier;
-    public HeightMapGenerator(NoiseSettings noiseSettings, AnimationCurve heightCurve, int heightMultiplier, int seed)
+    readonly NoiseGenerator noiseGenerator;
+    readonly BiomeSettings biomeSettings;
+    public BiomeGenerator(BiomeSettings biomeSettings, int seed)
     {
 
-        this.noiseGenerator = new NoiseGenerator(noiseSettings, seed);
-        this.heightCurve = heightCurve;
-        this.heightMultiplier = heightMultiplier;
+        this.noiseGenerator = new NoiseGenerator(biomeSettings, seed);
+        this.biomeSettings = biomeSettings;
     }
     public HeightMap BuildHeightMap(
         int width,
@@ -18,8 +16,20 @@ public class HeightMapGenerator
         Vector2 sampleCenter
     )
     {
-        float[,] values = noiseGenerator.BuildNoiseMap(width, height, sampleCenter);
-        AnimationCurve heightCurve_threadsafe = new(heightCurve.keys);
+        double distanceFromOrigin = Mathf.Sqrt((sampleCenter.x * sampleCenter.x) + (sampleCenter.y * sampleCenter.y));
+        Biome biome = biomeSettings.biomes[0];
+        // TODO another if-statement here
+        for (int i = 0; i < biomeSettings.biomes.Length; i++)
+        {
+            biome = biomeSettings.biomes[i];
+            if (biome.endDistance <= distanceFromOrigin)
+            {
+                break;
+            }
+        }
+
+        float[,] values = noiseGenerator.BuildNoiseMap(width, height, sampleCenter, biome.noiseSettings);
+        AnimationCurve heightCurve_threadsafe = new(biome.heightCurve.keys);
 
         float minValue = float.MaxValue;
         float maxValue = float.MinValue;
@@ -28,7 +38,7 @@ public class HeightMapGenerator
         {
             for (int j = 0; j < height; j++)
             {
-                values[i, j] *= heightCurve_threadsafe.Evaluate(values[i, j]) * heightMultiplier;
+                values[i, j] *= heightCurve_threadsafe.Evaluate(values[i, j]) * biome.heightMultiplier;
 
                 if (values[i, j] > maxValue)
                 {

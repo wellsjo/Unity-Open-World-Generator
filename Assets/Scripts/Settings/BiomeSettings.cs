@@ -10,4 +10,7 @@ public class BiomeSettings : UpdatableData
 public class Biome
 {
     public NoiseSettings noiseSettings;
+    public AnimationCurve heightCurve;
+    public float heightMultiplier;
+    public float endDistance;
 }

@@ -15,8 +15,6 @@ public class MapPreview : MonoBehaviour
     public MeshRenderer previewMeshRenderer;
 
     public MapSettings mapSettings;
-    // public TextureSettings textureData;
-
     public Material terrainMaterial;
 
 
@@ -24,7 +22,10 @@ public class MapPreview : MonoBehaviour
     public void DrawMapInEditor()
     {
         this.Reset();
-        HeightMapGenerator heightMapGenerator = new HeightMapGenerator(mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, mapSettings.seed);
+        BiomeGenerator heightMapGenerator = new BiomeGenerator(
+            mapSettings.biomeSettings,
+            mapSettings.seed
+        );
 
         if (drawMode == Map.DrawMode.NoiseMap)
         {
@@ -52,7 +53,7 @@ public class MapPreview : MonoBehaviour
         else if (drawMode == Map.DrawMode.Terrain)
         {
             mapSettings.textureSettings.ApplyToMaterial(terrainMaterial);
-            mapSettings.textureSettings.UpdateMeshHeights(terrainMaterial, mapSettings.minHeight, mapSettings.maxHeight);
+            mapSettings.textureSettings.UpdateMeshHeights(terrainMaterial, mapSettings.MinHeight, mapSettings.MaxHeight);
             previewTerrain.SetActive(true);
             TerrainGenerator.GeneratePreview(
                 mapSettings.textureSettings,
@@ -65,7 +66,7 @@ public class MapPreview : MonoBehaviour
         else if (drawMode == Map.DrawMode.Play)
         {
             mapSettings.textureSettings.ApplyToMaterial(terrainMaterial);
-            mapSettings.textureSettings.UpdateMeshHeights(terrainMaterial, mapSettings.minHeight, mapSettings.maxHeight);
+            mapSettings.textureSettings.UpdateMeshHeights(terrainMaterial, mapSettings.MinHeight, mapSettings.MaxHeight);
             HeightMap heightMap = heightMapGenerator.BuildHeightMap(
                 mapSettings.meshSettings.numVertsPerLine,
                 mapSettings.meshSettings.numVertsPerLine,

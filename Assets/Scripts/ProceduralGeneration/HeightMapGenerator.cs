@@ -16,20 +16,8 @@ public class BiomeGenerator
         Vector2 sampleCenter
     )
     {
-        double distanceFromOrigin = Mathf.Sqrt((sampleCenter.x * sampleCenter.x) + (sampleCenter.y * sampleCenter.y));
-        Biome biome = biomeSettings.biomes[0];
-        // TODO another if-statement here
-        for (int i = 0; i < biomeSettings.biomes.Length; i++)
-        {
-            biome = biomeSettings.biomes[i];
-            if (biome.endDistance <= distanceFromOrigin)
-            {
-                break;
-            }
-        }
-
-        float[,] values = noiseGenerator.BuildNoiseMap(width, height, sampleCenter, biome.noiseSettings);
-        AnimationCurve heightCurve_threadsafe = new(biome.heightCurve.keys);
+        float[,] values = noiseGenerator.BuildNoiseMap(width, height, sampleCenter, biomeSettings.noiseSettings);
+        AnimationCurve heightCurve_threadsafe = new(biomeSettings.heightCurve.keys);
 
         float minValue = float.MaxValue;
         float maxValue = float.MinValue;
@@ -38,7 +26,7 @@ public class BiomeGenerator
         {
             for (int j = 0; j < height; j++)
             {
-                values[i, j] *= heightCurve_threadsafe.Evaluate(values[i, j]) * biome.heightMultiplier;
+                values[i, j] *= heightCurve_threadsafe.Evaluate(values[i, j]) * biomeSettings.heightMultiplier;
 
                 if (values[i, j] > maxValue)
                 {

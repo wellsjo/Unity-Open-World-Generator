@@ -31,17 +31,8 @@ public class MapSettings : UpdatableData
     {
         get
         {
-            float minHeight = float.MaxValue;
-            for (int i = 0; i < biomeSettings.biomes.Length; i++)
-            {
-                Biome biome = biomeSettings.biomes[i];
-                float minHeightForBiome = biome.heightMultiplier * biome.heightCurve.Evaluate(0);
-                if (minHeightForBiome < minHeight)
-                {
-                    minHeight = minHeightForBiome;
-                }
-            }
-            return minHeight;
+            return biomeSettings.heightMultiplier * biomeSettings.heightCurve.Evaluate(0);
+
         }
     }
 
@@ -49,17 +40,7 @@ public class MapSettings : UpdatableData
     {
         get
         {
-            float maxHeight = float.MinValue;
-            for (int i = 0; i < biomeSettings.biomes.Length; i++)
-            {
-                Biome biome = biomeSettings.biomes[i];
-                float maxHeightForBiome = biome.heightMultiplier * biome.heightCurve.Evaluate(0);
-                if (maxHeightForBiome > maxHeight)
-                {
-                    maxHeight = maxHeightForBiome;
-                }
-            }
-            return maxHeight;
+            return biomeSettings.heightMultiplier * biomeSettings.heightCurve.Evaluate(1);
         }
     }
 

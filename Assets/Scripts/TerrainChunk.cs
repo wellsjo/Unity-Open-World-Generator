@@ -50,7 +50,6 @@ public class TerrainChunk
         Vector2 position = coord * meshSettings.meshWorldSize;
         bounds = new Bounds(position, Vector2.one * meshSettings.meshWorldSize);
 
-        //meshObject = new GameObject(string.Format("Terrain Chunk {0}", coord.ToString()));
         this.meshObject = meshObject;
         meshRenderer = meshObject.AddComponent<MeshRenderer>();
         meshFilter = meshObject.AddComponent<MeshFilter>();
@@ -58,7 +57,6 @@ public class TerrainChunk
         meshRenderer.material = material;
 
         meshObject.transform.position = new Vector3(position.x, 0, position.y);
-        //meshObject.transform.parent = parent;
         SetVisible(false);
 
         lodMeshes = new LODMesh[detailLevels.Length];
@@ -66,6 +64,7 @@ public class TerrainChunk
         {
             lodMeshes[i] = new LODMesh(detailLevels[i].lod);
             lodMeshes[i].updateCallback += UpdateTerrainChunk;
+            // TODO this seems like a bug, should be i < colliderLODIndex
             if (i == colliderLODIndex)
             {
                 lodMeshes[i].updateCallback += UpdateCollisionMesh;
@@ -78,19 +77,10 @@ public class TerrainChunk
 
     // TerrainChunk loads a new height map with only the number of vertices per mesh, then requests mesh data for it.
     // This is used for infinite terrain.
-    public void LoadHeightMapThreaded(MapSettings heightMapSettings)
+    public void LoadHeightMapThreaded(BiomeGenerator heightMapGenerator, int size, Vector2 coord)
     {
-        // TODO generate the height map in the threaded data requester
-        HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(
-            meshSettings.numVertsPerLine,
-            meshSettings.numVertsPerLine,
-            heightMapSettings.noiseSettings,
-            heightMapSettings.heightCurve,
-            heightMapSettings.heightMultiplier,
-            sampleCentre,
-            false
-        );
-        ThreadedDataRequester.RequestData(() => heightMap, OnHeightMapReceived);
+        Vector2 sampleCenter = coord * meshSettings.meshWorldSize / meshSettings.meshScale;
+        ThreadedDataRequester.RequestData(() => heightMapGenerator.BuildHeightMap(size, size, sampleCenter), OnHeightMapReceived);
     }
 
     public void LoadFromHeightMap(HeightMap heightMap)

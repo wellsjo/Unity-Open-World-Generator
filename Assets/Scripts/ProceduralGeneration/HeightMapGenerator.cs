@@ -1,16 +1,23 @@
 using UnityEngine;
 
-public static class HeightMapGenerator
+public class BiomeGenerator
 {
-    // TODO move this away from this class, and remove the if statement below
-    static float[,] falloffMap;
-
-    public static HeightMap GenerateHeightMap(int width, int height, NoiseSettings noiseSettings, AnimationCurve heightCurve, float heightMultiplier, Vector2 sampleCentre, bool useFalloff)
+    readonly NoiseGenerator noiseGenerator;
+    readonly BiomeSettings biomeSettings;
+    public BiomeGenerator(BiomeSettings biomeSettings, int seed)
     {
-        //Debug.LogFormat("GenerateHeightMap {0}", sampleCentre);
-        float[,] values = Noise.GenerateNoiseMap(width, height, noiseSettings, sampleCentre);
 
-        AnimationCurve heightCurve_threadsafe = new(heightCurve.keys);
+        this.noiseGenerator = new NoiseGenerator(biomeSettings, seed);
+        this.biomeSettings = biomeSettings;
+    }
+    public HeightMap BuildHeightMap(
+        int width,
+        int height,
+        Vector2 sampleCenter
+    )
+    {
+        float[,] values = noiseGenerator.BuildNoiseMap(width, height, sampleCenter, biomeSettings.noiseSettings);
+        AnimationCurve heightCurve_threadsafe = new(biomeSettings.heightCurve.keys);
 
         float minValue = float.MaxValue;
         float maxValue = float.MinValue;
@@ -19,8 +26,7 @@ public static class HeightMapGenerator
         {
             for (int j = 0; j < height; j++)
             {
-                float falloffAmount = useFalloff ? falloffMap[i, j] : 0;
-                values[i, j] *= heightCurve_threadsafe.Evaluate(values[i, j] - (falloffAmount)) * heightMultiplier;
+                values[i, j] *= heightCurve_threadsafe.Evaluate(values[i, j]) * biomeSettings.heightMultiplier;
 
                 if (values[i, j] > maxValue)
                 {

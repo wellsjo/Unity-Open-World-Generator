@@ -15,9 +15,6 @@ public class MapPreview : MonoBehaviour
     public MeshRenderer previewMeshRenderer;
 
     public MapSettings mapSettings;
-    public MeshSettings meshSettings;
-    public TextureData textureData;
-
     public Material terrainMaterial;
 
 
@@ -25,6 +22,10 @@ public class MapPreview : MonoBehaviour
     public void DrawMapInEditor()
     {
         this.Reset();
+        BiomeGenerator heightMapGenerator = new BiomeGenerator(
+            mapSettings.biomeSettings,
+            mapSettings.seed
+        );
 
         if (drawMode == Map.DrawMode.NoiseMap)
         {
@@ -33,27 +34,45 @@ public class MapPreview : MonoBehaviour
             int heightMapSize;
             if (mapSettings.borderType == Map.BorderType.Infinite)
             {
-                heightMapSize = meshSettings.numVertsPerLine;
+                heightMapSize = mapSettings.meshSettings.numVertsPerLine;
             }
             else
             {
-                heightMapSize = meshSettings.numVertsPerLine * mapSettings.fixedSize;
+                heightMapSize = mapSettings.meshSettings.numVertsPerLine * mapSettings.fixedSize;
             }
-            HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(heightMapSize, heightMapSize, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
+            Debug.LogFormat("Height {0}", heightMapSize);
+
+            HeightMap heightMap = heightMapGenerator.BuildHeightMap(
+                heightMapSize,
+                heightMapSize,
+                Vector2.zero
+            );
             Texture2D texture = TextureGenerator.TextureFromHeightMap(heightMap);
             DrawTexture(texture);
         }
         else if (drawMode == Map.DrawMode.Terrain)
         {
+            mapSettings.textureSettings.ApplyToMaterial(terrainMaterial);
+            mapSettings.textureSettings.UpdateMeshHeights(terrainMaterial, mapSettings.MinHeight, mapSettings.MaxHeight);
             previewTerrain.SetActive(true);
-            TerrainGenerator.GeneratePreview(textureData, meshSettings, mapSettings, terrainMaterial, previewTerrain.transform);
+            TerrainGenerator.GeneratePreview(
+                mapSettings.textureSettings,
+                mapSettings.meshSettings,
+                mapSettings,
+                terrainMaterial,
+                previewTerrain.transform
+            );
         }
         else if (drawMode == Map.DrawMode.Play)
         {
-            textureData.ApplyToMaterial(terrainMaterial);
-            textureData.UpdateMeshHeights(terrainMaterial, mapSettings.minHeight, mapSettings.maxHeight);
-            HeightMap heightMap = HeightMapGenerator.GenerateHeightMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, mapSettings.noiseSettings, mapSettings.heightCurve, mapSettings.heightMultiplier, Vector2.zero, mapSettings.useFalloff);
-            MeshData meshData = MeshGenerator.GetTerrainChunkMesh(heightMap.values, meshSettings, editorPreviewLOD);
+            mapSettings.textureSettings.ApplyToMaterial(terrainMaterial);
+            mapSettings.textureSettings.UpdateMeshHeights(terrainMaterial, mapSettings.MinHeight, mapSettings.MaxHeight);
+            HeightMap heightMap = heightMapGenerator.BuildHeightMap(
+                mapSettings.meshSettings.numVertsPerLine,
+                mapSettings.meshSettings.numVertsPerLine,
+                Vector2.zero
+            );
+            MeshData meshData = MeshGenerator.GetTerrainChunkMesh(heightMap.values, mapSettings.meshSettings, editorPreviewLOD);
             DrawMesh(meshData);
         }
 
@@ -75,16 +94,12 @@ public class MapPreview : MonoBehaviour
     {
         previewTexture.sharedMaterial.mainTexture = texture;
         previewTexture.transform.localScale = new Vector3(texture.width, 1, texture.height) / 10f;
-
         previewTexture.gameObject.SetActive(true);
-        previewMeshFilter.gameObject.SetActive(false);
     }
 
     public void DrawMesh(MeshData meshData)
     {
         previewMeshFilter.sharedMesh = meshData.CreateMesh();
-
-        previewTexture.gameObject.SetActive(false);
         previewMeshFilter.gameObject.SetActive(true);
     }
 
@@ -96,28 +111,13 @@ public class MapPreview : MonoBehaviour
         }
     }
 
-    void OnTextureValuesUpdated()
-    {
-        textureData.ApplyToMaterial(terrainMaterial);
-    }
-
     void OnValidate()
     {
 
-        if (meshSettings != null)
-        {
-            meshSettings.OnValuesUpdated -= OnValuesUpdated;
-            meshSettings.OnValuesUpdated += OnValuesUpdated;
-        }
         if (mapSettings != null)
         {
             mapSettings.OnValuesUpdated -= OnValuesUpdated;
             mapSettings.OnValuesUpdated += OnValuesUpdated;
-        }
-        if (textureData != null)
-        {
-            textureData.OnValuesUpdated -= OnTextureValuesUpdated;
-            textureData.OnValuesUpdated += OnTextureValuesUpdated;
         }
     }
 

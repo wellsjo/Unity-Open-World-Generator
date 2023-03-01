@@ -13,51 +13,39 @@ MonoBehaviour:
   m_Name: Map Settings
   m_EditorClassIdentifier: 
   autoUpdate: 1
+  seed: 0
   borderType: 0
-  fixedSize: 3
-  useFalloff: 0
-  noiseSettings:
-    normalizeMode: 1
-    scale: 20.57
-    octaves: 3
-    persistance: 0.467
-    lacunarity: 1.96
-    seed: 32
-    offset: {x: 0, y: 0}
-  heightMultiplier: 24
-  heightCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: -0.047576904
-      value: 0
-      inSlope: 0.797666
-      outSlope: 0.797666
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.06663835
-    - serializedVersion: 3
-      time: 1.1175146
-      value: 0.7346609
-      inSlope: 1.8339847
-      outSlope: 1.8339847
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1.5088736
-      value: 3.001634
-      inSlope: 4.8722453
-      outSlope: 4.8722453
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.05583086
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
+  fixedSize: 5
+  biomeSettings: {fileID: 11400000, guid: 1f6c52d6e42444845a55e8577424dd88, type: 2}
+  meshSettings:
+    meshScale: 2
+    useFlatShading: 0
+    chunkSizeIndex: 3
+    flatshadedChunkSizeIndex: 0
+  textureSettings:
+    layers:
+    - texture: {fileID: 2800000, guid: aa701e5be2dbcd24aad4fb9c3ca284da, type: 3}
+      tint: {r: 0, g: 0.09437523, b: 0.8396226, a: 0}
+      tintStrength: 0.293
+      startHeight: 0
+      blendStrength: 0
+      textureScale: 0
+    - texture: {fileID: 2800000, guid: 59b577b39270af04abdc731059ae1a2b, type: 3}
+      tint: {r: 0.0028479954, g: 0.6037736, b: 0.01015056, a: 0}
+      tintStrength: 0.377
+      startHeight: 0.104
+      blendStrength: 0.136
+      textureScale: 0
+    - texture: {fileID: 2800000, guid: a87cbf62329d56d4681d92302095915c, type: 3}
+      tint: {r: 0.3773585, g: 0.2585167, b: 0, a: 0}
+      tintStrength: 0.487
+      startHeight: 0.179
+      blendStrength: 0
+      textureScale: 0
   detailLevels:
   - lod: 0
     visibleDstThreshold: 100
+  - lod: 1
+    visibleDstThreshold: 300
+  - lod: 2
+    visibleDstThreshold: 600

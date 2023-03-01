@@ -13,16 +13,35 @@ MonoBehaviour:
   m_Name: Biome Settings
   m_EditorClassIdentifier: 
   autoUpdate: 1
-  biomes:
-  - noiseSettings:
-      startingOffset: {x: 0, y: 0}
-      persistance: 5
-      octaves: 4
-      scale: 5
-      lacunarity: 0.5
-  - noiseSettings:
-      startingOffset: {x: 0, y: 0}
-      persistance: 0.5
-      octaves: 4
-      scale: 20
-      lacunarity: 5
+  noiseSettings:
+    startingOffset: {x: 0, y: 0}
+    persistance: 0.5
+    octaves: 6
+    scale: 20
+    lacunarity: 2
+  heightCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2
+      outSlope: 2
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  heightMultiplier: 30
+  endDistance: 0

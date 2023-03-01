@@ -15,56 +15,8 @@ MonoBehaviour:
   autoUpdate: 1
   seed: 0
   borderType: 0
-  fixedSize: 3
-  heightCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: -0.4293213
-      value: -0.37826538
-      inSlope: 0.31915545
-      outSlope: 0.31915545
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0.2640336
-    - serializedVersion: 3
-      time: -0.02098087
-      value: -0.29824913
-      inSlope: 0.020774573
-      outSlope: 0.020774573
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.3141489
-      value: 0.6024244
-      inSlope: 2.0762699
-      outSlope: 2.0762699
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.14624152
-    - serializedVersion: 3
-      time: 1.0111709
-      value: 3.379529
-      inSlope: 3.9842427
-      outSlope: 3.9842427
-      tangentMode: 34
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  heightMultiplier: 30
-  noiseSettings:
-    startingOffset: {x: 0, y: 0}
-    persistance: 0.6
-    octaves: 6
-    scale: 50
-    lacunarity: 2
+  fixedSize: 5
+  biomeSettings: {fileID: 11400000, guid: 1f6c52d6e42444845a55e8577424dd88, type: 2}
   meshSettings:
     meshScale: 2
     useFlatShading: 0

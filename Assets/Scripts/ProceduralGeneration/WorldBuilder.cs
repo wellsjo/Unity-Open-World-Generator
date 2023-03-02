@@ -3,16 +3,15 @@ using UnityEngine;
 
 // Procedurally generate terrain based on various settings and the viewer's position. When the viewer moves,
 // We calculate the changed terrain chunks in view / out of view, then update them if necessary.
-public class TerrainGenerator : MonoBehaviour
+public class WorldBuilder : MonoBehaviour
 {
     const float viewerMoveThresholdForChunkUpdate = 25f;
     const float sqrViewerMoveThresholdForChunkUpdate = viewerMoveThresholdForChunkUpdate * viewerMoveThresholdForChunkUpdate;
 
     public int colliderLODIndex;
 
-    public BiomeSettings biomeSettings;
+    // public BiomeSettings biomeSettings;
     public MapSettings mapSettings;
-    public MeshSettings meshSettings;
     public TextureSettings textureSettings;
 
     public Transform viewer;
@@ -23,21 +22,22 @@ public class TerrainGenerator : MonoBehaviour
 
     float meshWorldSize;
     int chunksVisibleInViewDst;
-
-    Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new Dictionary<Vector2, TerrainChunk>();
-    List<TerrainChunk> visibleTerrainChunks = new List<TerrainChunk>();
-    BiomeGenerator heightMapGenerator;
+    readonly Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new();
+    readonly List<TerrainChunk> visibleTerrainChunks = new();
+    Biome heightMapGenerator;
 
     void Start()
     {
         textureSettings.ApplyToMaterial(mapMaterial);
         textureSettings.UpdateMeshHeights(mapMaterial, mapSettings.MinHeight, mapSettings.MaxHeight);
 
-        float maxViewDst = mapSettings.detailLevels[mapSettings.detailLevels.Length - 1].visibleDstThreshold;
-        meshWorldSize = meshSettings.meshWorldSize;
+        float maxViewDst = mapSettings.detailLevels[^1].visibleDstThreshold;
+
+        // Calculate this once
+        meshWorldSize = mapSettings.meshSettings.meshWorldSize;
         chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / meshWorldSize);
 
-        heightMapGenerator = new BiomeGenerator(mapSettings.biomeSettings, mapSettings.seed);
+        heightMapGenerator = new Biome(mapSettings.biome, mapSettings.seed);
 
         UpdateVisibleChunks();
     }
@@ -65,7 +65,7 @@ public class TerrainGenerator : MonoBehaviour
 
     void UpdateVisibleChunks()
     {
-        HashSet<Vector2> alreadyUpdatedChunkCoords = new HashSet<Vector2>();
+        HashSet<Vector2> alreadyUpdatedChunkCoords = new();
         for (int i = visibleTerrainChunks.Count - 1; i >= 0; i--)
         {
             alreadyUpdatedChunkCoords.Add(visibleTerrainChunks[i].coord);
@@ -79,9 +79,10 @@ public class TerrainGenerator : MonoBehaviour
         {
             for (int xOffset = -chunksVisibleInViewDst; xOffset <= chunksVisibleInViewDst; xOffset++)
             {
-                Vector2 viewedChunkCoord = new Vector2(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
+                Vector2 viewedChunkCoord = new(currentChunkCoordX + xOffset, currentChunkCoordY + yOffset);
                 if (!ChunkCoordInRange(viewedChunkCoord))
                 {
+                    // TODO unload chunk
                     continue;
                 }
 
@@ -93,12 +94,12 @@ public class TerrainGenerator : MonoBehaviour
                     }
                     else
                     {
-                        GameObject terrainObject = new GameObject(string.Format("Terrain Chunk {0}", viewedChunkCoord.ToString()));
+                        GameObject terrainObject = new(string.Format("Terrain Chunk {0}", viewedChunkCoord.ToString()));
                         terrainObject.transform.parent = transform;
                         TerrainChunk newChunk = new(
                             viewedChunkCoord,
                             terrainObject,
-                            meshSettings,
+                            mapSettings.meshSettings,
                             mapSettings.detailLevels,
                             colliderLODIndex,
                             viewer,
@@ -109,7 +110,7 @@ public class TerrainGenerator : MonoBehaviour
                         newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
 
                         Debug.Log("Loading Infinite Terrain Chunk");
-                        newChunk.LoadHeightMapThreaded(heightMapGenerator, meshSettings.numVertsPerLine, viewedChunkCoord);
+                        newChunk.LoadHeightMapInThread(heightMapGenerator, mapSettings.meshSettings.numVertsPerLine, viewedChunkCoord);
                     }
                 }
 
@@ -147,15 +148,15 @@ public class TerrainGenerator : MonoBehaviour
     }
 
     public static void GeneratePreview(
-        TextureSettings textureData,
+        // TextureSettings textureData,
         MeshSettings meshSettings,
         MapSettings mapSettings,
         Material mapMaterial,
         Transform terrainChunkParent
     )
     {
-        BiomeGenerator heightMapGenerator = new BiomeGenerator(
-            mapSettings.biomeSettings,
+        Biome heightMapGenerator = new(
+            mapSettings.biome,
             mapSettings.seed
         );
 
@@ -171,6 +172,7 @@ public class TerrainGenerator : MonoBehaviour
         {
             for (int y = (int)range.x; y <= range.y; y++)
             {
+                // TODO move this to biome.Spawn(chunkCoord)
                 Vector2 chunkCoord = new(x, y);
                 string gameObjectName = string.Format("Preview Terrain Chunk {0}", chunkCoord.ToString());
 
@@ -194,5 +196,10 @@ public class TerrainGenerator : MonoBehaviour
 
     }
 
+    // public override bool Equals(object obj)
+    // {
+    //     return obj is WorldBuilder builder &&
+    //            base.Equals(obj) &&
+    //            EqualityComparer<MapSettings>.Default.Equals(mapSettings, builder.mapSettings);
+    // }
 }
-

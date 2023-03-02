@@ -22,8 +22,8 @@ public class MapPreview : MonoBehaviour
     public void DrawMapInEditor()
     {
         this.Reset();
-        BiomeGenerator heightMapGenerator = new(
-            mapSettings.biomeSettings,
+        Biome heightMapGenerator = new(
+            mapSettings.biome,
             mapSettings.seed
         );
 
@@ -54,8 +54,8 @@ public class MapPreview : MonoBehaviour
             mapSettings.textureSettings.ApplyToMaterial(terrainMaterial);
             mapSettings.textureSettings.UpdateMeshHeights(terrainMaterial, mapSettings.MinHeight, mapSettings.MaxHeight);
             previewTerrain.SetActive(true);
-            TerrainGenerator.GeneratePreview(
-                mapSettings.textureSettings,
+            WorldBuilder.GeneratePreview(
+                // mapSettings.textureSettings,
                 mapSettings.meshSettings,
                 mapSettings,
                 terrainMaterial,
@@ -117,11 +117,11 @@ public class MapPreview : MonoBehaviour
         {
             mapSettings.OnValuesUpdated -= OnValuesUpdated;
             mapSettings.OnValuesUpdated += OnValuesUpdated;
-            if (mapSettings.biomeSettings != null)
+            if (mapSettings.biome != null)
             {
                 Debug.Log("BiomeSettings OnValuesUpdated");
-                mapSettings.biomeSettings.OnValuesUpdated -= OnValuesUpdated;
-                mapSettings.biomeSettings.OnValuesUpdated += OnValuesUpdated;
+                mapSettings.biome.OnValuesUpdated -= OnValuesUpdated;
+                mapSettings.biome.OnValuesUpdated += OnValuesUpdated;
             }
         }
     }

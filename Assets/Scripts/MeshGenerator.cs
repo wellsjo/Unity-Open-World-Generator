@@ -96,7 +96,7 @@ public static class MeshGenerator
 public class MeshData
 {
     Vector3[] vertices;
-    int[] triangles;
+    readonly int[] triangles;
     Vector2[] uvs;
     Vector3[] bakedNormals;
 

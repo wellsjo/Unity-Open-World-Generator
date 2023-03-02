@@ -11,7 +11,7 @@ public class MapSettings : UpdatableData
     // number of terrain chunks to use per vertex
     // field is ignored if map border type is infinite
     public int fixedSize;
-    public BiomeSettings biomeSettings;
+    public BiomeSettings biome;
     public MeshSettings meshSettings;
     public TextureSettings textureSettings;
     public LODInfo[] detailLevels;
@@ -31,7 +31,7 @@ public class MapSettings : UpdatableData
     {
         get
         {
-            return biomeSettings.heightMultiplier * biomeSettings.heightCurve.Evaluate(0);
+            return biome.terrainSettings.heightMultiplier * biome.terrainSettings.heightCurve.Evaluate(0);
 
         }
     }
@@ -40,7 +40,7 @@ public class MapSettings : UpdatableData
     {
         get
         {
-            return biomeSettings.heightMultiplier * biomeSettings.heightCurve.Evaluate(1);
+            return biome.terrainSettings.heightMultiplier * biome.terrainSettings.heightCurve.Evaluate(1);
         }
     }
 

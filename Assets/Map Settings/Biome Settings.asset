@@ -17,7 +17,7 @@ MonoBehaviour:
     startingOffset: {x: 0, y: 0}
     persistance: 0.5
     octaves: 6
-    scale: 20
+    scale: 25
     lacunarity: 2
   heightCurve:
     serializedVersion: 2
@@ -32,8 +32,17 @@ MonoBehaviour:
       inWeight: 0
       outWeight: 0
     - serializedVersion: 3
-      time: 1
-      value: 1
+      time: 0.54629785
+      value: 0.6177368
+      inSlope: 1.1505604
+      outSlope: 1.1505604
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1.001831
+      value: 1.4411011
       inSlope: 2
       outSlope: 2
       tangentMode: 0

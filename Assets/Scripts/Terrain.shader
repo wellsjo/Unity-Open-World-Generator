@@ -1,74 +1,149 @@
-Shader "Custom/Terrain" {
-	Properties{
-		testTexture("Texture", 2D) = "white"{}
-		testScale("Scale", Float) = 1
+Shader "SLE/MapGeneration/Terrain"
+{
 
+	Properties
+	{
+		_Color("Color", Color) = (1,1,1,1)
 	}
-		SubShader{
-			Tags { "RenderType" = "Opaque" }
-			LOD 200
 
-			CGPROGRAM
-			// Physically based Standard lighting model, and enable shadows on all light types
-			#pragma surface surf Standard fullforwardshadows
+	SubShader
+	{
+		Tags
+		{
+			"RenderPipeline" = "UniversalPipeline"
+			"RenderType" = "Opaque"
+		    "Queue" = "Geometry"
+		}
+		LOD 200
 
-			// Use shader model 3.0 target, to get nicer looking lighting
-			#pragma target 3.0
+		Pass
+		{
+			Name "Universal Forward"
+			Tags
+			{
+				"LightMode" = "UniversalForward"
+			}
 
-			const static int maxLayerCount = 8;
-			const static float epsilon = 1E-4;
+			Cull Back
+			Blend One Zero
+			ZTest LEqual
+			ZWrite On
 
-			int layerCount;
-			float3 baseColours[maxLayerCount];
-			float baseStartHeights[maxLayerCount];
-			float baseBlends[maxLayerCount];
-			float baseColourStrength[maxLayerCount];
-			float baseTextureScales[maxLayerCount];
+			HLSLPROGRAM
+
+			#pragma target 4.5
+			#pragma exclude_renderers gles gles3
+			#pragma multi_compile_instancing
+			#pragma multi_compile_fog
+			#pragma instancing_options renderinglayer
+			#pragma multi_compile _ DOTS_INSTANCING_ON
+			#pragma vertex vert
+			#pragma fragment frag
+
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+			const static int   maxLayerCount = 8;
+			const static float epsilon = 1e-4;
+
+			CBUFFER_START(UnityPerMaterial)
+
+			int    layerCount;
+			float3 baseColors[maxLayerCount];
+			float  baseStartHeights[maxLayerCount];
+			float  baseBlends[maxLayerCount];
+			float  baseColorStrength[maxLayerCount];
+			float  baseTextureScales[maxLayerCount];
 
 			float minHeight;
 			float maxHeight;
 
-			sampler2D testTexture;
-			float testScale;
+			CBUFFER_END
 
-			UNITY_DECLARE_TEX2DARRAY(baseTextures);
+			TEXTURE2D_ARRAY(baseTextures);
+			SAMPLER(sampler_baseTextures);
 
-			struct Input {
-				float3 worldPos;
-				float3 worldNormal;
+			struct v2f
+			{
+				float4 vertex     : SV_POSITION;
+				float3 worldPos   : TEXCOORD0;
+				half3 worldNormal : TEXCOORD1;
+				half4 diff        : COLOR0; // diffuse lighting color
+				half3 ambient     : COLOR1;
 			};
 
-			float inverseLerp(float a, float b, float value) {
+			float inverseLerp(float a, float b, float value)
+			{
 				return saturate((value - a) / (b - a));
 			}
 
-			float3 triplanar(float3 worldPos, float scale, float3 blendAxes, int textureIndex) {
+			float3 triplanar(float3 worldPos, float scale, float3 blendAxes, int textureIndex)
+			{
 				float3 scaledWorldPos = worldPos / scale;
-				float3 xProjection = UNITY_SAMPLE_TEX2DARRAY(baseTextures, float3(scaledWorldPos.y, scaledWorldPos.z, textureIndex)) * blendAxes.x;
-				float3 yProjection = UNITY_SAMPLE_TEX2DARRAY(baseTextures, float3(scaledWorldPos.x, scaledWorldPos.z, textureIndex)) * blendAxes.y;
-				float3 zProjection = UNITY_SAMPLE_TEX2DARRAY(baseTextures, float3(scaledWorldPos.x, scaledWorldPos.y, textureIndex)) * blendAxes.z;
+
+				float3 xProjection = SAMPLE_TEXTURE2D_ARRAY(baseTextures, sampler_baseTextures, float2(scaledWorldPos.y, scaledWorldPos.z), textureIndex) * blendAxes.x;
+				float3 yProjection = SAMPLE_TEXTURE2D_ARRAY(baseTextures, sampler_baseTextures, float2(scaledWorldPos.x, scaledWorldPos.z), textureIndex) * blendAxes.y;
+				float3 zProjection = SAMPLE_TEXTURE2D_ARRAY(baseTextures, sampler_baseTextures, float2(scaledWorldPos.x, scaledWorldPos.y), textureIndex) * blendAxes.z;
+
 				return xProjection + yProjection + zProjection;
 			}
 
-			void surf(Input IN, inout SurfaceOutputStandard o) {
-				float heightPercent = inverseLerp(minHeight,maxHeight, IN.worldPos.y);
-				float3 blendAxes = abs(IN.worldNormal);
-				blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
+			v2f vert(float4 vertex : POSITION, float3 normal : NORMAL)
+			{
+				v2f o;
 
-				for (int i = 0; i < layerCount; i++) {
-					float drawStrength = inverseLerp(-baseBlends[i] / 2 - epsilon, baseBlends[i] / 2, heightPercent - baseStartHeights[i]);
+				o.worldPos    = mul(unity_ObjectToWorld, vertex);
+				o.vertex      = TransformObjectToHClip(vertex);
+				o.worldNormal = TransformObjectToWorldNormal(normal);
 
-					float3 baseColour = baseColours[i] * baseColourStrength[i];
-					float3 textureColour = triplanar(IN.worldPos, baseTextureScales[i], blendAxes, i) * (1 - baseColourStrength[i]);
+				Light mainLight = GetMainLight();
 
-					o.Albedo = o.Albedo * (1 - drawStrength) + (baseColour + textureColour) * drawStrength;
-				}
+				half nl = max(0, dot(o.worldNormal, mainLight.direction.xyz));
 
+				// factor in the light color
+				o.diff = nl * half4(mainLight.color, 1);
 
+				o.ambient = SampleSH(o.worldNormal);
+
+				TransformWorldToShadowCoord(vertex.xyz);
+
+				return o;
 			}
 
+			half4 _Color;
+			half4 frag(v2f IN) : SV_Target
+			{
+				float heightPercent = inverseLerp(minHeight, maxHeight, IN.worldPos.y);
+				float3 blendAxes    = abs(IN.worldNormal);
 
-			ENDCG
+				blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
+
+				half3 col = _Color;
+				for (int i = 0; i < layerCount; i++)
+				{
+					float a = -baseBlends[i] / 2.0 - epsilon;
+					float b = baseBlends[i] / 2.0;
+					float t = heightPercent - baseStartHeights[i];
+
+					float drawStrength = inverseLerp(a, b, t);
+
+					float3 baseColor    = baseColors[i] * baseColorStrength[i];
+					float3 textureColor = triplanar(IN.worldPos, baseTextureScales[i], blendAxes, i) * (1 - baseColorStrength[i]);
+
+					col = col * (1 - drawStrength) + (baseColor + textureColor) * drawStrength;
+				}
+				_Color.rgb = col;
+
+				Light mainLight = GetMainLight();
+
+				// darken light's illumination with shadow, keep ambient intact
+				half3 lighting = IN.diff * mainLight.shadowAttenuation + IN.ambient;
+				_Color.rgb *= lighting;
+
+				return _Color;
+			}
+
+			ENDHLSL
 		}
-			FallBack "Diffuse"
+	}
 }

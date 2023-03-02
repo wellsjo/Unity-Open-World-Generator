@@ -7,4 +7,12 @@ public class BiomeSettings : UpdatableData
     public AnimationCurve heightCurve;
     public float heightMultiplier;
     public float endDistance;
+
+#if UNITY_EDITOR
+    protected override void OnValidate()
+    {
+        base.OnValidate();
+    }
+#endif
+
 }

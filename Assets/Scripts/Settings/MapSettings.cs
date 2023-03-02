@@ -70,11 +70,9 @@ public class MapSettings : UpdatableData
     }
 
 #if UNITY_EDITOR
-
     protected override void OnValidate()
     {
         this.ValidateValues();
-        //noiseSettings.ValidateValues();
         base.OnValidate();
     }
 #endif

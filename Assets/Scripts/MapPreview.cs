@@ -22,7 +22,7 @@ public class MapPreview : MonoBehaviour
     public void DrawMapInEditor()
     {
         this.Reset();
-        BiomeGenerator heightMapGenerator = new BiomeGenerator(
+        BiomeGenerator heightMapGenerator = new(
             mapSettings.biomeSettings,
             mapSettings.seed
         );
@@ -40,7 +40,6 @@ public class MapPreview : MonoBehaviour
             {
                 heightMapSize = mapSettings.meshSettings.numVertsPerLine * mapSettings.fixedSize;
             }
-            Debug.LogFormat("Height {0}", heightMapSize);
 
             HeightMap heightMap = heightMapGenerator.BuildHeightMap(
                 heightMapSize,
@@ -118,6 +117,12 @@ public class MapPreview : MonoBehaviour
         {
             mapSettings.OnValuesUpdated -= OnValuesUpdated;
             mapSettings.OnValuesUpdated += OnValuesUpdated;
+            if (mapSettings.biomeSettings != null)
+            {
+                Debug.Log("BiomeSettings OnValuesUpdated");
+                mapSettings.biomeSettings.OnValuesUpdated -= OnValuesUpdated;
+                mapSettings.biomeSettings.OnValuesUpdated += OnValuesUpdated;
+            }
         }
     }
 

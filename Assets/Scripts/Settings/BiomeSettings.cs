@@ -29,4 +29,5 @@ public struct VegetationSettings
     public NoiseSettings noiseSettings;
     public float startHeight;
     public float endHeight;
+    public GameObject treePrefab;
 }

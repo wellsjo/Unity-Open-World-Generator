@@ -1,13 +1,14 @@
+using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
 using System.CodeDom.Compiler;
 using UnityEngine;
 
 public class Biome
 {
-    readonly Noise noise;
-    readonly BiomeSettings settings;
+    public Noise noise;
+    public BiomeSettings settings;
     public Biome(BiomeSettings settings, int seed)
     {
-
         this.noise = new Noise(seed);
         this.settings = settings;
     }
@@ -23,6 +24,7 @@ public class Biome
             sampleCenter,
             settings.terrainSettings.noiseSettings
         );
+
         AnimationCurve heightCurve_threadsafe = new(settings.terrainSettings.heightCurve.keys);
 
         float minValue = float.MaxValue;
@@ -48,43 +50,7 @@ public class Biome
         return new HeightMap(values, minValue, maxValue);
     }
 
-    // public void SpawnVegetation(
-    // HeightMap heightMap,
-    // Vector2 sampleCenter,
-    // Transform parent
-    // )
-    // {
-    //     float[,] noiseMap = noise.Generate(
-    //         heightMap.width,
-    //         heightMap.height,
-    //         sampleCenter,
-    //         settings.vegetationSettings.noiseSettings
-    //     );
 
-    //     float vegetationStartHeight = settings.vegetationSettings.startHeight;
-    //     float vegetationEndHeight = settings.vegetationSettings.endHeight;
-
-    //     for (int i = 0; i < heightMap.width; i++)
-    //     {
-    //         for (int j = 0; j < heightMap.height; j++)
-    //         {
-    //             if (heightMap[i, j] > vegetationStartHeight && heightMap[i, j] < vegetationEndHeight)
-    //             {
-    //                 if (heightMap.values[i, j] > settings.endDistance)
-    //                 {
-    //                     float x = i + sampleCenter.x - heightMap.width / 2f;
-    //                     float y = heightMap.values[i, j];
-    //                     float z = j + sampleCenter.y - heightMap.height / 2f;
-
-    //                     Vector3 position = new(x, y, z);
-
-    //                     GameObject vegetation = Instantiate(settings.vegetationSettings.vegetationPrefab, position, Quaternion.identity, parent);
-    //                     vegetation.transform.localScale = Vector3.one * noiseMap[i, j];
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
 }
 
 // Useful for updating mesh in thread

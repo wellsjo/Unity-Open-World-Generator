@@ -9,8 +9,6 @@ public class WorldBuilder : MonoBehaviour
     const float sqrViewerMoveThresholdForChunkUpdate = viewerMoveThresholdForChunkUpdate * viewerMoveThresholdForChunkUpdate;
 
     public int colliderLODIndex;
-
-    // public BiomeSettings biomeSettings;
     public MapSettings mapSettings;
     public Transform viewer;
     public Material mapMaterial;
@@ -22,7 +20,7 @@ public class WorldBuilder : MonoBehaviour
     int chunksVisibleInViewDst;
     readonly Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new();
     readonly List<TerrainChunk> visibleTerrainChunks = new();
-    Biome heightMapGenerator;
+    Biome biome;
 
     void Start()
     {
@@ -39,7 +37,7 @@ public class WorldBuilder : MonoBehaviour
         meshWorldSize = mapSettings.meshSettings.meshWorldSize;
         chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / meshWorldSize);
 
-        heightMapGenerator = new Biome(mapSettings.biome, mapSettings.seed);
+        biome = new Biome(mapSettings.biome, mapSettings.seed);
 
         UpdateVisibleChunks(viewerPosition);
     }
@@ -104,10 +102,8 @@ public class WorldBuilder : MonoBehaviour
                         TerrainChunk newChunk = new(
                             viewedChunkCoord,
                             terrainObject,
-                            mapSettings.meshSettings,
-                            mapSettings.detailLevels,
+                            mapSettings,
                             colliderLODIndex,
-                            // viewer,
                             mapMaterial
                         );
 
@@ -116,7 +112,7 @@ public class WorldBuilder : MonoBehaviour
 
                         Debug.Log("Loading Infinite Terrain Chunk");
                         newChunk.LoadHeightMapInThread(
-                            heightMapGenerator,
+                            biome,
                             mapSettings.meshSettings.numVertsPerLine,
                             viewedChunkCoord,
                             viewerPosition
@@ -157,15 +153,42 @@ public class WorldBuilder : MonoBehaviour
         }
     }
 
+    public static void SpawnVegetation(HeightMap heightMap, float[,] treeNoise, Vector2 sampleCenter)
+    {
+        // float vegetationStartHeight = mapSettings.biome.vegetationSettings.startHeight;
+        // float vegetationEndHeight = mapSettings.biome.vegetationSettings.endHeight;
+        float vegetationStartHeight = 0;
+        float vegetationEndHeight = 100;
+
+        for (int i = 0; i < heightMap.width; i++)
+        {
+            for (int j = 0; j < heightMap.height; j++)
+            {
+                if (heightMap.values[i, j] > vegetationStartHeight && heightMap.values[i, j] < vegetationEndHeight)
+                {
+                    if (treeNoise[i, j] > 0.5f)
+                    {
+                        float x = i + sampleCenter.x - heightMap.width / 2f;
+                        float y = heightMap.values[i, j];
+                        float z = j + sampleCenter.y - heightMap.height / 2f;
+
+                        Vector3 position = new(x, y, z);
+                        GameObject tree = Instantiate(mapSettings.biome.vegetationSettings.treePrefab);
+                        tree.transform.localScale = position;
+                    }
+                }
+            }
+        }
+    }
+
     public static void GeneratePreview(
-        // TextureSettings textureData,
         MeshSettings meshSettings,
         MapSettings mapSettings,
         Material mapMaterial,
         Transform terrainChunkParent
     )
     {
-        Biome heightMapGenerator = new(
+        Biome biome = new(
             mapSettings.biome,
             mapSettings.seed
         );
@@ -193,15 +216,14 @@ public class WorldBuilder : MonoBehaviour
                 TerrainChunk newChunk = new(
                     chunkCoord,
                     meshObject,
-                    meshSettings,
-                    mapSettings.detailLevels,
+                    mapSettings,
                     0,
                     mapMaterial
                 );
 
                 Vector2 sampleCenter = chunkCoord * meshSettings.meshWorldSize / meshSettings.meshScale;
 
-                HeightMap heightMap = heightMapGenerator.BuildHeightMap(
+                HeightMap heightMap = biome.BuildHeightMap(
                     meshSettings.numVertsPerLine,
                     meshSettings.numVertsPerLine,
                     sampleCenter
@@ -209,6 +231,15 @@ public class WorldBuilder : MonoBehaviour
 
                 newChunk.LoadFromHeightMap(heightMap);
                 newChunk.SetVisible(true);
+
+                float[,] treeNoise = biome.noise.Generate(
+                    meshSettings.numVertsPerLine,
+                    meshSettings.numVertsPerLine,
+                    sampleCenter,
+                    mapSettings.biome.vegetationSettings.noiseSettings
+                );
+
+                SpawnVegetation(newChunk.heightMap, treeNoise, chunkCoord);
             }
         }
 

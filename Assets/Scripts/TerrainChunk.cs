@@ -4,7 +4,6 @@ using UnityEngine;
 // Terrain mesh renderable in different quality settings, based on a height map
 public class TerrainChunk
 {
-
     const float colliderGenerationDistanceThreshold = 5;
     public event System.Action<TerrainChunk, bool> OnVisibilityChanged;
     public Vector2 coord;
@@ -16,12 +15,13 @@ public class TerrainChunk
     MeshRenderer meshRenderer;
     MeshFilter meshFilter;
     MeshCollider meshCollider;
+    VegetationSettings vegetationSettings;
 
     LODInfo[] detailLevels;
     LODMesh[] lodMeshes;
     int colliderLODIndex;
 
-    HeightMap heightMap;
+    public HeightMap heightMap;
     bool heightMapReceived;
     int previousLODIndex = -1;
     bool hasSetCollider;
@@ -32,16 +32,16 @@ public class TerrainChunk
     public TerrainChunk(
         Vector2 coord,
         GameObject meshObject,
-        MeshSettings meshSettings,
-        LODInfo[] detailLevels,
+        MapSettings mapSettings,
         int colliderLODIndex,
         Material material
     )
     {
         this.coord = coord;
-        this.detailLevels = detailLevels;
+        this.detailLevels = mapSettings.detailLevels;
         this.colliderLODIndex = colliderLODIndex;
-        this.meshSettings = meshSettings;
+        this.meshSettings = mapSettings.meshSettings;
+        this.vegetationSettings = mapSettings.biome.vegetationSettings;
 
         sampleCentre = coord * meshSettings.meshWorldSize / meshSettings.meshScale;
         Vector2 position = coord * meshSettings.meshWorldSize;
@@ -74,7 +74,7 @@ public class TerrainChunk
     // TerrainChunk loads a new height map with only the number of vertices per mesh, then requests mesh data for it.
     // This is used for infinite terrain.
     public void LoadHeightMapInThread(
-        Biome heightMapGenerator,
+        Biome biome,
         int size,
         Vector2 chunkCoord,
         Vector2 viewerPosition
@@ -84,7 +84,7 @@ public class TerrainChunk
         ThreadedDataRequester.RequestData(() =>
         {
             return new HeightMapUpdateData(
-                heightMapGenerator.BuildHeightMap(size, size, offset), viewerPosition
+                biome.BuildHeightMap(size, size, offset), viewerPosition
             );
         }, OnHeightMapReceived
         );
@@ -96,6 +96,7 @@ public class TerrainChunk
         Mesh mesh = meshData.CreateMesh();
         meshFilter.mesh = mesh;
     }
+
 
     void OnHeightMapReceived(object heightMapObject)
     {

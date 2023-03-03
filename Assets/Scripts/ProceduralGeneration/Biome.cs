@@ -87,7 +87,17 @@ public class Biome
     // }
 }
 
-
+// Useful for updating mesh in thread
+public struct HeightMapUpdateData
+{
+    public HeightMap heightMap;
+    public Vector2 viewerPosition;
+    public HeightMapUpdateData(HeightMap heightMap, Vector2 viewerPosition)
+    {
+        this.heightMap = heightMap;
+        this.viewerPosition = viewerPosition;
+    }
+}
 
 public struct HeightMap
 {

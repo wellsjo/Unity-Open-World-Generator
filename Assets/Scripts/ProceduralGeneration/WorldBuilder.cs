@@ -12,8 +12,6 @@ public class WorldBuilder : MonoBehaviour
 
     // public BiomeSettings biomeSettings;
     public MapSettings mapSettings;
-    public TextureSettings textureSettings;
-
     public Transform viewer;
     public Material mapMaterial;
 
@@ -28,8 +26,12 @@ public class WorldBuilder : MonoBehaviour
 
     void Start()
     {
-        textureSettings.ApplyToMaterial(mapMaterial);
-        textureSettings.UpdateMeshHeights(mapMaterial, mapSettings.MinHeight, mapSettings.MaxHeight);
+        mapSettings.textureSettings.ApplyToMaterial(mapMaterial);
+        mapSettings.textureSettings.UpdateMeshHeights(
+            mapMaterial,
+            mapSettings.MinHeight,
+            mapSettings.MaxHeight
+        );
 
         float maxViewDst = mapSettings.detailLevels[^1].visibleDstThreshold;
 
@@ -39,7 +41,7 @@ public class WorldBuilder : MonoBehaviour
 
         heightMapGenerator = new Biome(mapSettings.biome, mapSettings.seed);
 
-        UpdateVisibleChunks();
+        UpdateVisibleChunks(viewerPosition);
     }
 
     // Chek if the player has moved, if so update the collision mesh
@@ -52,24 +54,26 @@ public class WorldBuilder : MonoBehaviour
         {
             foreach (TerrainChunk chunk in visibleTerrainChunks)
             {
-                chunk.UpdateCollisionMesh();
+                chunk.UpdateCollisionMesh(viewerPosition);
             }
         }
 
         if ((viewerPositionOld - viewerPosition).sqrMagnitude > sqrViewerMoveThresholdForChunkUpdate)
         {
             viewerPositionOld = viewerPosition;
-            UpdateVisibleChunks();
+            UpdateVisibleChunks(viewerPosition);
         }
     }
 
-    void UpdateVisibleChunks()
+    void UpdateVisibleChunks(Vector2 viewerPosition)
     {
+
         HashSet<Vector2> alreadyUpdatedChunkCoords = new();
         for (int i = visibleTerrainChunks.Count - 1; i >= 0; i--)
         {
+            TerrainChunk chunk = visibleTerrainChunks[i];
             alreadyUpdatedChunkCoords.Add(visibleTerrainChunks[i].coord);
-            visibleTerrainChunks[i].UpdateTerrainChunk();
+            visibleTerrainChunks[i].UpdateTerrainChunk(viewerPosition);
         }
 
         int currentChunkCoordX = Mathf.RoundToInt(viewerPosition.x / meshWorldSize);
@@ -90,7 +94,8 @@ public class WorldBuilder : MonoBehaviour
                 {
                     if (terrainChunkDictionary.ContainsKey(viewedChunkCoord))
                     {
-                        terrainChunkDictionary[viewedChunkCoord].UpdateTerrainChunk();
+                        TerrainChunk chunk = terrainChunkDictionary[viewedChunkCoord];
+                        terrainChunkDictionary[viewedChunkCoord].UpdateTerrainChunk(viewerPosition);
                     }
                     else
                     {
@@ -102,15 +107,20 @@ public class WorldBuilder : MonoBehaviour
                             mapSettings.meshSettings,
                             mapSettings.detailLevels,
                             colliderLODIndex,
-                            viewer,
+                            // viewer,
                             mapMaterial
                         );
 
                         terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
-                        newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
+                        newChunk.OnVisibilityChanged += OnTerrainChunkVisibilityChanged;
 
                         Debug.Log("Loading Infinite Terrain Chunk");
-                        newChunk.LoadHeightMapInThread(heightMapGenerator, mapSettings.meshSettings.numVertsPerLine, viewedChunkCoord);
+                        newChunk.LoadHeightMapInThread(
+                            heightMapGenerator,
+                            mapSettings.meshSettings.numVertsPerLine,
+                            viewedChunkCoord,
+                            viewerPosition
+                        );
                     }
                 }
 
@@ -179,7 +189,15 @@ public class WorldBuilder : MonoBehaviour
                 // Make a new terrain chunk under the Terrain Preview parent
                 GameObject meshObject = new(gameObjectName);
                 meshObject.transform.parent = terrainChunkParent;
-                TerrainChunk newChunk = new(chunkCoord, meshObject, meshSettings, mapSettings.detailLevels, 0, null, mapMaterial);
+
+                TerrainChunk newChunk = new(
+                    chunkCoord,
+                    meshObject,
+                    meshSettings,
+                    mapSettings.detailLevels,
+                    0,
+                    mapMaterial
+                );
 
                 Vector2 sampleCenter = chunkCoord * meshSettings.meshWorldSize / meshSettings.meshScale;
 
@@ -196,10 +214,4 @@ public class WorldBuilder : MonoBehaviour
 
     }
 
-    // public override bool Equals(object obj)
-    // {
-    //     return obj is WorldBuilder builder &&
-    //            base.Equals(obj) &&
-    //            EqualityComparer<MapSettings>.Default.Equals(mapSettings, builder.mapSettings);
-    // }
 }

@@ -1,23 +1,33 @@
+using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
+using System.CodeDom.Compiler;
 using UnityEngine;
 
-public class BiomeGenerator
+public class HeightMapGenerator
 {
-    readonly NoiseGenerator noiseGenerator;
-    readonly BiomeSettings biomeSettings;
-    public BiomeGenerator(BiomeSettings biomeSettings, int seed)
+    public NoiseGenerator noiseGenerator;
+    public BiomeSettings settings;
+    readonly int width;
+    readonly int height;
+    public HeightMapGenerator(BiomeSettings settings, int width, int height, int seed)
     {
-
-        this.noiseGenerator = new NoiseGenerator(biomeSettings, seed);
-        this.biomeSettings = biomeSettings;
+        this.noiseGenerator = new NoiseGenerator(seed);
+        this.settings = settings;
+        this.width = width;
+        this.height = height;
     }
-    public HeightMap BuildHeightMap(
-        int width,
-        int height,
+    public HeightMap BuildTerrainHeightMap(
         Vector2 sampleCenter
     )
     {
-        float[,] values = noiseGenerator.BuildNoiseMap(width, height, sampleCenter, biomeSettings.noiseSettings);
-        AnimationCurve heightCurve_threadsafe = new(biomeSettings.heightCurve.keys);
+        float[,] values = noiseGenerator.Generate(
+            this.width,
+            this.height,
+            sampleCenter,
+            settings.terrainSettings.noiseSettings
+        );
+
+        AnimationCurve heightCurve_threadsafe = new(settings.terrainSettings.heightCurve.keys);
 
         float minValue = float.MaxValue;
         float maxValue = float.MinValue;
@@ -26,7 +36,7 @@ public class BiomeGenerator
         {
             for (int j = 0; j < height; j++)
             {
-                values[i, j] *= heightCurve_threadsafe.Evaluate(values[i, j]) * biomeSettings.heightMultiplier;
+                values[i, j] *= heightCurve_threadsafe.Evaluate(values[i, j]) * settings.terrainSettings.heightMultiplier;
 
                 if (values[i, j] > maxValue)
                 {
@@ -41,7 +51,18 @@ public class BiomeGenerator
 
         return new HeightMap(values, minValue, maxValue);
     }
+}
 
+// Useful for updating mesh in thread
+public struct HeightMapUpdateData
+{
+    public HeightMap heightMap;
+    public Vector2 viewerPosition;
+    public HeightMapUpdateData(HeightMap heightMap, Vector2 viewerPosition)
+    {
+        this.heightMap = heightMap;
+        this.viewerPosition = viewerPosition;
+    }
 }
 
 public struct HeightMap

@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   autoUpdate: 1
   seed: 0
-  borderType: 0
-  fixedSize: 3
+  borderType: 1
+  fixedSize: 1
   biomeSettings: {fileID: 11400000, guid: 1f6c52d6e42444845a55e8577424dd88, type: 2}
   meshSettings:
     meshScale: 2
     useFlatShading: 0
-    chunkSizeIndex: 6
+    chunkSizeIndex: 3
     flatshadedChunkSizeIndex: 0
   textureSettings:
     layers:
@@ -33,13 +33,13 @@ MonoBehaviour:
     - texture: {fileID: 2800000, guid: 59b577b39270af04abdc731059ae1a2b, type: 3}
       tint: {r: 0.0028479954, g: 0.6037736, b: 0.01015056, a: 0}
       tintStrength: 0.377
-      startHeight: 0
-      blendStrength: 0.136
+      startHeight: 0.012
+      blendStrength: 0
       textureScale: 0
     - texture: {fileID: 2800000, guid: a87cbf62329d56d4681d92302095915c, type: 3}
       tint: {r: 0.3773585, g: 0.2585167, b: 0, a: 0}
       tintStrength: 0.487
-      startHeight: 0.214
+      startHeight: 0.138
       blendStrength: 0
       textureScale: 0
   detailLevels:

@@ -93,10 +93,12 @@ public static class MeshGenerator
 
 }
 
+// TODO make this MeshUpdateData
 public class MeshData
 {
     Vector3[] vertices;
-    int[] triangles;
+    public Vector2 ViewerPosition;
+    readonly int[] triangles;
     Vector2[] uvs;
     Vector3[] bakedNormals;
 
@@ -264,10 +266,13 @@ public class MeshData
 
     public Mesh CreateMesh()
     {
-        Mesh mesh = new Mesh();
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.uv = uvs;
+        Mesh mesh = new()
+        {
+            vertices = vertices,
+            triangles = triangles,
+            uv = uvs
+        };
+
         if (useFlatShading)
         {
             mesh.RecalculateNormals();
@@ -276,6 +281,7 @@ public class MeshData
         {
             mesh.normals = bakedNormals;
         }
+
         return mesh;
     }
 

@@ -1,56 +1,53 @@
+using System;
 using UnityEngine;
 
 // Terrain mesh renderable in different quality settings, based on a height map
 public class TerrainChunk
 {
-
     const float colliderGenerationDistanceThreshold = 5;
-    public event System.Action<TerrainChunk, bool> onVisibilityChanged;
+    public event System.Action<TerrainChunk, bool> OnVisibilityChanged;
     public Vector2 coord;
 
-    GameObject meshObject;
+    public GameObject gameObject;
     Vector2 sampleCentre;
-    Bounds bounds;
+    public Bounds bounds;
 
     MeshRenderer meshRenderer;
     MeshFilter meshFilter;
     MeshCollider meshCollider;
+    VegetationSettings vegetationSettings;
 
     LODInfo[] detailLevels;
     LODMesh[] lodMeshes;
     int colliderLODIndex;
 
-    HeightMap heightMap;
+    public HeightMap heightMap;
     bool heightMapReceived;
     int previousLODIndex = -1;
     bool hasSetCollider;
     float maxViewDst;
-
-    MeshSettings meshSettings;
-    Transform viewer;
+    readonly MeshSettings meshSettings;
 
     // A piece of terrain which also is aware of the user's position
     public TerrainChunk(
         Vector2 coord,
         GameObject meshObject,
-        MeshSettings meshSettings,
-        LODInfo[] detailLevels,
+        MapSettings mapSettings,
         int colliderLODIndex,
-        Transform viewer,
         Material material
     )
     {
         this.coord = coord;
-        this.detailLevels = detailLevels;
+        this.detailLevels = mapSettings.detailLevels;
         this.colliderLODIndex = colliderLODIndex;
-        this.meshSettings = meshSettings;
-        this.viewer = viewer;
+        this.meshSettings = mapSettings.meshSettings;
+        this.vegetationSettings = mapSettings.biomeSettings.vegetationSettings;
 
         sampleCentre = coord * meshSettings.meshWorldSize / meshSettings.meshScale;
         Vector2 position = coord * meshSettings.meshWorldSize;
         bounds = new Bounds(position, Vector2.one * meshSettings.meshWorldSize);
 
-        this.meshObject = meshObject;
+        this.gameObject = meshObject;
         meshRenderer = meshObject.AddComponent<MeshRenderer>();
         meshFilter = meshObject.AddComponent<MeshFilter>();
         meshCollider = meshObject.AddComponent<MeshCollider>();
@@ -63,24 +60,34 @@ public class TerrainChunk
         for (int i = 0; i < detailLevels.Length; i++)
         {
             lodMeshes[i] = new LODMesh(detailLevels[i].lod);
-            lodMeshes[i].updateCallback += UpdateTerrainChunk;
+            lodMeshes[i].UpdateCallback += UpdateTerrainChunk;
             // TODO this seems like a bug, should be i < colliderLODIndex
             if (i == colliderLODIndex)
             {
-                lodMeshes[i].updateCallback += UpdateCollisionMesh;
+                lodMeshes[i].UpdateCallback += UpdateCollisionMesh;
             }
         }
 
-        maxViewDst = detailLevels[detailLevels.Length - 1].visibleDstThreshold;
-
+        maxViewDst = detailLevels[^1].visibleDstThreshold;
     }
 
     // TerrainChunk loads a new height map with only the number of vertices per mesh, then requests mesh data for it.
     // This is used for infinite terrain.
-    public void LoadHeightMapThreaded(BiomeGenerator heightMapGenerator, int size, Vector2 coord)
+    public void LoadHeightMapInThread(
+        HeightMapGenerator heightMapGenerator,
+        int size,
+        Vector2 chunkCoord,
+        Vector2 viewerPosition
+    )
     {
-        Vector2 sampleCenter = coord * meshSettings.meshWorldSize / meshSettings.meshScale;
-        ThreadedDataRequester.RequestData(() => heightMapGenerator.BuildHeightMap(size, size, sampleCenter), OnHeightMapReceived);
+        Vector2 offset = chunkCoord * meshSettings.meshWorldSize / meshSettings.meshScale;
+        ThreadedDataRequester.RequestData(() =>
+        {
+            return new HeightMapUpdateData(
+                heightMapGenerator.BuildTerrainHeightMap(offset),
+                viewerPosition
+            );
+        }, OnHeightMapReceived);
     }
 
     public void LoadFromHeightMap(HeightMap heightMap)
@@ -98,23 +105,16 @@ public class TerrainChunk
             return;
         }
 
-        Debug.Log("Height Map Received");
-        this.heightMap = (HeightMap)heightMapObject;
+        Debug.LogFormat("Height Map Received {0} {1}", heightMap.width, heightMap.height);
+        HeightMapUpdateData updateData = (HeightMapUpdateData)heightMapObject;
+        this.heightMap = updateData.heightMap;
         heightMapReceived = true;
 
-        UpdateTerrainChunk();
-    }
-
-    Vector2 viewerPosition
-    {
-        get
-        {
-            return new Vector2(viewer.position.x, viewer.position.z);
-        }
+        UpdateTerrainChunk(updateData.viewerPosition);
     }
 
     // Show, update the level of detail, or hide the terrain chunk based on the viewer's position
-    public void UpdateTerrainChunk()
+    public void UpdateTerrainChunk(Vector2 viewerPosition)
     {
         if (!heightMapReceived)
         {
@@ -122,7 +122,11 @@ public class TerrainChunk
             return;
         }
 
-        float viewerDstFromNearestEdge = Mathf.Sqrt(bounds.SqrDistance(viewerPosition));
+        float viewerDstFromNearestEdge = Mathf.Sqrt(
+            bounds.SqrDistance(viewerPosition)
+        );
+
+        // TODO replace this
         bool wasVisible = IsVisible();
         bool visible = viewerDstFromNearestEdge <= maxViewDst;
 
@@ -160,11 +164,11 @@ public class TerrainChunk
         if (wasVisible != visible)
         {
             SetVisible(visible);
-            onVisibilityChanged?.Invoke(this, visible);
+            OnVisibilityChanged?.Invoke(this, visible);
         }
     }
 
-    public void UpdateCollisionMesh()
+    public void UpdateCollisionMesh(Vector2 viewerPosition)
     {
         if (hasSetCollider)
         {
@@ -191,14 +195,35 @@ public class TerrainChunk
         }
     }
 
+    public Mesh GetMesh()
+    {
+        return meshFilter.mesh;
+    }
+
+    // public void SpawnVegetation(GameObject treePrefab)
+    // {
+    //     // TODO use level of detail for this
+    //     for (int i = 0; i < lodMeshes[0].mesh.vertices.Length; i++)
+    //     {
+    //         Vector3 worldPosVertex = lodMeshes[0].mesh.vertices[i];
+    //         Vector3 worldPos = meshObject.transform.TransformPoint(worldPosVertex);
+    //         float height = worldPos.y;
+    //         if (Math.Random.Range(0, 10) == 1)
+    //         {
+    //             GameObject tree = Instantiate(treePrefab);
+    //             tree.transform.parent = terrainChunkParent;
+    //         }
+    //     }
+    // }
+
     public void SetVisible(bool visible)
     {
-        meshObject.SetActive(visible);
+        gameObject.SetActive(visible);
     }
 
     public bool IsVisible()
     {
-        return meshObject.activeSelf;
+        return gameObject.activeSelf;
     }
 
 }
@@ -209,8 +234,8 @@ class LODMesh
     public Mesh mesh;
     public bool hasRequestedMesh;
     public bool hasMesh;
-    int lod;
-    public event System.Action updateCallback;
+    readonly int lod;
+    public event System.Action<Vector2> UpdateCallback;
 
     public LODMesh(int lod)
     {
@@ -219,17 +244,16 @@ class LODMesh
 
     void OnMeshDataReceived(object meshDataObject)
     {
-        mesh = ((MeshData)meshDataObject).CreateMesh();
+        MeshData meshData = (MeshData)meshDataObject;
+        mesh = meshData.CreateMesh();
         hasMesh = true;
-
-        updateCallback();
+        UpdateCallback(meshData.ViewerPosition);
     }
 
     public void RequestMesh(HeightMap heightMap, MeshSettings meshSettings)
     {
         hasRequestedMesh = true;
         MeshData meshData = MeshGenerator.GetTerrainChunkMesh(heightMap.values, meshSettings, lod);
-        Debug.Log("RequestMeshData");
         ThreadedDataRequester.RequestData(() => meshData, OnMeshDataReceived);
     }
 

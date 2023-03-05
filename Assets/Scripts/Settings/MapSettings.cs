@@ -31,7 +31,7 @@ public class MapSettings : UpdatableData
     {
         get
         {
-            return biomeSettings.heightMultiplier * biomeSettings.heightCurve.Evaluate(0);
+            return biomeSettings.terrainSettings.heightMultiplier * biomeSettings.terrainSettings.heightCurve.Evaluate(0);
 
         }
     }
@@ -40,7 +40,7 @@ public class MapSettings : UpdatableData
     {
         get
         {
-            return biomeSettings.heightMultiplier * biomeSettings.heightCurve.Evaluate(1);
+            return biomeSettings.terrainSettings.heightMultiplier * biomeSettings.terrainSettings.heightCurve.Evaluate(1);
         }
     }
 
@@ -50,7 +50,7 @@ public class MapSettings : UpdatableData
     {
         if (borderType == Map.BorderType.Infinite)
         {
-            fixedSize = -1;
+            fixedSize = 1;
         }
         else if (fixedSize % 2 != 1)
         {
@@ -60,7 +60,7 @@ public class MapSettings : UpdatableData
             }
             else
             {
-                fixedSize = 3;
+                fixedSize = 1;
             }
         }
         else if (fixedSize > MaxFixedSize)

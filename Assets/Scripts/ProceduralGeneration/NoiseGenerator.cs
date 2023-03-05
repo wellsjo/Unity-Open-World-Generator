@@ -4,15 +4,13 @@ using UnityEngine;
 
 public class NoiseGenerator
 {
-    private BiomeSettings biomeSettings;
-    private int seed;
-    public NoiseGenerator(BiomeSettings biomeSettings, int seed)
+    private readonly int seed;
+    public NoiseGenerator(int seed)
     {
-        this.biomeSettings = biomeSettings;
         this.seed = seed;
     }
 
-    public float[,] BuildNoiseMap(
+    public float[,] Generate(
         int width,
         int height,
         Vector2 offset,
@@ -46,7 +44,6 @@ public class NoiseGenerator
         float halfWidth = width / 2f;
         float halfHeight = height / 2f;
 
-
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < width; x++)
@@ -78,6 +75,7 @@ public class NoiseGenerator
                 }
                 noiseMap[x, y] = noiseHeight;
 
+                // TODO maybe only need this for terrain
                 float normalizedHeight = (noiseMap[x, y] + 1) / (maxPossibleHeight / 0.9f);
                 noiseMap[x, y] = Mathf.Clamp(normalizedHeight, 0, int.MaxValue);
             }

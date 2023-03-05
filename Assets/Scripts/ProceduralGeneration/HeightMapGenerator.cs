@@ -3,24 +3,26 @@ using Microsoft.Win32.SafeHandles;
 using System.CodeDom.Compiler;
 using UnityEngine;
 
-public class Biome
+public class HeightMapGenerator
 {
-    public Noise noise;
+    public NoiseGenerator noiseGenerator;
     public BiomeSettings settings;
-    public Biome(BiomeSettings settings, int seed)
+    readonly int width;
+    readonly int height;
+    public HeightMapGenerator(BiomeSettings settings, int width, int height, int seed)
     {
-        this.noise = new Noise(seed);
+        this.noiseGenerator = new NoiseGenerator(seed);
         this.settings = settings;
+        this.width = width;
+        this.height = height;
     }
-    public HeightMap BuildHeightMap(
-        int width,
-        int height,
+    public HeightMap BuildTerrainHeightMap(
         Vector2 sampleCenter
     )
     {
-        float[,] values = noise.Generate(
-            width,
-            height,
+        float[,] values = noiseGenerator.Generate(
+            this.width,
+            this.height,
             sampleCenter,
             settings.terrainSettings.noiseSettings
         );
@@ -49,8 +51,6 @@ public class Biome
 
         return new HeightMap(values, minValue, maxValue);
     }
-
-
 }
 
 // Useful for updating mesh in thread

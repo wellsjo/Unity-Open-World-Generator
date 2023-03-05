@@ -2,10 +2,10 @@ using System;
 using Palmmedia.ReportGenerator.Core;
 using UnityEngine;
 
-public class Noise
+public class NoiseGenerator
 {
     private readonly int seed;
-    public Noise(int seed)
+    public NoiseGenerator(int seed)
     {
         this.seed = seed;
     }

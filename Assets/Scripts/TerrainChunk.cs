@@ -8,7 +8,7 @@ public class TerrainChunk
     public event System.Action<TerrainChunk, bool> OnVisibilityChanged;
     public Vector2 coord;
 
-    GameObject meshObject;
+    public GameObject gameObject;
     Vector2 sampleCentre;
     public Bounds bounds;
 
@@ -41,13 +41,13 @@ public class TerrainChunk
         this.detailLevels = mapSettings.detailLevels;
         this.colliderLODIndex = colliderLODIndex;
         this.meshSettings = mapSettings.meshSettings;
-        this.vegetationSettings = mapSettings.biome.vegetationSettings;
+        this.vegetationSettings = mapSettings.biomeSettings.vegetationSettings;
 
         sampleCentre = coord * meshSettings.meshWorldSize / meshSettings.meshScale;
         Vector2 position = coord * meshSettings.meshWorldSize;
         bounds = new Bounds(position, Vector2.one * meshSettings.meshWorldSize);
 
-        this.meshObject = meshObject;
+        this.gameObject = meshObject;
         meshRenderer = meshObject.AddComponent<MeshRenderer>();
         meshFilter = meshObject.AddComponent<MeshFilter>();
         meshCollider = meshObject.AddComponent<MeshCollider>();
@@ -74,7 +74,7 @@ public class TerrainChunk
     // TerrainChunk loads a new height map with only the number of vertices per mesh, then requests mesh data for it.
     // This is used for infinite terrain.
     public void LoadHeightMapInThread(
-        Biome biome,
+        HeightMapGenerator heightMapGenerator,
         int size,
         Vector2 chunkCoord,
         Vector2 viewerPosition
@@ -84,10 +84,10 @@ public class TerrainChunk
         ThreadedDataRequester.RequestData(() =>
         {
             return new HeightMapUpdateData(
-                biome.BuildHeightMap(size, size, offset), viewerPosition
+                heightMapGenerator.BuildTerrainHeightMap(offset),
+                viewerPosition
             );
-        }, OnHeightMapReceived
-        );
+        }, OnHeightMapReceived);
     }
 
     public void LoadFromHeightMap(HeightMap heightMap)
@@ -97,7 +97,6 @@ public class TerrainChunk
         meshFilter.mesh = mesh;
     }
 
-
     void OnHeightMapReceived(object heightMapObject)
     {
         if (heightMapObject == null)
@@ -106,7 +105,7 @@ public class TerrainChunk
             return;
         }
 
-        Debug.Log("Height Map Received");
+        Debug.LogFormat("Height Map Received {0} {1}", heightMap.width, heightMap.height);
         HeightMapUpdateData updateData = (HeightMapUpdateData)heightMapObject;
         this.heightMap = updateData.heightMap;
         heightMapReceived = true;
@@ -196,14 +195,35 @@ public class TerrainChunk
         }
     }
 
+    public Mesh GetMesh()
+    {
+        return meshFilter.mesh;
+    }
+
+    // public void SpawnVegetation(GameObject treePrefab)
+    // {
+    //     // TODO use level of detail for this
+    //     for (int i = 0; i < lodMeshes[0].mesh.vertices.Length; i++)
+    //     {
+    //         Vector3 worldPosVertex = lodMeshes[0].mesh.vertices[i];
+    //         Vector3 worldPos = meshObject.transform.TransformPoint(worldPosVertex);
+    //         float height = worldPos.y;
+    //         if (Math.Random.Range(0, 10) == 1)
+    //         {
+    //             GameObject tree = Instantiate(treePrefab);
+    //             tree.transform.parent = terrainChunkParent;
+    //         }
+    //     }
+    // }
+
     public void SetVisible(bool visible)
     {
-        meshObject.SetActive(visible);
+        gameObject.SetActive(visible);
     }
 
     public bool IsVisible()
     {
-        return meshObject.activeSelf;
+        return gameObject.activeSelf;
     }
 
 }
@@ -234,7 +254,6 @@ class LODMesh
     {
         hasRequestedMesh = true;
         MeshData meshData = MeshGenerator.GetTerrainChunkMesh(heightMap.values, meshSettings, lod);
-        Debug.Log("RequestMeshData");
         ThreadedDataRequester.RequestData(() => meshData, OnMeshDataReceived);
     }
 

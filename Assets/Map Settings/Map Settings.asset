@@ -14,13 +14,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   autoUpdate: 1
   seed: 0
-  borderType: 0
-  fixedSize: 3
+  borderType: 1
+  fixedSize: 1
   biomeSettings: {fileID: 11400000, guid: 1f6c52d6e42444845a55e8577424dd88, type: 2}
   meshSettings:
     meshScale: 2
     useFlatShading: 0
-    chunkSizeIndex: 6
+    chunkSizeIndex: 3
     flatshadedChunkSizeIndex: 0
   textureSettings:
     layers:

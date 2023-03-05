@@ -12,45 +12,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06a79b4cdd01f794ebec6d907414ae22, type: 3}
   m_Name: Biome Settings
   m_EditorClassIdentifier: 
-  autoUpdate: 1
-  noiseSettings:
-    startingOffset: {x: 0, y: 0}
-    persistance: 0.5
-    octaves: 6
-    scale: 40
-    lacunarity: 2
-  heightCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 0.54629785
-      value: 0.6177368
-      inSlope: 1.1505604
-      outSlope: 1.1505604
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 0.9925261
-      value: 1.509725
-      inSlope: 2.3154113
-      outSlope: 2.3154113
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.29888406
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  heightMultiplier: 30
-  endDistance: 0
+  autoUpdate: 0
+  terrainSettings:
+    noiseSettings:
+      startingOffset: {x: 0, y: 0}
+      persistance: 0.5
+      octaves: 6
+      scale: 20
+      lacunarity: 2
+    heightCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1
+        value: 1
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    heightMultiplier: 50
+  vegetationSettings:
+    noiseSettings:
+      startingOffset: {x: 0, y: 0}
+      persistance: 0
+      octaves: 0
+      scale: 0
+      lacunarity: 0
+    noiseThreshold: 0
+    startHeight: 0
+    endHeight: 0
+    treePrefab: {fileID: 7309463327552452509, guid: de691dfc4f267f7428befc75c109cb1c, type: 3}

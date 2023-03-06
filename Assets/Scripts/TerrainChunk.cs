@@ -34,13 +34,14 @@ public class TerrainChunk
 
         SetVisible(false);
     }
+
     public void SetVisible(bool visible)
     {
         meshObject.SetActive(visible);
     }
+
     public void LoadFromHeightMap(HeightMap heightMap)
     {
-        Debug.LogFormat("height map {0}", heightMap.width);
         MeshData meshData = MeshGenerator.GetTerrainChunkMesh(
             heightMap.values,
             mapSettings.meshSettings,
@@ -104,7 +105,7 @@ public class DynamicTerrainChunk : TerrainChunk
 
     // TerrainChunk loads a new height map with only the number of vertices per mesh, then requests mesh data for it.
     // This is used for infinite terrain.
-    public void LoadHeightMapInThread(
+    public void LoadHeightMapAsync(
         HeightMapGenerator heightMapGenerator
     )
     {
@@ -115,6 +116,18 @@ public class DynamicTerrainChunk : TerrainChunk
             return heightMapGenerator.BuildTerrainHeightMap(heightMapOffSet);
         }, OnHeightMapReceived);
     }
+
+    // public void LoadVegetationAsync(
+    //     VegetationGenerator vegetationGenerator
+    // )
+    // {
+    //     // Center of the height map on the game world
+    //     Vector2 heightMapOffSet = chunkCoord * mapSettings.meshSettings.meshWorldSize / mapSettings.meshSettings.meshScale;
+    //     ThreadedDataRequester.RequestData(() =>
+    //     {
+    //         return vegetationGenerator.BuildVegetationMap(heightMapOffSet);
+    //     }, OnVegetationMapReceived);
+    // }
 
     void OnHeightMapReceived(object heightMapObj)
     {

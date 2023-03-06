@@ -38,7 +38,7 @@ public class WorldBuilder : MonoBehaviour
         chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / meshWorldSize);
 
         heightMapGenerator = new HeightMapGenerator(
-            mapSettings.biomeSettings,
+            mapSettings.biomeSettings.terrainSettings,
             mapSettings.meshSettings.numVertsPerLine,
             mapSettings.meshSettings.numVertsPerLine,
             mapSettings.seed
@@ -117,7 +117,7 @@ public class WorldBuilder : MonoBehaviour
                         newChunk.OnVisibilityChanged += OnTerrainChunkVisibilityChanged;
 
                         Debug.Log("Loading Infinite Terrain Chunk");
-                        newChunk.LoadHeightMapInThread(heightMapGenerator);
+                        newChunk.LoadHeightMapAsync(heightMapGenerator);
                     }
                 }
 

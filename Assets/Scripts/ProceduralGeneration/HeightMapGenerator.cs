@@ -3,15 +3,18 @@ using Microsoft.Win32.SafeHandles;
 using System.CodeDom.Compiler;
 using UnityEngine;
 
-public class HeightMapGenerator
+public class HeightMapGenerator : NoiseGenerator
 {
-    public NoiseGenerator noiseGenerator;
-    public BiomeSettings settings;
+    public TerrainSettings settings;
     readonly int width;
     readonly int height;
-    public HeightMapGenerator(BiomeSettings settings, int width, int height, int seed)
+    public HeightMapGenerator(
+        TerrainSettings settings,
+        int width,
+        int height,
+        int seed
+    ) : base(seed)
     {
-        this.noiseGenerator = new NoiseGenerator(seed);
         this.settings = settings;
         this.width = width;
         this.height = height;
@@ -20,14 +23,14 @@ public class HeightMapGenerator
         Vector2 sampleCenter
     )
     {
-        float[,] values = noiseGenerator.Generate(
+        float[,] values = this.Generate(
             this.width,
             this.height,
             sampleCenter,
-            settings.terrainSettings.noiseSettings
+            settings.noiseSettings
         );
 
-        AnimationCurve heightCurve_threadsafe = new(settings.terrainSettings.heightCurve.keys);
+        AnimationCurve heightCurve_threadsafe = new(settings.heightCurve.keys);
 
         float minValue = float.MaxValue;
         float maxValue = float.MinValue;
@@ -36,7 +39,7 @@ public class HeightMapGenerator
         {
             for (int j = 0; j < height; j++)
             {
-                values[i, j] *= heightCurve_threadsafe.Evaluate(values[i, j]) * settings.terrainSettings.heightMultiplier;
+                values[i, j] *= heightCurve_threadsafe.Evaluate(values[i, j]) * settings.heightMultiplier;
 
                 if (values[i, j] > maxValue)
                 {
@@ -54,16 +57,16 @@ public class HeightMapGenerator
 }
 
 // Useful for updating mesh in thread
-public struct HeightMapUpdateData
-{
-    public HeightMap heightMap;
-    public Vector2 viewerPosition;
-    public HeightMapUpdateData(HeightMap heightMap, Vector2 viewerPosition)
-    {
-        this.heightMap = heightMap;
-        this.viewerPosition = viewerPosition;
-    }
-}
+// public struct HeightMapUpdateData
+// {
+//     public HeightMap heightMap;
+//     public Vector2 viewerPosition;
+//     public HeightMapUpdateData(HeightMap heightMap, Vector2 viewerPosition)
+//     {
+//         this.heightMap = heightMap;
+//         this.viewerPosition = viewerPosition;
+//     }
+// }
 
 public struct HeightMap
 {

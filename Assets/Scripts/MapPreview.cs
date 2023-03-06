@@ -37,7 +37,7 @@ public class MapPreview : MonoBehaviour
             }
 
             HeightMapGenerator heightMapGenerator = new(
-                mapSettings.biomeSettings,
+                mapSettings.biomeSettings.terrainSettings,
                 heightMapSize,
                 heightMapSize,
                 mapSettings.seed
@@ -72,7 +72,7 @@ public class MapPreview : MonoBehaviour
     )
     {
         HeightMapGenerator terrainChunkHeightMapGenerator = new(
-            mapSettings.biomeSettings,
+            mapSettings.biomeSettings.terrainSettings,
             mapSettings.meshSettings.numVertsPerLine,
             mapSettings.meshSettings.numVertsPerLine,
             mapSettings.seed

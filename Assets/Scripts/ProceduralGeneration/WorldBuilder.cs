@@ -110,14 +110,13 @@ public class WorldBuilder : MonoBehaviour
                             terrainObject,
                             mapSettings,
                             colliderLODIndex,
-                            mapMaterial
+                            mapMaterial,
+                            heightMapGenerator
                         );
 
                         terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
                         newChunk.OnVisibilityChanged += OnTerrainChunkVisibilityChanged;
-
-                        Debug.Log("Loading Infinite Terrain Chunk");
-                        newChunk.LoadHeightMapAsync(heightMapGenerator);
+                        newChunk.Load();
                     }
                 }
 

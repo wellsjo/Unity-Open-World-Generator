@@ -3,6 +3,7 @@ using Microsoft.Win32.SafeHandles;
 using System.CodeDom.Compiler;
 using UnityEngine;
 
+// Used by WorldBuilder to generate height maps for terrain chunks.
 public class HeightMapGenerator : NoiseGenerator
 {
     public TerrainSettings settings;

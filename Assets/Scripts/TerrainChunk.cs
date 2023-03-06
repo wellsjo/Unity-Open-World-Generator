@@ -58,6 +58,7 @@ public class DynamicTerrainChunk : TerrainChunk
     private readonly Transform viewer;
     public event System.Action<DynamicTerrainChunk, bool> OnVisibilityChanged;
     readonly float maxViewDst;
+    readonly Vector2 heightMapOffset;
     // Used to get the distance from nearest edge
     public Bounds bounds;
     const float colliderGenerationDistanceThreshold = 5;
@@ -68,6 +69,7 @@ public class DynamicTerrainChunk : TerrainChunk
     bool heightMapReceived;
     readonly int colliderLODIndex;
     bool hasSetCollider;
+    private readonly HeightMapGenerator heightMapGenerator;
 
     // A terrain chunk which updates its LOD based on the user's position.
     public DynamicTerrainChunk(
@@ -76,11 +78,13 @@ public class DynamicTerrainChunk : TerrainChunk
         GameObject meshObject,
         MapSettings mapSettings,
         int colliderLODIndex,
-        Material material
+        Material material,
+        HeightMapGenerator heightMapGenerator
     ) : base(coord, meshObject, mapSettings, material)
     {
         this.viewer = viewer;
         this.colliderLODIndex = colliderLODIndex;
+        this.heightMapGenerator = heightMapGenerator;
 
         // position in 3d space
         Vector2 position = coord * mapSettings.meshSettings.meshWorldSize;
@@ -101,19 +105,17 @@ public class DynamicTerrainChunk : TerrainChunk
         }
 
         maxViewDst = mapSettings.detailLevels[^1].visibleDstThreshold;
+        heightMapOffset = chunkCoord * mapSettings.meshSettings.meshWorldSize / mapSettings.meshSettings.meshScale;
     }
 
     // TerrainChunk loads a new height map with only the number of vertices per mesh, then requests mesh data for it.
     // This is used for infinite terrain.
-    public void LoadHeightMapAsync(
-        HeightMapGenerator heightMapGenerator
-    )
+    public void Load()
     {
         // Center of the height map on the game world
-        Vector2 heightMapOffSet = chunkCoord * mapSettings.meshSettings.meshWorldSize / mapSettings.meshSettings.meshScale;
         ThreadedDataRequester.RequestData(() =>
         {
-            return heightMapGenerator.BuildTerrainHeightMap(heightMapOffSet);
+            return heightMapGenerator.BuildTerrainHeightMap(heightMapOffset);
         }, OnHeightMapReceived);
     }
 
@@ -154,7 +156,7 @@ public class DynamicTerrainChunk : TerrainChunk
             return;
         }
 
-        Vector2 viewerPosition = new(viewer.position.x, viewer.position.z);
+        Vector2 viewerPosition = ViewerPosition();
 
         float viewerDstFromNearestEdge = Mathf.Sqrt(
             bounds.SqrDistance(viewerPosition)
@@ -183,6 +185,7 @@ public class DynamicTerrainChunk : TerrainChunk
             if (lodIndex != previousLODIndex)
             {
                 LODMesh lodMesh = lodMeshes[lodIndex];
+
                 if (lodMesh.hasMesh)
                 {
                     previousLODIndex = lodIndex;

@@ -11,7 +11,7 @@ public class TerrainChunk
     protected readonly MeshFilter meshFilter;
     protected readonly MapSettings mapSettings;
 
-    // A piece of terrain which also is aware of the user's position
+    // A piece of terrain on a grid
     public TerrainChunk(
         Vector2 chunkCoord,
         GameObject meshObject,
@@ -20,6 +20,8 @@ public class TerrainChunk
     )
     {
         this.chunkCoord = chunkCoord;
+        this.mapSettings = mapSettings;
+
         this.meshObject = meshObject;
         meshRenderer = meshObject.AddComponent<MeshRenderer>();
         meshFilter = meshObject.AddComponent<MeshFilter>();
@@ -60,12 +62,13 @@ public class DynamicTerrainChunk : TerrainChunk
     const float colliderGenerationDistanceThreshold = 5;
     int previousLODIndex = -1;
     readonly MeshCollider meshCollider;
-    private readonly LODInfo[] detailLevels;
     readonly LODMesh[] lodMeshes;
     public HeightMap heightMap;
     bool heightMapReceived;
     readonly int colliderLODIndex;
     bool hasSetCollider;
+
+    // A terrain chunk which updates its LOD based on the user's position.
     public DynamicTerrainChunk(
         Transform viewer,
         Vector2 coord,
@@ -82,10 +85,12 @@ public class DynamicTerrainChunk : TerrainChunk
         Vector2 position = coord * mapSettings.meshSettings.meshWorldSize;
         bounds = new Bounds(position, Vector2.one * mapSettings.meshSettings.meshWorldSize);
 
-        lodMeshes = new LODMesh[detailLevels.Length];
-        for (int i = 0; i < detailLevels.Length; i++)
+        meshCollider = meshObject.AddComponent<MeshCollider>();
+
+        lodMeshes = new LODMesh[mapSettings.detailLevels.Length];
+        for (int i = 0; i < mapSettings.detailLevels.Length; i++)
         {
-            lodMeshes[i] = new LODMesh(detailLevels[i].lod);
+            lodMeshes[i] = new LODMesh(mapSettings.detailLevels[i].lod);
             lodMeshes[i].UpdateCallback += UpdateTerrainChunk;
             // TODO this seems like a bug, should be i < colliderLODIndex
             if (i == colliderLODIndex)
@@ -94,7 +99,7 @@ public class DynamicTerrainChunk : TerrainChunk
             }
         }
 
-        maxViewDst = detailLevels[^1].visibleDstThreshold;
+        maxViewDst = mapSettings.detailLevels[^1].visibleDstThreshold;
     }
 
     // TerrainChunk loads a new height map with only the number of vertices per mesh, then requests mesh data for it.
@@ -150,9 +155,9 @@ public class DynamicTerrainChunk : TerrainChunk
         {
             int lodIndex = 0;
 
-            for (int i = 0; i < detailLevels.Length - 1; i++)
+            for (int i = 0; i < mapSettings.detailLevels.Length - 1; i++)
             {
-                if (viewerDstFromNearestEdge > detailLevels[i].visibleDstThreshold)
+                if (viewerDstFromNearestEdge > mapSettings.detailLevels[i].visibleDstThreshold)
                 {
                     lodIndex = i + 1;
                 }
@@ -193,7 +198,7 @@ public class DynamicTerrainChunk : TerrainChunk
         Vector2 viewerPosition = ViewerPosition();
         float sqrDstFromViewerToEdge = bounds.SqrDistance(viewerPosition);
 
-        if (sqrDstFromViewerToEdge < detailLevels[colliderLODIndex].sqrVisibleDstThreshold)
+        if (sqrDstFromViewerToEdge < mapSettings.detailLevels[colliderLODIndex].sqrVisibleDstThreshold)
         {
             if (!lodMeshes[colliderLODIndex].hasRequestedMesh)
             {

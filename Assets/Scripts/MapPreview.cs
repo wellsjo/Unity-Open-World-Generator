@@ -62,23 +62,6 @@ public class MapPreview : MonoBehaviour
                 previewTerrain.transform
             );
         }
-        // else if (drawMode == Map.DrawMode.Play)
-        // {
-        //     // previewMeshRenderer.SetActive(true);
-        //     mapSettings.textureSettings.ApplyToMaterial(terrainMaterial);
-        //     mapSettings.textureSettings.UpdateMeshHeights(terrainMaterial, mapSettings.MinHeight, mapSettings.MaxHeight);
-        //     HeightMapGenerator heightMapGenerator = new(
-        //         mapSettings.biomeSettings,
-        //         mapSettings.fixedSize,
-        //         mapSettings.fixedSize,
-        //         mapSettings.seed
-        //     );
-        //     HeightMap heightMap = heightMapGenerator.BuildTerrainHeightMap(
-        //         Vector2.zero
-        //     );
-        //     MeshData meshData = MeshGenerator.GetTerrainChunkMesh(heightMap.values, mapSettings.meshSettings, editorPreviewLOD);
-        //     DrawMesh(meshData);
-        // }
 
     }
     public static void GeneratePreview(
@@ -119,7 +102,6 @@ public class MapPreview : MonoBehaviour
                     chunkCoord,
                     terrainChunkObject,
                     mapSettings,
-                    0,
                     mapMaterial
                 );
 
@@ -134,21 +116,18 @@ public class MapPreview : MonoBehaviour
                     continue;
                 }
 
-                Mesh mesh = newChunk.GetMesh();
-                // mesh = GetComponent()
-                // mesh = GetComponent<MeshFilter>().sharedMesh;
-                Debug.LogFormat("Iterating over {0} vertices", mesh.vertices.Length);
-                for (int i = 0; i < mesh.vertices.Length; i++)
-                {
-                    Vector3 worldPosVertex = mesh.vertices[i];
-                    Vector3 worldPos = newChunk.gameObject.transform.TransformPoint(worldPosVertex);
-                    if (Random.Range(0, 10) == 1)
-                    {
-                        GameObject tree = Instantiate(mapSettings.biomeSettings.vegetationSettings.treePrefab, worldPos, Quaternion.identity);
-                        tree.transform.parent = terrainChunkObject.transform;
-                        tree.transform.position = worldPos;
-                    }
-                }
+                // Mesh mesh = newChunk.GetMesh();
+                // for (int i = 0; i < mesh.vertices.Length; i++)
+                // {
+                //     Vector3 worldPosVertex = mesh.vertices[i];
+                //     Vector3 worldPos = newChunk.gameObject.transform.TransformPoint(worldPosVertex);
+                //     if (Random.Range(0, 10) == 1)
+                //     {
+                //         GameObject tree = Instantiate(mapSettings.biomeSettings.vegetationSettings.treePrefab, worldPos, Quaternion.identity);
+                //         tree.transform.parent = terrainChunkObject.transform;
+                //         tree.transform.position = worldPos;
+                //     }
+                // }
             }
         }
 

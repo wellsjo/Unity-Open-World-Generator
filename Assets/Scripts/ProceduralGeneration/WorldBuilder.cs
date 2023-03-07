@@ -21,6 +21,7 @@ public class WorldBuilder : MonoBehaviour
     readonly Dictionary<Vector2, DynamicTerrainChunk> terrainChunkDictionary = new();
     readonly List<DynamicTerrainChunk> visibleTerrainChunks = new();
     HeightMapGenerator heightMapGenerator;
+    VegetationGenerator vegetationGenerator;
 
     void Start()
     {
@@ -39,6 +40,13 @@ public class WorldBuilder : MonoBehaviour
 
         heightMapGenerator = new HeightMapGenerator(
             mapSettings.biomeSettings.terrainSettings,
+            mapSettings.meshSettings.numVertsPerLine,
+            mapSettings.meshSettings.numVertsPerLine,
+            mapSettings.seed
+        );
+
+        vegetationGenerator = new VegetationGenerator(
+            mapSettings.biomeSettings.vegetationSettings,
             mapSettings.meshSettings.numVertsPerLine,
             mapSettings.meshSettings.numVertsPerLine,
             mapSettings.seed
@@ -104,6 +112,7 @@ public class WorldBuilder : MonoBehaviour
                     {
                         GameObject terrainObject = new(string.Format("Terrain Chunk {0}", viewedChunkCoord.ToString()));
                         terrainObject.transform.parent = transform;
+
                         DynamicTerrainChunk newChunk = new(
                             viewer,
                             viewedChunkCoord,
@@ -111,7 +120,8 @@ public class WorldBuilder : MonoBehaviour
                             mapSettings,
                             colliderLODIndex,
                             mapMaterial,
-                            heightMapGenerator
+                            heightMapGenerator,
+                            vegetationGenerator
                         );
 
                         terrainChunkDictionary.Add(viewedChunkCoord, newChunk);

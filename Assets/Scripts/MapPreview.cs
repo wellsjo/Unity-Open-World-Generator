@@ -43,7 +43,7 @@ public class MapPreview : MonoBehaviour
                 mapSettings.seed
             );
 
-            HeightMap heightMap = heightMapGenerator.BuildTerrainHeightMap(
+            HeightMap heightMap = heightMapGenerator.BuildHeightMap(
                 Vector2.zero
             );
             Texture2D texture = TextureGenerator.TextureFromHeightMap(heightMap);
@@ -106,7 +106,7 @@ public class MapPreview : MonoBehaviour
                 );
 
                 Vector2 sampleCenter = chunkCoord * mapSettings.meshSettings.meshWorldSize / mapSettings.meshSettings.meshScale;
-                HeightMap heightMap = terrainChunkHeightMapGenerator.BuildTerrainHeightMap(sampleCenter);
+                HeightMap heightMap = terrainChunkHeightMapGenerator.BuildHeightMap(sampleCenter);
 
                 newChunk.LoadFromHeightMap(heightMap);
                 newChunk.SetVisible(true);

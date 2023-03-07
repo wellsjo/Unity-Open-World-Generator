@@ -3,7 +3,7 @@
 [CreateAssetMenu()]
 public class BiomeSettings : UpdatableData
 {
-    public TerrainSettings terrainSettings;
+    public HeightMapSettings terrainSettings;
     public VegetationSettings vegetationSettings;
 
 #if UNITY_EDITOR
@@ -17,7 +17,7 @@ public class BiomeSettings : UpdatableData
 }
 
 [System.Serializable]
-public struct TerrainSettings
+public struct HeightMapSettings
 {
     public NoiseSettings noiseSettings;
     public AnimationCurve heightCurve;

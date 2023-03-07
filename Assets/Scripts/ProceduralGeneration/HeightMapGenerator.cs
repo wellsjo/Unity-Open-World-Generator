@@ -6,11 +6,11 @@ using UnityEngine;
 // Used by WorldBuilder to generate height maps for terrain chunks.
 public class HeightMapGenerator : NoiseGenerator
 {
-    public TerrainSettings settings;
+    public HeightMapSettings settings;
     readonly int width;
     readonly int height;
     public HeightMapGenerator(
-        TerrainSettings settings,
+        HeightMapSettings settings,
         int width,
         int height,
         int seed
@@ -20,7 +20,7 @@ public class HeightMapGenerator : NoiseGenerator
         this.width = width;
         this.height = height;
     }
-    public HeightMap BuildTerrainHeightMap(
+    public HeightMap BuildHeightMap(
         Vector2 sampleCenter
     )
     {
@@ -57,19 +57,7 @@ public class HeightMapGenerator : NoiseGenerator
     }
 }
 
-// Useful for updating mesh in thread
-// public struct HeightMapUpdateData
-// {
-//     public HeightMap heightMap;
-//     public Vector2 viewerPosition;
-//     public HeightMapUpdateData(HeightMap heightMap, Vector2 viewerPosition)
-//     {
-//         this.heightMap = heightMap;
-//         this.viewerPosition = viewerPosition;
-//     }
-// }
-
-public struct HeightMap
+public readonly struct HeightMap
 {
     public readonly float[,] values;
     public readonly float minValue;

@@ -48,11 +48,11 @@ MonoBehaviour:
   vegetationSettings:
     noiseSettings:
       startingOffset: {x: 0, y: 0}
-      persistance: 0
-      octaves: 0
-      scale: 0
-      lacunarity: 0
-    noiseThreshold: 0
-    startHeight: 0
-    endHeight: 0
+      persistance: 0.6
+      octaves: 6
+      scale: 20
+      lacunarity: 2
+    noiseThreshold: 0.5
+    startHeight: 0.012
+    endHeight: 0.138
     treePrefab: {fileID: 7309463327552452509, guid: de691dfc4f267f7428befc75c109cb1c, type: 3}

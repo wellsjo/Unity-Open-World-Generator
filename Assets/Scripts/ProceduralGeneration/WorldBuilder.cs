@@ -18,9 +18,10 @@ public class WorldBuilder : MonoBehaviour
 
     float meshWorldSize;
     int chunksVisibleInViewDst;
-    readonly Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new();
-    readonly List<TerrainChunk> visibleTerrainChunks = new();
+    readonly Dictionary<Vector2, DynamicTerrainChunk> terrainChunkDictionary = new();
+    readonly List<DynamicTerrainChunk> visibleTerrainChunks = new();
     HeightMapGenerator heightMapGenerator;
+    VegetationGenerator vegetationGenerator;
 
     void Start()
     {
@@ -38,7 +39,14 @@ public class WorldBuilder : MonoBehaviour
         chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / meshWorldSize);
 
         heightMapGenerator = new HeightMapGenerator(
-            mapSettings.biomeSettings,
+            mapSettings.biomeSettings.terrainSettings,
+            mapSettings.meshSettings.numVertsPerLine,
+            mapSettings.meshSettings.numVertsPerLine,
+            mapSettings.seed
+        );
+
+        vegetationGenerator = new VegetationGenerator(
+            mapSettings.biomeSettings.vegetationSettings,
             mapSettings.meshSettings.numVertsPerLine,
             mapSettings.meshSettings.numVertsPerLine,
             mapSettings.seed
@@ -55,9 +63,9 @@ public class WorldBuilder : MonoBehaviour
 
         if (viewerPosition != viewerPositionOld)
         {
-            foreach (TerrainChunk chunk in visibleTerrainChunks)
+            foreach (DynamicTerrainChunk chunk in visibleTerrainChunks)
             {
-                chunk.UpdateCollisionMesh(viewerPosition);
+                chunk.UpdateCollisionMesh();
             }
         }
 
@@ -74,9 +82,9 @@ public class WorldBuilder : MonoBehaviour
         HashSet<Vector2> alreadyUpdatedChunkCoords = new();
         for (int i = visibleTerrainChunks.Count - 1; i >= 0; i--)
         {
-            TerrainChunk chunk = visibleTerrainChunks[i];
-            alreadyUpdatedChunkCoords.Add(visibleTerrainChunks[i].coord);
-            visibleTerrainChunks[i].UpdateTerrainChunk(viewerPosition);
+            DynamicTerrainChunk chunk = visibleTerrainChunks[i];
+            alreadyUpdatedChunkCoords.Add(visibleTerrainChunks[i].chunkCoord);
+            visibleTerrainChunks[i].UpdateTerrainChunk();
         }
 
         int currentChunkCoordX = Mathf.RoundToInt(viewerPosition.x / meshWorldSize);
@@ -97,31 +105,28 @@ public class WorldBuilder : MonoBehaviour
                 {
                     if (terrainChunkDictionary.ContainsKey(viewedChunkCoord))
                     {
-                        TerrainChunk chunk = terrainChunkDictionary[viewedChunkCoord];
-                        terrainChunkDictionary[viewedChunkCoord].UpdateTerrainChunk(viewerPosition);
+                        DynamicTerrainChunk chunk = terrainChunkDictionary[viewedChunkCoord];
+                        terrainChunkDictionary[viewedChunkCoord].UpdateTerrainChunk();
                     }
                     else
                     {
                         GameObject terrainObject = new(string.Format("Terrain Chunk {0}", viewedChunkCoord.ToString()));
                         terrainObject.transform.parent = transform;
-                        TerrainChunk newChunk = new(
+
+                        DynamicTerrainChunk newChunk = new(
+                            viewer,
                             viewedChunkCoord,
                             terrainObject,
                             mapSettings,
                             colliderLODIndex,
-                            mapMaterial
+                            mapMaterial,
+                            heightMapGenerator,
+                            vegetationGenerator
                         );
 
                         terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
                         newChunk.OnVisibilityChanged += OnTerrainChunkVisibilityChanged;
-
-                        Debug.Log("Loading Infinite Terrain Chunk");
-                        newChunk.LoadHeightMapInThread(
-                            heightMapGenerator,
-                            mapSettings.meshSettings.numVertsPerLine,
-                            viewedChunkCoord,
-                            viewerPosition
-                        );
+                        newChunk.Load();
                     }
                 }
 
@@ -145,7 +150,7 @@ public class WorldBuilder : MonoBehaviour
         return true;
     }
 
-    void OnTerrainChunkVisibilityChanged(TerrainChunk chunk, bool isVisible)
+    void OnTerrainChunkVisibilityChanged(DynamicTerrainChunk chunk, bool isVisible)
     {
         if (isVisible)
         {

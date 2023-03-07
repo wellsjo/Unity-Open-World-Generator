@@ -1,8 +1,8 @@
 using UnityEngine;
 
+// Generate a terrain chunk mesh
 public static class MeshGenerator
 {
-    // This function is limited to drawing over pre-defined mesh sizes (loops over vertsPerLine)
     public static MeshData GetTerrainChunkMesh(float[,] heightMap, MeshSettings meshSettings, int levelOfDetail)
     {
         int skipIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
@@ -97,7 +97,6 @@ public static class MeshGenerator
 public class MeshData
 {
     Vector3[] vertices;
-    public Vector2 ViewerPosition;
     readonly int[] triangles;
     Vector2[] uvs;
     Vector3[] bakedNormals;
@@ -130,10 +129,12 @@ public class MeshData
         int numMainTriangles = (numMainVerticesPerLine - 1) * (numMainVerticesPerLine - 1) * 2;
         int[] triangles = new int[(numMeshEdgeTriangles + numMainTriangles) * 3];
 
-        MeshData meshData = new MeshData(vertices, triangles, uvs);
-        meshData.useFlatShading = useFlatShading;
-        meshData.outOfMeshVertices = new Vector3[numVertsPerLine * 4 - 4];
-        meshData.outOfMeshTriangles = new int[24 * (numVertsPerLine - 2)];
+        MeshData meshData = new(vertices, triangles, uvs)
+        {
+            useFlatShading = useFlatShading,
+            outOfMeshVertices = new Vector3[numVertsPerLine * 4 - 4],
+            outOfMeshTriangles = new int[24 * (numVertsPerLine - 2)]
+        };
 
         return meshData;
     }

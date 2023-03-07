@@ -197,7 +197,7 @@ GameObject:
   - component: {fileID: 497659949}
   - component: {fileID: 497659948}
   m_Layer: 0
-  m_Name: Static Viewer Tester
+  m_Name: View Tester
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -443,7 +443,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   drawMode: 0
-  editorPreviewLOD: 0
+  editorPreviewLOD: 4
   autoUpdate: 1
   spawnVegetation: 0
   previewTerrain: {fileID: 1508352695}

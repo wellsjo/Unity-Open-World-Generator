@@ -18,31 +18,58 @@ public class VegetationGenerator : NoiseGenerator
         this.height = height;
     }
 
-    public List<Vector3> BuildVegetationMap(Vector2 sampleCenter, float[,] heightMapValues)
+    public List<Vector3> BuildVegetationMap(Vector2 sampleCenter, int numVertsPerLine, Vector3[] vertices)
     {
         float[,] values = this.Generate(
-            this.width,
-            this.height,
+            vertices.Length,
+            vertices.Length,
             sampleCenter,
             vegetationSettings.noiseSettings
         );
+        Debug.LogFormat("BuildVegetationMap {0} {1} {2}", vertices.Length, numVertsPerLine, numVertsPerLine * numVertsPerLine);
 
+        int levelOfDetail = 0;
+        int skipIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
         List<Vector3> returnValues = new();
-        for (int x = 0; x < width; x++)
+        int vertexIndex = 0;
+
+        for (int y = 0; y < numVertsPerLine; y++)
         {
-            for (int y = 0; y < height; y++)
+            for (int x = 0; x < numVertsPerLine; x++)
             {
-                float height = heightMapValues[x, y];
-                // Debug.LogFormat("Processing {0}, {1}", values[x, y], height);
-                if (values[x, y] > vegetationSettings.noiseThreshold
-                    && height > vegetationSettings.startHeight
-                    && height < vegetationSettings.endHeight)
+                bool isOutOfMeshVertex = y == 0 || y == numVertsPerLine - 1 || x == 0 || x == numVertsPerLine - 1;
+                bool isSkippedVertex = x > 2 && x < numVertsPerLine - 3 && y > 2 && y < numVertsPerLine - 3 && ((x - 2) % skipIncrement != 0 || (y - 2) % skipIncrement != 0);
+
+                if (isOutOfMeshVertex)
                 {
-                    returnValues.Add(new Vector3(x, heightMapValues[x, y], y));
+                    continue;
                 }
+                else if (isSkippedVertex)
+                {
+                    continue;
+                }
+
+                if (Random.Range(0, 10) > 7)
+                {
+                    returnValues.Add(vertices[vertexIndex]);
+                }
+
+                vertexIndex++;
             }
         }
 
+        Debug.LogFormat("Vegetation Vertices {0} {1}", vertexIndex, returnValues.Count);
+
         return returnValues;
+
+        // for (int i = 0; i < vertices.Length; i++)
+        // {
+        //     Vector3 vertex = vertices[vertexIndex];
+
+        // Vector3 worldPos = newChunk.gameObject.transform.TransformPoint(vertex);
+        // GameObject tree = Instantiate(mapSettings.biomeSettings.vegetationSettings.treePrefab, worldPos, Quaternion.identity);
+        // Vector3 worldPosVertex = terrainMesh.vertices[i];
+        // tree.transform.parent = terrainChunkObject.transform;
+        // tree.transform.position = worldPos;
     }
 }

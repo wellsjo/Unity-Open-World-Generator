@@ -80,7 +80,7 @@ public class MapPreview : MonoBehaviour
 
         // Default to something reasonable for infinite view
         // TODO make this a map preview option
-        Vector2 range = new(-1, 1);
+        Vector2 range = new(0, 0);
         if (mapSettings.borderType == Map.BorderType.Fixed)
         {
             range = mapSettings.range;
@@ -116,7 +116,27 @@ public class MapPreview : MonoBehaviour
                     continue;
                 }
 
-                // Mesh mesh = newChunk.GetMesh();
+                // List<Vector3> treePositions = new();
+                VegetationGenerator vegetationGenerator = new(
+                    mapSettings.biomeSettings.vegetationSettings,
+                    mapSettings.meshSettings.numVertsPerLine,
+                    mapSettings.meshSettings.numVertsPerLine,
+                    mapSettings.seed
+                );
+
+                List<Vector3> vegetationMap = vegetationGenerator.BuildVegetationMap(sampleCenter, mapSettings.meshSettings.numVertsPerLine, newChunk.meshFilter.sharedMesh.vertices);
+                newChunk.LoadVegetationFromMap(vegetationMap);
+
+                // foreach (Vector3 vegetationValue in vegetationMap)
+                // {
+                //     Debug.Log("Spawning Tree");
+                //     UnityEngine.GameObject tree = UnityEngine.GameObject.Instantiate(
+                //         mapSettings.biomeSettings.vegetationSettings.treePrefab
+                //     );
+                //     tree.transform.position = vegetationValue;
+                //     tree.transform.parent = terrainChunkObject.transform;
+                // }
+
                 // for (int i = 0; i < mesh.vertices.Length; i++)
                 // {
                 //     Vector3 worldPosVertex = mesh.vertices[i];

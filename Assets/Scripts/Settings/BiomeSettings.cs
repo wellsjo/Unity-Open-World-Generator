@@ -111,7 +111,8 @@ public class TextureSettings
         [Range(0, 1)]
         public float blendStrength;
         public float textureScale;
-        public float ObjectRNG;
+        [Range(0, 1)]
+        public float ObjectFrequency;
         public LayerObjectSettings[] layerObjectSettings;
     }
 

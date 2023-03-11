@@ -31,12 +31,19 @@ public static class VegetationGenerator
                 {
                     continue;
                 }
-                int index = GetPrefabIndexFromLayerObjectSettings(settings);
+                // int index = GetPrefabIndexFromLayerObjectSettings(settings);
+
+                float[] weights = new float[settings.Length];
+                for (int i = 0; i < settings.Length; i++)
+                {
+                    weights[i] = settings[i].density;
+                }
+
 
                 returnValues.Add(
                     new ObjectPlacement(
                         vertices[vertexIndex],
-                        index
+                        GetRandomWeightedIndex(weights)
                     )
                 );
 
@@ -47,22 +54,50 @@ public static class VegetationGenerator
         return returnValues;
     }
 
-    public static int GetPrefabIndexFromLayerObjectSettings(LayerObjectSettings[] settings)
+    // public static int GetPrefabIndexFromLayerObjectSettings(LayerObjectSettings[] settings)
+    // {
+    // float totalDensity = 0f;
+    // for (int i = 0; i < settings.Length; i++)
+    // {
+    //     totalDensity += settings[i].density;
+    // }
+
+    // float rng = Random.Range(0f, totalDensity);
+    // for (int i = 0; i < settings.Length; i++)
+    // {
+    //     if (rng < settings[i].density + i)
+    //     {
+    //         return i;
+    //     }
+    //     i++;
+    // }
+
+    // return -1;
+    // }
+
+    public static int GetRandomWeightedIndex(float[] weights)
     {
-        float totalDensity = 0f;
-        for (int i = 0; i < settings.Length; i++)
+        if (weights == null || weights.Length == 0) return -1;
+
+        float w;
+        float total = 0f;
+        int i;
+        for (i = 0; i < weights.Length; i++)
         {
-            totalDensity += settings[i].density;
+            w = weights[i];
+            if (w >= 0f && !float.IsNaN(w)) total += weights[i];
         }
 
-        float rng = Random.Range(0f, totalDensity);
-        for (int i = 0; i < settings.Length; i++)
+        float r = Random.value;
+        float s = 0f;
+
+        for (i = 0; i < weights.Length; i++)
         {
-            if (rng < settings[i].density + i)
-            {
-                return i;
-            }
-            i++;
+            w = weights[i];
+            if (float.IsNaN(w) || w <= 0f) continue;
+
+            s += w / total;
+            if (s >= r) return i;
         }
 
         return -1;

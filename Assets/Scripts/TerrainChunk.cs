@@ -66,10 +66,10 @@ public class TerrainChunk
                     continue;
                 }
                 float rng = UnityEngine.Random.Range(0f, 1f);
-                // if (rng < 0.8)
-                // {
-                //     continue;
-                // }
+                if (rng < (1 - mapSettings.biomeSettings.textureSettings.layers[1].ObjectFrequency))
+                {
+                    continue;
+                }
 
                 UnityEngine.GameObject tree = UnityEngine.GameObject.Instantiate(
                     mapSettings.biomeSettings.textureSettings.layers[1].layerObjectSettings[vegetationValue.prefabIndex].treePrefab

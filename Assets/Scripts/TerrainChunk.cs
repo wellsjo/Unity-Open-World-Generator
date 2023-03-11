@@ -102,8 +102,8 @@ public class TerrainChunk
         }
 
         UnityEngine.GameObject tree = UnityEngine.GameObject.Instantiate(layer.layerObjectSettings[obj.prefabIndex].prefab);
-        tree.transform.position = obj.position;
         tree.transform.parent = terrainMesh.transform;
+        tree.transform.localPosition = obj.position;
     }
 }
 
@@ -177,6 +177,20 @@ public class DynamicTerrainChunk : TerrainChunk
         }, OnHeightMapReceived);
     }
 
+    public void SpawnPendingObjects()
+    {
+        if (vegetationLoaded)
+        {
+            return;
+        }
+        if (!vegetationMapReceived)
+        {
+            return;
+        }
+        LoadVegetationFromMap(vegetationMap);
+        vegetationLoaded = true;
+        vegetationMap = null;
+    }
 
     void OnHeightMapReceived(object heightMapObj)
     {
@@ -204,9 +218,9 @@ public class DynamicTerrainChunk : TerrainChunk
             LoadVegetationAsync();
             return;
         }
-        LoadVegetationFromMap(vegetationMap);
-        vegetationLoaded = true;
-        vegetationMap = null;
+        // LoadVegetationFromMap(vegetationMap);
+        // vegetationLoaded = true;
+        // vegetationMap = null;
     }
 
     public void LoadVegetationAsync()
@@ -220,7 +234,8 @@ public class DynamicTerrainChunk : TerrainChunk
             return VegetationGenerator.BuildVegetationMap(
                 mapSettings.biomeSettings.textureSettings.layers,
                 mapSettings.meshSettings.NumVertsPerLine,
-                vertices
+                vertices,
+                mapSettings.seed
             );
         }, OnVegetationMapReceived);
     }
@@ -247,7 +262,6 @@ public class DynamicTerrainChunk : TerrainChunk
             Debug.LogWarning("height map not received");
             return;
         }
-        Debug.Log("Update Terrain Chunk");
 
         if (lodMeshes[0].hasMesh && !vegetationLoaded)
         {

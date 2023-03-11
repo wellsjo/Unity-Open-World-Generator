@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: Map Settings
   m_EditorClassIdentifier: 
   autoUpdate: 1
-  seed: 0
+  seed: 1
   borderType: 1
   fixedSize: 1
   biomeSettings: {fileID: 11400000, guid: 1f6c52d6e42444845a55e8577424dd88, type: 2}
   meshSettings:
     meshScale: 1
     useFlatShading: 0
-    chunkSizeIndex: 3
+    chunkSizeIndex: 2
     flatshadedChunkSizeIndex: 0
   detailLevels:
   - lod: 0

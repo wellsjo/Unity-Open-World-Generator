@@ -99,23 +99,23 @@ public class TextureSettings
         return textureArray;
     }
 
-    [System.Serializable]
-    public class Layer
-    {
-        public Texture2D texture;
-        public Color tint;
-        [Range(0, 1)]
-        public float tintStrength;
-        [Range(0, 1)]
-        public float startHeight;
-        [Range(0, 1)]
-        public float blendStrength;
-        public float textureScale;
-        [Range(0, 1)]
-        public float ObjectFrequency;
-        public LayerObjectSettings[] layerObjectSettings;
-    }
+}
 
+[System.Serializable]
+public class Layer
+{
+    public Texture2D texture;
+    public Color tint;
+    [Range(0, 1)]
+    public float tintStrength;
+    [Range(0, 1)]
+    public float startHeight;
+    [Range(0, 1)]
+    public float blendStrength;
+    public float textureScale;
+    [Range(0, 1)]
+    public float ObjectFrequency;
+    public LayerObjectSettings[] layerObjectSettings;
 }
 
 // algorith to randomly place objects with weights assigned to each object that dictate how relatively common it is
@@ -125,5 +125,5 @@ public struct LayerObjectSettings
 {
     [Range(0, 1)]
     public float density;
-    public GameObject treePrefab;
+    public GameObject prefab;
 }

@@ -53,31 +53,57 @@ public class TerrainChunk
     }
     public void LoadVegetationFromMap(List<ObjectPlacement> vegetationMap)
     {
-        foreach (ObjectPlacement vegetationValue in vegetationMap)
+        foreach (ObjectPlacement objectPlacement in vegetationMap)
         {
-            Vector3 worldPos = terrainMesh.transform.TransformPoint(vegetationValue.position);
-            if (
-                worldPos.y > mapSettings.biomeSettings.textureSettings.layers[1].startHeight * mapSettings.biomeSettings.terrainSettings.heightMultiplier
-                && worldPos.y < mapSettings.biomeSettings.textureSettings.layers[2].startHeight * mapSettings.biomeSettings.terrainSettings.heightMultiplier
-                )
+            if (objectPlacement.prefabIndex == -1)
             {
-                if (vegetationValue.prefabIndex == -1)
-                {
-                    continue;
-                }
-                float rng = UnityEngine.Random.Range(0f, 1f);
-                if (rng < (1 - mapSettings.biomeSettings.textureSettings.layers[1].ObjectFrequency))
-                {
-                    continue;
-                }
-
-                UnityEngine.GameObject tree = UnityEngine.GameObject.Instantiate(
-                    mapSettings.biomeSettings.textureSettings.layers[1].layerObjectSettings[vegetationValue.prefabIndex].treePrefab
-                );
-                tree.transform.position = vegetationValue.position;
-                tree.transform.parent = terrainMesh.transform;
+                continue;
             }
+
+            Vector3 worldPos = terrainMesh.transform.TransformPoint(objectPlacement.position);
+
+            for (int i = 0; i < mapSettings.biomeSettings.textureSettings.layers.Length - 1; i++)
+            {
+                Layer layer = mapSettings.biomeSettings.textureSettings.layers[i];
+                Layer nextLayer = mapSettings.biomeSettings.textureSettings.layers[i + 1];
+
+                if (worldPos.y > layer.startHeight * mapSettings.biomeSettings.terrainSettings.heightMultiplier
+                    && worldPos.y < nextLayer.startHeight * mapSettings.biomeSettings.terrainSettings.heightMultiplier)
+                {
+                    SpawnObject(objectPlacement, layer);
+                }
+            }
+
+            Layer lastLayer = mapSettings.biomeSettings.textureSettings.layers[^1];
+            if (worldPos.y > lastLayer.startHeight * mapSettings.biomeSettings.terrainSettings.heightMultiplier)
+            {
+                SpawnObject(objectPlacement, lastLayer);
+            }
+
         }
+    }
+
+    private void SpawnObject(
+        ObjectPlacement obj,
+        Layer layer
+    )
+    {
+        if (obj.prefabIndex > layer.layerObjectSettings.Length - 1)
+        {
+            return;
+        }
+        if (obj.prefabIndex == -1)
+        {
+            return;
+        }
+        if (UnityEngine.Random.Range(0f, 1f) < (1 - layer.ObjectFrequency))
+        {
+            return;
+        }
+
+        UnityEngine.GameObject tree = UnityEngine.GameObject.Instantiate(layer.layerObjectSettings[obj.prefabIndex].prefab);
+        tree.transform.position = obj.position;
+        tree.transform.parent = terrainMesh.transform;
     }
 }
 
@@ -192,7 +218,7 @@ public class DynamicTerrainChunk : TerrainChunk
         ThreadedDataRequester.RequestData(() =>
         {
             return VegetationGenerator.BuildVegetationMap(
-                mapSettings.biomeSettings.textureSettings.layers[1].layerObjectSettings,
+                mapSettings.biomeSettings.textureSettings.layers,
                 mapSettings.meshSettings.NumVertsPerLine,
                 vertices
             );

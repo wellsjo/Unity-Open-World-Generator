@@ -6,9 +6,9 @@ public static class MeshGenerator
     public static MeshData GetTerrainChunkMesh(float[,] heightMap, MeshSettings meshSettings, int levelOfDetail)
     {
         int skipIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
-        int numVertsPerLine = meshSettings.numVertsPerLine;
+        int numVertsPerLine = meshSettings.NumVertsPerLine;
 
-        Vector2 topLeft = new Vector2(-1, 1) * meshSettings.meshWorldSize / 2f;
+        Vector2 topLeft = new Vector2(-1, 1) * meshSettings.MeshWorldSize / 2f;
 
         MeshData meshData = MeshData.Procedural(numVertsPerLine, skipIncrement, meshSettings.useFlatShading);
 
@@ -50,7 +50,7 @@ public static class MeshGenerator
 
                     int vertexIndex = vertexIndicesMap[x, y];
                     Vector2 percent = new Vector2(x - 1, y - 1) / (numVertsPerLine - 3);
-                    Vector2 vertexPosition2D = topLeft + new Vector2(percent.x, -percent.y) * meshSettings.meshWorldSize;
+                    Vector2 vertexPosition2D = topLeft + new Vector2(percent.x, -percent.y) * meshSettings.MeshWorldSize;
                     float height = heightMap[x, y];
 
                     if (isEdgeConnectionVertex)

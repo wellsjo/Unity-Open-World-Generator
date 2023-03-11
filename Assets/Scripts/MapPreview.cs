@@ -22,6 +22,8 @@ public class MapPreview : MonoBehaviour
     {
         this.Reset();
 
+        Random.InitState(mapSettings.seed);
+
         if (drawMode == Map.DrawMode.NoiseMap)
         {
             previewTexture.gameObject.SetActive(true);
@@ -29,11 +31,11 @@ public class MapPreview : MonoBehaviour
             int heightMapSize;
             if (mapSettings.borderType == Map.BorderType.Infinite)
             {
-                heightMapSize = mapSettings.meshSettings.numVertsPerLine;
+                heightMapSize = mapSettings.meshSettings.NumVertsPerLine;
             }
             else
             {
-                heightMapSize = mapSettings.meshSettings.numVertsPerLine * mapSettings.fixedSize;
+                heightMapSize = mapSettings.meshSettings.NumVertsPerLine * mapSettings.fixedSize;
             }
 
             HeightMapGenerator heightMapGenerator = new(
@@ -51,8 +53,8 @@ public class MapPreview : MonoBehaviour
         }
         else if (drawMode == Map.DrawMode.Terrain)
         {
-            mapSettings.textureSettings.ApplyToMaterial(terrainMaterial);
-            mapSettings.textureSettings.UpdateMeshHeights(terrainMaterial, mapSettings.MinHeight, mapSettings.MaxHeight);
+            mapSettings.biomeSettings.textureSettings.ApplyToMaterial(terrainMaterial);
+            mapSettings.biomeSettings.textureSettings.UpdateMeshHeights(terrainMaterial, mapSettings.MinHeight, mapSettings.MaxHeight);
             previewTerrain.SetActive(true);
 
             GeneratePreview(
@@ -73,17 +75,17 @@ public class MapPreview : MonoBehaviour
     {
         HeightMapGenerator terrainChunkHeightMapGenerator = new(
             mapSettings.biomeSettings.terrainSettings,
-            mapSettings.meshSettings.numVertsPerLine,
-            mapSettings.meshSettings.numVertsPerLine,
+            mapSettings.meshSettings.NumVertsPerLine,
+            mapSettings.meshSettings.NumVertsPerLine,
             mapSettings.seed
         );
 
         // Default to something reasonable for infinite view
         // TODO make this a map preview option
-        Vector2 range = new(-1, 1);
+        Vector2 range = new(0, 0);
         if (mapSettings.borderType == Map.BorderType.Fixed)
         {
-            range = mapSettings.range;
+            range = mapSettings.Range;
         }
 
         for (int x = (int)range.x; x <= range.y; x++)
@@ -105,7 +107,7 @@ public class MapPreview : MonoBehaviour
                     mapMaterial
                 );
 
-                Vector2 sampleCenter = chunkCoord * mapSettings.meshSettings.meshWorldSize / mapSettings.meshSettings.meshScale;
+                Vector2 sampleCenter = chunkCoord * mapSettings.meshSettings.MeshWorldSize / mapSettings.meshSettings.meshScale;
                 HeightMap heightMap = terrainChunkHeightMapGenerator.BuildHeightMap(sampleCenter);
 
                 newChunk.LoadFromHeightMap(heightMap);
@@ -116,18 +118,13 @@ public class MapPreview : MonoBehaviour
                     continue;
                 }
 
-                // Mesh mesh = newChunk.GetMesh();
-                // for (int i = 0; i < mesh.vertices.Length; i++)
-                // {
-                //     Vector3 worldPosVertex = mesh.vertices[i];
-                //     Vector3 worldPos = newChunk.gameObject.transform.TransformPoint(worldPosVertex);
-                //     if (Random.Range(0, 10) == 1)
-                //     {
-                //         GameObject tree = Instantiate(mapSettings.biomeSettings.vegetationSettings.treePrefab, worldPos, Quaternion.identity);
-                //         tree.transform.parent = terrainChunkObject.transform;
-                //         tree.transform.position = worldPos;
-                //     }
-                // }
+                List<ObjectPlacement> vegetationMap = VegetationGenerator.BuildVegetationMap(
+                    mapSettings.biomeSettings.textureSettings.layers,
+                    mapSettings.meshSettings.NumVertsPerLine,
+                    newChunk.meshFilter.sharedMesh.vertices
+                );
+
+                newChunk.LoadVegetationFromMap(vegetationMap);
             }
         }
 

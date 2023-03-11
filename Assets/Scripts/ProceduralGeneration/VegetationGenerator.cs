@@ -1,48 +1,105 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VegetationGenerator : NoiseGenerator
+public static class VegetationGenerator
 {
-    private readonly VegetationSettings vegetationSettings;
-    private readonly int width;
-    private readonly int height;
-    public VegetationGenerator(
-        VegetationSettings vegetationSettings,
-        int width,
-        int height,
-        int seed
-    ) : base(seed)
+    public static List<ObjectPlacement> BuildVegetationMap(
+        Layer[] layers,
+        int numVertsPerLine,
+        Vector3[] vertices
+    )
     {
-        this.vegetationSettings = vegetationSettings;
-        this.width = width;
-        this.height = height;
-    }
+        int levelOfDetail = 0;
+        int skipIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
 
-    public List<Vector3> BuildVegetationMap(Vector2 sampleCenter, float[,] heightMapValues)
-    {
-        float[,] values = this.Generate(
-            this.width,
-            this.height,
-            sampleCenter,
-            vegetationSettings.noiseSettings
-        );
+        List<ObjectPlacement> returnValues = new();
 
-        List<Vector3> returnValues = new();
-        for (int x = 0; x < width; x++)
+        int vertexIndex = 0;
+
+        for (int y = 0; y < numVertsPerLine; y++)
         {
-            for (int y = 0; y < height; y++)
+            for (int x = 0; x < numVertsPerLine; x++)
             {
-                float height = heightMapValues[x, y];
-                // Debug.LogFormat("Processing {0}, {1}", values[x, y], height);
-                if (values[x, y] > vegetationSettings.noiseThreshold
-                    && height > vegetationSettings.startHeight
-                    && height < vegetationSettings.endHeight)
+                bool isOutOfMeshVertex = y == 0 || y == numVertsPerLine - 1 || x == 0 || x == numVertsPerLine - 1;
+                bool isSkippedVertex = x > 2 && x < numVertsPerLine - 3 && y > 2 && y < numVertsPerLine - 3 && ((x - 2) % skipIncrement != 0 || (y - 2) % skipIncrement != 0);
+
+                if (isOutOfMeshVertex)
                 {
-                    returnValues.Add(new Vector3(x, heightMapValues[x, y], y));
+                    continue;
                 }
+                else if (isSkippedVertex)
+                {
+                    continue;
+                }
+                for (int i = 0; i < layers.Length; i++)
+                {
+                    LayerObjectSettings[] settings = layers[i].layerObjectSettings;
+                    if (settings.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    float[] weights = new float[settings.Length];
+                    for (int j = 0; j < settings.Length; j++)
+                    {
+                        weights[j] = settings[j].density;
+                    }
+
+                    returnValues.Add(
+                        new ObjectPlacement(
+                            vertices[vertexIndex],
+                            GetRandomWeightedIndex(weights)
+                        )
+                    );
+                }
+
+                vertexIndex++;
             }
         }
 
         return returnValues;
+    }
+
+    public static int GetRandomWeightedIndex(float[] weights)
+    {
+        if (weights == null || weights.Length == 0) return -1;
+
+        float w;
+        float total = 0f;
+        int i;
+        for (i = 0; i < weights.Length; i++)
+        {
+            w = weights[i];
+            if (w >= 0f && !float.IsNaN(w)) total += weights[i];
+        }
+
+        float r = Random.value;
+        float s = 0f;
+
+        for (i = 0; i < weights.Length; i++)
+        {
+            w = weights[i];
+            if (float.IsNaN(w) || w <= 0f) continue;
+
+            s += w / total;
+            if (s >= r) return i;
+        }
+
+        return -1;
+    }
+}
+
+// Algorithm which takes a list of LayerObjectSettings, and returns a prefab based on the density of each layer.
+public struct ObjectPlacement
+{
+    public Vector3 position;
+    // public int layerIndex;
+    public int prefabIndex;
+
+    public ObjectPlacement(Vector3 position, int prefabIndex)
+    {
+        this.position = position;
+        // this.layerIndex = layerIndex;
+        this.prefabIndex = prefabIndex;
     }
 }

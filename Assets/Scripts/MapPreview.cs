@@ -22,6 +22,8 @@ public class MapPreview : MonoBehaviour
     {
         this.Reset();
 
+        Random.InitState(mapSettings.seed);
+
         if (drawMode == Map.DrawMode.NoiseMap)
         {
             previewTexture.gameObject.SetActive(true);
@@ -29,11 +31,11 @@ public class MapPreview : MonoBehaviour
             int heightMapSize;
             if (mapSettings.borderType == Map.BorderType.Infinite)
             {
-                heightMapSize = mapSettings.meshSettings.numVertsPerLine;
+                heightMapSize = mapSettings.meshSettings.NumVertsPerLine;
             }
             else
             {
-                heightMapSize = mapSettings.meshSettings.numVertsPerLine * mapSettings.fixedSize;
+                heightMapSize = mapSettings.meshSettings.NumVertsPerLine * mapSettings.fixedSize;
             }
 
             HeightMapGenerator heightMapGenerator = new(
@@ -73,8 +75,8 @@ public class MapPreview : MonoBehaviour
     {
         HeightMapGenerator terrainChunkHeightMapGenerator = new(
             mapSettings.biomeSettings.terrainSettings,
-            mapSettings.meshSettings.numVertsPerLine,
-            mapSettings.meshSettings.numVertsPerLine,
+            mapSettings.meshSettings.NumVertsPerLine,
+            mapSettings.meshSettings.NumVertsPerLine,
             mapSettings.seed
         );
 
@@ -83,7 +85,7 @@ public class MapPreview : MonoBehaviour
         Vector2 range = new(0, 0);
         if (mapSettings.borderType == Map.BorderType.Fixed)
         {
-            range = mapSettings.range;
+            range = mapSettings.Range;
         }
 
         for (int x = (int)range.x; x <= range.y; x++)
@@ -105,7 +107,7 @@ public class MapPreview : MonoBehaviour
                     mapMaterial
                 );
 
-                Vector2 sampleCenter = chunkCoord * mapSettings.meshSettings.meshWorldSize / mapSettings.meshSettings.meshScale;
+                Vector2 sampleCenter = chunkCoord * mapSettings.meshSettings.MeshWorldSize / mapSettings.meshSettings.meshScale;
                 HeightMap heightMap = terrainChunkHeightMapGenerator.BuildHeightMap(sampleCenter);
 
                 newChunk.LoadFromHeightMap(heightMap);
@@ -118,7 +120,7 @@ public class MapPreview : MonoBehaviour
 
                 List<ObjectPlacement> vegetationMap = VegetationGenerator.BuildVegetationMap(
                     mapSettings.biomeSettings.textureSettings.layers[1].layerObjectSettings,
-                    mapSettings.meshSettings.numVertsPerLine,
+                    mapSettings.meshSettings.NumVertsPerLine,
                     newChunk.meshFilter.sharedMesh.vertices
                 );
 

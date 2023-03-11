@@ -1,6 +1,4 @@
 using UnityEngine;
-// using System.Linq;
-
 
 [CreateAssetMenu()]
 public class MapSettings : UpdatableData
@@ -17,7 +15,13 @@ public class MapSettings : UpdatableData
 
     public const int MaxFixedSize = 11;
 
-    public Vector2 range
+    public void Awake()
+    {
+        Debug.Log("Setting seed");
+        Random.InitState(seed);
+    }
+
+    public Vector2 Range
     {
         get
         {
@@ -86,7 +90,7 @@ public struct LODInfo
     public float visibleDstThreshold;
 
 
-    public float sqrVisibleDstThreshold
+    public float SqrVisibleDstThreshold
     {
         get
         {
@@ -114,7 +118,7 @@ public class MeshSettings
 
 
     // num verts per line of mesh rendered at LOD = 0. Includes the 2 extra verts that are excluded from final mesh, but used for calculating normals
-    public int numVertsPerLine
+    public int NumVertsPerLine
     {
         get
         {
@@ -123,11 +127,11 @@ public class MeshSettings
     }
 
     // Size of a terrain chunk
-    public float meshWorldSize
+    public float MeshWorldSize
     {
         get
         {
-            return (numVertsPerLine - 3) * meshScale;
+            return (NumVertsPerLine - 3) * meshScale;
         }
     }
 

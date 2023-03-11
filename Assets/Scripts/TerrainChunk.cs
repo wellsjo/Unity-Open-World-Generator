@@ -30,7 +30,7 @@ public class TerrainChunk
 
         // Get the game world coordinate of the chunk based on the chunk index,
         // then move the chunk there.
-        Vector2 position = chunkCoord * mapSettings.meshSettings.meshWorldSize;
+        Vector2 position = chunkCoord * mapSettings.meshSettings.MeshWorldSize;
         terrainMesh.transform.position = new Vector3(position.x, 0, position.y);
 
         SetVisible(false);
@@ -66,10 +66,10 @@ public class TerrainChunk
                     continue;
                 }
                 float rng = UnityEngine.Random.Range(0f, 1f);
-                if (rng < 0.8)
-                {
-                    continue;
-                }
+                // if (rng < 0.8)
+                // {
+                //     continue;
+                // }
 
                 UnityEngine.GameObject tree = UnityEngine.GameObject.Instantiate(
                     mapSettings.biomeSettings.textureSettings.layers[1].layerObjectSettings[vegetationValue.prefabIndex].treePrefab
@@ -119,8 +119,8 @@ public class DynamicTerrainChunk : TerrainChunk
         this.heightMapGenerator = heightMapGenerator;
 
         // position in 3d space
-        Vector2 position = coord * mapSettings.meshSettings.meshWorldSize;
-        bounds = new Bounds(position, Vector2.one * mapSettings.meshSettings.meshWorldSize);
+        Vector2 position = coord * mapSettings.meshSettings.MeshWorldSize;
+        bounds = new Bounds(position, Vector2.one * mapSettings.meshSettings.MeshWorldSize);
 
         meshCollider = meshObject.AddComponent<MeshCollider>();
 
@@ -137,7 +137,7 @@ public class DynamicTerrainChunk : TerrainChunk
         }
 
         maxViewDst = mapSettings.detailLevels[^1].visibleDstThreshold;
-        heightMapOffset = chunkCoord * mapSettings.meshSettings.meshWorldSize / mapSettings.meshSettings.meshScale;
+        heightMapOffset = chunkCoord * mapSettings.meshSettings.MeshWorldSize / mapSettings.meshSettings.meshScale;
     }
 
     // TerrainChunk loads a new height map with only the number of vertices per mesh, then requests mesh data for it.
@@ -187,13 +187,13 @@ public class DynamicTerrainChunk : TerrainChunk
     {
         Debug.Log("Loading Vegetation Async");
         // Center of the height map on the game world
-        Vector2 heightMapOffSet = chunkCoord * mapSettings.meshSettings.meshWorldSize / mapSettings.meshSettings.meshScale;
+        Vector2 heightMapOffSet = chunkCoord * mapSettings.meshSettings.MeshWorldSize / mapSettings.meshSettings.meshScale;
         Vector3[] vertices = lodMeshes[0].mesh.vertices;
         ThreadedDataRequester.RequestData(() =>
         {
             return VegetationGenerator.BuildVegetationMap(
                 mapSettings.biomeSettings.textureSettings.layers[1].layerObjectSettings,
-                mapSettings.meshSettings.numVertsPerLine,
+                mapSettings.meshSettings.NumVertsPerLine,
                 vertices
             );
         }, OnVegetationMapReceived);
@@ -288,7 +288,7 @@ public class DynamicTerrainChunk : TerrainChunk
         Vector2 viewerPosition = ViewerPosition();
         float sqrDstFromViewerToEdge = bounds.SqrDistance(viewerPosition);
 
-        if (sqrDstFromViewerToEdge < mapSettings.detailLevels[colliderLODIndex].sqrVisibleDstThreshold)
+        if (sqrDstFromViewerToEdge < mapSettings.detailLevels[colliderLODIndex].SqrVisibleDstThreshold)
         {
             if (!lodMeshes[colliderLODIndex].hasRequestedMesh)
             {

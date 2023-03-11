@@ -35,13 +35,13 @@ public class WorldBuilder : MonoBehaviour
         float maxViewDst = mapSettings.detailLevels[^1].visibleDstThreshold;
 
         // Calculate this once
-        meshWorldSize = mapSettings.meshSettings.meshWorldSize;
+        meshWorldSize = mapSettings.meshSettings.MeshWorldSize;
         chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / meshWorldSize);
 
         heightMapGenerator = new HeightMapGenerator(
             mapSettings.biomeSettings.terrainSettings,
-            mapSettings.meshSettings.numVertsPerLine,
-            mapSettings.meshSettings.numVertsPerLine,
+            mapSettings.meshSettings.NumVertsPerLine,
+            mapSettings.meshSettings.NumVertsPerLine,
             mapSettings.seed
         );
 
@@ -130,7 +130,7 @@ public class WorldBuilder : MonoBehaviour
     {
         if (mapSettings.borderType == Map.BorderType.Fixed)
         {
-            Vector2 range = mapSettings.range;
+            Vector2 range = mapSettings.Range;
             return (
                 chunkCoord.x >= range.x
                 && chunkCoord.x <= range.y

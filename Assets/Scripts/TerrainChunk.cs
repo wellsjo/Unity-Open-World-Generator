@@ -53,7 +53,6 @@ public class TerrainChunk
     }
     public void LoadVegetationFromMap(List<ObjectPlacement> vegetationMap)
     {
-        Debug.Log("Loading vegetation from map");
         foreach (ObjectPlacement objectPlacement in vegetationMap)
         {
             if (objectPlacement.prefabIndex == -1)

@@ -121,7 +121,8 @@ public class MapPreview : MonoBehaviour
                 List<ObjectPlacement> vegetationMap = VegetationGenerator.BuildVegetationMap(
                     mapSettings.biomeSettings.textureSettings.layers,
                     mapSettings.meshSettings.NumVertsPerLine,
-                    newChunk.meshFilter.sharedMesh.vertices
+                    newChunk.meshFilter.sharedMesh.vertices,
+                    mapSettings.seed
                 );
 
                 newChunk.LoadVegetationFromMap(vegetationMap);

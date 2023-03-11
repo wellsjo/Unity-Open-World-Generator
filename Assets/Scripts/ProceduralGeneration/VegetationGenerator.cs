@@ -6,11 +6,14 @@ public static class VegetationGenerator
     public static List<ObjectPlacement> BuildVegetationMap(
         Layer[] layers,
         int numVertsPerLine,
-        Vector3[] vertices
+        Vector3[] vertices,
+        int seed
     )
     {
+        // TODO fix object placement + LOD
         int levelOfDetail = 0;
         int skipIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
+        System.Random rng = new(seed);
 
         List<ObjectPlacement> returnValues = new();
 
@@ -48,7 +51,7 @@ public static class VegetationGenerator
                     returnValues.Add(
                         new ObjectPlacement(
                             vertices[vertexIndex],
-                            GetRandomWeightedIndex(weights)
+                            GetRandomWeightedIndex(weights, rng)
                         )
                     );
                 }
@@ -60,7 +63,7 @@ public static class VegetationGenerator
         return returnValues;
     }
 
-    public static int GetRandomWeightedIndex(float[] weights)
+    public static int GetRandomWeightedIndex(float[] weights, System.Random rng)
     {
         if (weights == null || weights.Length == 0) return -1;
 
@@ -73,7 +76,8 @@ public static class VegetationGenerator
             if (w >= 0f && !float.IsNaN(w)) total += weights[i];
         }
 
-        float r = Random.Range(0, 1f);
+        // Get number between 0 and 1
+        float r = (float)rng.Next(0, 100) / 100;
         float s = 0f;
 
         for (i = 0; i < weights.Length; i++)

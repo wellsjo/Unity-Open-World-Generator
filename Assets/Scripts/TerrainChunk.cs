@@ -51,21 +51,30 @@ public class TerrainChunk
         Mesh mesh = meshData.CreateMesh();
         meshFilter.sharedMesh = mesh;
     }
-    public void LoadVegetationFromMap(List<Vector3> vegetationMap)
+    public void LoadVegetationFromMap(List<ObjectPlacement> vegetationMap)
     {
-        foreach (Vector3 vegetationValue in vegetationMap)
+        foreach (ObjectPlacement vegetationValue in vegetationMap)
         {
-
-            Vector3 worldPos = terrainMesh.transform.TransformPoint(vegetationValue);
+            Vector3 worldPos = terrainMesh.transform.TransformPoint(vegetationValue.position);
             if (
-                worldPos.y > mapSettings.textureSettings.layers[1].startHeight * mapSettings.biomeSettings.terrainSettings.heightMultiplier
-                && worldPos.y < mapSettings.textureSettings.layers[2].startHeight * mapSettings.biomeSettings.terrainSettings.heightMultiplier
+                worldPos.y > mapSettings.biomeSettings.textureSettings.layers[1].startHeight * mapSettings.biomeSettings.terrainSettings.heightMultiplier
+                && worldPos.y < mapSettings.biomeSettings.textureSettings.layers[2].startHeight * mapSettings.biomeSettings.terrainSettings.heightMultiplier
                 )
             {
+                if (vegetationValue.prefabIndex == -1)
+                {
+                    continue;
+                }
+                float rng = UnityEngine.Random.Range(0f, 1f);
+                if (rng < 0.8)
+                {
+                    continue;
+                }
+
                 UnityEngine.GameObject tree = UnityEngine.GameObject.Instantiate(
-                    mapSettings.biomeSettings.vegetationSettings.treePrefab
+                    mapSettings.biomeSettings.textureSettings.layers[1].layerObjectSettings[vegetationValue.prefabIndex].treePrefab
                 );
-                tree.transform.position = vegetationValue;
+                tree.transform.position = vegetationValue.position;
                 tree.transform.parent = terrainMesh.transform;
             }
         }
@@ -90,9 +99,8 @@ public class DynamicTerrainChunk : TerrainChunk
     readonly int colliderLODIndex;
     bool hasSetCollider;
     private readonly HeightMapGenerator heightMapGenerator;
-    private readonly VegetationGenerator vegetationGenerator;
     public HeightMap heightMap;
-    private List<Vector3> vegetationMap;
+    private List<ObjectPlacement> vegetationMap;
     private bool vegetationLoaded = false;
 
     // A terrain chunk which updates its LOD based on the user's position.
@@ -103,14 +111,12 @@ public class DynamicTerrainChunk : TerrainChunk
         MapSettings mapSettings,
         int colliderLODIndex,
         Material material,
-        HeightMapGenerator heightMapGenerator,
-        VegetationGenerator vegetationGenerator
+        HeightMapGenerator heightMapGenerator
     ) : base(coord, meshObject, mapSettings, material)
     {
         this.viewer = viewer;
         this.colliderLODIndex = colliderLODIndex;
         this.heightMapGenerator = heightMapGenerator;
-        this.vegetationGenerator = vegetationGenerator;
 
         // position in 3d space
         Vector2 position = coord * mapSettings.meshSettings.meshWorldSize;
@@ -173,15 +179,6 @@ public class DynamicTerrainChunk : TerrainChunk
             return;
         }
         LoadVegetationFromMap(vegetationMap);
-        // foreach (Vector3 vegetationValue in vegetationMap)
-        // {
-        //     Debug.Log("Spawning Tree");
-        //     UnityEngine.GameObject tree = UnityEngine.GameObject.Instantiate(
-        //         mapSettings.biomeSettings.vegetationSettings.treePrefab
-        //     );
-        //     tree.transform.position = vegetationValue;
-        //     tree.transform.parent = terrainMesh.transform;
-        // }
         vegetationLoaded = true;
         vegetationMap = null;
     }
@@ -194,8 +191,8 @@ public class DynamicTerrainChunk : TerrainChunk
         Vector3[] vertices = lodMeshes[0].mesh.vertices;
         ThreadedDataRequester.RequestData(() =>
         {
-            return vegetationGenerator.BuildVegetationMap(
-                heightMapOffSet,
+            return VegetationGenerator.BuildVegetationMap(
+                mapSettings.biomeSettings.textureSettings.layers[1].layerObjectSettings,
                 mapSettings.meshSettings.numVertsPerLine,
                 vertices
             );
@@ -209,9 +206,9 @@ public class DynamicTerrainChunk : TerrainChunk
             return;
         }
 
-        List<Vector3> vMap = (List<Vector3>)vegetationMapObj;
+        List<ObjectPlacement> vMap = (List<ObjectPlacement>)vegetationMapObj;
         Debug.LogFormat("Vegetation Map Received {0}", vMap.Count);
-        this.vegetationMap = vegetationMap;
+        this.vegetationMap = vMap;
         vegetationMapReceived = true;
     }
 

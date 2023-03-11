@@ -51,8 +51,8 @@ public class MapPreview : MonoBehaviour
         }
         else if (drawMode == Map.DrawMode.Terrain)
         {
-            mapSettings.textureSettings.ApplyToMaterial(terrainMaterial);
-            mapSettings.textureSettings.UpdateMeshHeights(terrainMaterial, mapSettings.MinHeight, mapSettings.MaxHeight);
+            mapSettings.biomeSettings.textureSettings.ApplyToMaterial(terrainMaterial);
+            mapSettings.biomeSettings.textureSettings.UpdateMeshHeights(terrainMaterial, mapSettings.MinHeight, mapSettings.MaxHeight);
             previewTerrain.SetActive(true);
 
             GeneratePreview(
@@ -116,38 +116,13 @@ public class MapPreview : MonoBehaviour
                     continue;
                 }
 
-                // List<Vector3> treePositions = new();
-                VegetationGenerator vegetationGenerator = new(
-                    mapSettings.biomeSettings.vegetationSettings,
+                List<ObjectPlacement> vegetationMap = VegetationGenerator.BuildVegetationMap(
+                    mapSettings.biomeSettings.textureSettings.layers[1].layerObjectSettings,
                     mapSettings.meshSettings.numVertsPerLine,
-                    mapSettings.meshSettings.numVertsPerLine,
-                    mapSettings.seed
+                    newChunk.meshFilter.sharedMesh.vertices
                 );
 
-                List<Vector3> vegetationMap = vegetationGenerator.BuildVegetationMap(sampleCenter, mapSettings.meshSettings.numVertsPerLine, newChunk.meshFilter.sharedMesh.vertices);
                 newChunk.LoadVegetationFromMap(vegetationMap);
-
-                // foreach (Vector3 vegetationValue in vegetationMap)
-                // {
-                //     Debug.Log("Spawning Tree");
-                //     UnityEngine.GameObject tree = UnityEngine.GameObject.Instantiate(
-                //         mapSettings.biomeSettings.vegetationSettings.treePrefab
-                //     );
-                //     tree.transform.position = vegetationValue;
-                //     tree.transform.parent = terrainChunkObject.transform;
-                // }
-
-                // for (int i = 0; i < mesh.vertices.Length; i++)
-                // {
-                //     Vector3 worldPosVertex = mesh.vertices[i];
-                //     Vector3 worldPos = newChunk.gameObject.transform.TransformPoint(worldPosVertex);
-                //     if (Random.Range(0, 10) == 1)
-                //     {
-                //         GameObject tree = Instantiate(mapSettings.biomeSettings.vegetationSettings.treePrefab, worldPos, Quaternion.identity);
-                //         tree.transform.parent = terrainChunkObject.transform;
-                //         tree.transform.position = worldPos;
-                //     }
-                // }
             }
         }
 

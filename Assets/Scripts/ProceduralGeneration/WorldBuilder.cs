@@ -21,12 +21,12 @@ public class WorldBuilder : MonoBehaviour
     readonly Dictionary<Vector2, DynamicTerrainChunk> terrainChunkDictionary = new();
     readonly List<DynamicTerrainChunk> visibleTerrainChunks = new();
     HeightMapGenerator heightMapGenerator;
-    VegetationGenerator vegetationGenerator;
+    // VegetationGenerator vegetationGenerator;
 
     void Start()
     {
-        mapSettings.textureSettings.ApplyToMaterial(mapMaterial);
-        mapSettings.textureSettings.UpdateMeshHeights(
+        mapSettings.biomeSettings.textureSettings.ApplyToMaterial(mapMaterial);
+        mapSettings.biomeSettings.textureSettings.UpdateMeshHeights(
             mapMaterial,
             mapSettings.MinHeight,
             mapSettings.MaxHeight
@@ -40,13 +40,6 @@ public class WorldBuilder : MonoBehaviour
 
         heightMapGenerator = new HeightMapGenerator(
             mapSettings.biomeSettings.terrainSettings,
-            mapSettings.meshSettings.numVertsPerLine,
-            mapSettings.meshSettings.numVertsPerLine,
-            mapSettings.seed
-        );
-
-        vegetationGenerator = new VegetationGenerator(
-            mapSettings.biomeSettings.vegetationSettings,
             mapSettings.meshSettings.numVertsPerLine,
             mapSettings.meshSettings.numVertsPerLine,
             mapSettings.seed
@@ -120,8 +113,7 @@ public class WorldBuilder : MonoBehaviour
                             mapSettings,
                             colliderLODIndex,
                             mapMaterial,
-                            heightMapGenerator,
-                            vegetationGenerator
+                            heightMapGenerator
                         );
 
                         terrainChunkDictionary.Add(viewedChunkCoord, newChunk);

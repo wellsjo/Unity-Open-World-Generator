@@ -1,36 +1,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VegetationGenerator : NoiseGenerator
+public static class VegetationGenerator
 {
-    private readonly VegetationSettings vegetationSettings;
-    private readonly int width;
-    private readonly int height;
-    public VegetationGenerator(
-        VegetationSettings vegetationSettings,
-        int width,
-        int height,
-        int seed
-    ) : base(seed)
+    public static List<ObjectPlacement> BuildVegetationMap(
+        LayerObjectSettings[] settings,
+        int numVertsPerLine,
+        Vector3[] vertices
+    )
     {
-        this.vegetationSettings = vegetationSettings;
-        this.width = width;
-        this.height = height;
-    }
-
-    public List<Vector3> BuildVegetationMap(Vector2 sampleCenter, int numVertsPerLine, Vector3[] vertices)
-    {
-        float[,] values = this.Generate(
-            vertices.Length,
-            vertices.Length,
-            sampleCenter,
-            vegetationSettings.noiseSettings
-        );
-        Debug.LogFormat("BuildVegetationMap {0} {1} {2}", vertices.Length, numVertsPerLine, numVertsPerLine * numVertsPerLine);
-
         int levelOfDetail = 0;
         int skipIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
-        List<Vector3> returnValues = new();
+
+        List<ObjectPlacement> returnValues = new();
+
         int vertexIndex = 0;
 
         for (int y = 0; y < numVertsPerLine; y++)
@@ -48,28 +31,55 @@ public class VegetationGenerator : NoiseGenerator
                 {
                     continue;
                 }
+                int index = GetPrefabIndexFromLayerObjectSettings(settings);
 
-                if (Random.Range(0, 10) > 7)
-                {
-                    returnValues.Add(vertices[vertexIndex]);
-                }
+                returnValues.Add(
+                    new ObjectPlacement(
+                        vertices[vertexIndex],
+                        index
+                    )
+                );
 
                 vertexIndex++;
             }
         }
 
-        Debug.LogFormat("Vegetation Vertices {0} {1}", vertexIndex, returnValues.Count);
-
         return returnValues;
+    }
 
-        // for (int i = 0; i < vertices.Length; i++)
-        // {
-        //     Vector3 vertex = vertices[vertexIndex];
+    public static int GetPrefabIndexFromLayerObjectSettings(LayerObjectSettings[] settings)
+    {
+        float totalDensity = 0f;
+        for (int i = 0; i < settings.Length; i++)
+        {
+            totalDensity += settings[i].density;
+        }
 
-        // Vector3 worldPos = newChunk.gameObject.transform.TransformPoint(vertex);
-        // GameObject tree = Instantiate(mapSettings.biomeSettings.vegetationSettings.treePrefab, worldPos, Quaternion.identity);
-        // Vector3 worldPosVertex = terrainMesh.vertices[i];
-        // tree.transform.parent = terrainChunkObject.transform;
-        // tree.transform.position = worldPos;
+        float rng = Random.Range(0f, totalDensity);
+        for (int i = 0; i < settings.Length; i++)
+        {
+            if (rng < settings[i].density + i)
+            {
+                return i;
+            }
+            i++;
+        }
+
+        return -1;
+    }
+}
+
+// Algorithm which takes a list of LayerObjectSettings, and returns a prefab based on the density of each layer.
+public struct ObjectPlacement
+{
+    public Vector3 position;
+    // public int layerIndex;
+    public int prefabIndex;
+
+    public ObjectPlacement(Vector3 position, int prefabIndex)
+    {
+        this.position = position;
+        // this.layerIndex = layerIndex;
+        this.prefabIndex = prefabIndex;
     }
 }

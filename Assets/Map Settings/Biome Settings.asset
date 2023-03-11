@@ -45,14 +45,32 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
     heightMultiplier: 50
-  vegetationSettings:
-    noiseSettings:
-      startingOffset: {x: 0, y: 0}
-      persistance: 0.6
-      octaves: 6
-      scale: 20
-      lacunarity: 2
-    noiseThreshold: 0.5
-    startHeight: 0
-    endHeight: 1000
-    treePrefab: {fileID: 7309463327552452509, guid: de691dfc4f267f7428befc75c109cb1c, type: 3}
+  textureSettings:
+    layers:
+    - texture: {fileID: 2800000, guid: aa701e5be2dbcd24aad4fb9c3ca284da, type: 3}
+      tint: {r: 0, g: 0.24035579, b: 0.8773585, a: 0}
+      tintStrength: 0
+      startHeight: 0
+      blendStrength: 0
+      textureScale: 0
+      layerObjectSettings: []
+    - texture: {fileID: 2800000, guid: 59b577b39270af04abdc731059ae1a2b, type: 3}
+      tint: {r: 0, g: 0.4811321, b: 0.009710272, a: 0}
+      tintStrength: 0
+      startHeight: 0.044
+      blendStrength: 0
+      textureScale: 0
+      layerObjectSettings:
+      - density: 0.09
+        treePrefab: {fileID: 4556671804527212049, guid: 87e99ddde9cc8c44080a2694da58c315, type: 3}
+      - density: 0.201
+        treePrefab: {fileID: 6701854341644293351, guid: 769aa2481766ca449b46e1aae467e749, type: 3}
+    - texture: {fileID: 2800000, guid: a87cbf62329d56d4681d92302095915c, type: 3}
+      tint: {r: 0.3490566, g: 0.19633858, b: 0.0049394714, a: 0}
+      tintStrength: 0
+      startHeight: 0.255
+      blendStrength: 0
+      textureScale: 0
+      layerObjectSettings:
+      - density: 0
+        treePrefab: {fileID: 0}

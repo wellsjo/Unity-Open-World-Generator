@@ -73,7 +73,7 @@ public static class VegetationGenerator
             if (w >= 0f && !float.IsNaN(w)) total += weights[i];
         }
 
-        float r = Random.value;
+        float r = Random.Range(0, 1f);
         float s = 0f;
 
         for (i = 0; i < weights.Length; i++)

@@ -118,14 +118,14 @@ public class MapPreview : MonoBehaviour
                     continue;
                 }
 
-                List<ObjectPlacement> vegetationMap = VegetationGenerator.BuildVegetationMap(
+                List<ObjectPlacement> objectPlacements = ObjectMapper.BuildObjectMap(
                     mapSettings.biomeSettings.textureSettings.layers,
                     mapSettings.meshSettings.NumVertsPerLine,
                     newChunk.meshFilter.sharedMesh.vertices,
                     mapSettings.seed
                 );
 
-                newChunk.LoadVegetationFromMap(vegetationMap);
+                newChunk.PlaceObjects(objectPlacements);
             }
         }
 

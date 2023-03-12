@@ -16,7 +16,7 @@ MonoBehaviour:
   terrainSettings:
     noiseSettings:
       startingOffset: {x: 0, y: 0}
-      persistance: 0.5
+      persistance: 0.3
       octaves: 6
       scale: 30
       lacunarity: 2
@@ -61,7 +61,7 @@ MonoBehaviour:
       startHeight: 0.044
       blendStrength: 0
       textureScale: 0
-      ObjectFrequency: 0.172
+      ObjectFrequency: 0.03
       layerObjectSettings:
       - density: 0.292
         prefab: {fileID: 1528435694271650569, guid: 1bf94060ef0e0a949aac362e611da1b2, type: 3}
@@ -79,9 +79,9 @@ MonoBehaviour:
       textureScale: 0
       ObjectFrequency: 0.175
       layerObjectSettings:
-      - density: 0.3
+      - density: 0.75
         prefab: {fileID: 5800906375986613077, guid: ae95750e4caabeb47993e78d5c6ba9f4, type: 3}
-      - density: 0.346
+      - density: 0.79
         prefab: {fileID: 470123331780626262, guid: a5b864fe7ab693b4ebbfb3e1502aac7e, type: 3}
-      - density: 0.385
+      - density: 0.22
         prefab: {fileID: 6659427257207180123, guid: dfe81af08cc57394489d52c5ab1a3316, type: 3}

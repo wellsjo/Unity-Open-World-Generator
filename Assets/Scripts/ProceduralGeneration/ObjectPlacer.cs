@@ -116,9 +116,6 @@ public class ObjectPlacer
 
     public void LoadAsync(Vector3[] vertices)
     {
-        Debug.Log("Loading Vegetation Async");
-        // Center of the height map on the game world
-        // Vector3[] vertices = lodMeshes[0].mesh.vertices;
         ThreadedDataRequester.RequestData(() =>
         {
             return ObjectMapper.BuildObjectMap(
@@ -138,8 +135,6 @@ public class ObjectPlacer
             return;
         }
 
-        Debug.Log("Onload");
-
         List<ObjectPlacement> objectPlacements = (List<ObjectPlacement>)objectPlacementsList;
         Debug.LogFormat("Vegetation Map Received {0}", objectPlacements.Count);
         this.objectPlacements = objectPlacements;
@@ -147,7 +142,6 @@ public class ObjectPlacer
 
     public void PlaceObjects(List<ObjectPlacement> objectPlacements)
     {
-        Debug.Log("PlaceObjects");
         foreach (ObjectPlacement objectPlacement in objectPlacements)
         {
             if (objectPlacement.prefabIndex == -1)

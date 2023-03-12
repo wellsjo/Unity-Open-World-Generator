@@ -187,15 +187,9 @@ public class DynamicTerrainChunk : TerrainChunk
                 }
             }
 
-            LODMesh lodMesh = lodMeshes[lodIndex];
-            if (lodMesh.hasMesh)
-            {
-                objectPlacer.CheckAndLoadObjectData(lodMesh.mesh.vertices);
-            }
-
             if (lodIndex != previousLODIndex)
             {
-
+                LODMesh lodMesh = lodMeshes[lodIndex];
                 if (lodMesh.hasMesh)
                 {
                     previousLODIndex = lodIndex;
@@ -240,6 +234,15 @@ public class DynamicTerrainChunk : TerrainChunk
                 meshCollider.sharedMesh = lodMeshes[colliderLODIndex].mesh;
                 hasSetCollider = true;
             }
+        }
+    }
+
+    public void UpdateObjects()
+    {
+        LODMesh lodMesh = lodMeshes[0];
+        if (lodMesh.hasMesh)
+        {
+            objectPlacer.CheckAndLoadObjectData(lodMesh.mesh.vertices);
         }
     }
 

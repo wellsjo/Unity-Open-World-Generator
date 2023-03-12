@@ -50,7 +50,6 @@ public static class ObjectMapper
                         weights[j] = settings[j].density;
                     }
 
-                    Debug.LogFormat("vertices son {0} {1}", vertices.Length, vertexIndex);
                     returnValues.Add(
                         new ObjectPlacement(
                             vertices[vertexIndex],
@@ -99,22 +98,20 @@ public class ObjectPlacer
 
     public void CheckAndLoadObjectData(Vector3[] vertices)
     {
-        if (done || objectsRequested)
+        if (done)
         {
             return;
         }
         if (!objectsRequested)
         {
-            LoadAsync(vertices);
+            Debug.Log("loading async");
             objectsRequested = true;
-            return;
-        }
-        if (objectPlacements == null)
-        {
+            LoadAsync(vertices);
             return;
         }
         PlaceObjects(objectPlacements);
         objectPlacements = null;
+        done = true;
     }
 
     public void LoadAsync(Vector3[] vertices)
@@ -150,6 +147,7 @@ public class ObjectPlacer
 
     public void PlaceObjects(List<ObjectPlacement> objectPlacements)
     {
+        Debug.Log("PlaceObjects");
         foreach (ObjectPlacement objectPlacement in objectPlacements)
         {
             if (objectPlacement.prefabIndex == -1)

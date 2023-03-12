@@ -56,8 +56,7 @@ public class WorldBuilder : MonoBehaviour
 
         foreach (DynamicTerrainChunk chunk in visibleTerrainChunks)
         {
-            // chunk.UpdateObjects();
-
+            chunk.UpdateObjects();
             if (viewerPosition != viewerPositionOld)
             {
                 chunk.UpdateCollisionMesh();

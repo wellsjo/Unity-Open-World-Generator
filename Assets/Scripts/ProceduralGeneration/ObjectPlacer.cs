@@ -189,9 +189,14 @@ public class ObjectPlacer
             return;
         }
 
-        UnityEngine.GameObject tree = UnityEngine.GameObject.Instantiate(layer.layerObjectSettings[obj.prefabIndex].prefab);
-        tree.transform.parent = terrainMesh.transform;
-        tree.transform.localPosition = obj.position;
+
+        var randomRotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
+        UnityEngine.GameObject gameObject = UnityEngine.GameObject.Instantiate(
+            layer.layerObjectSettings[obj.prefabIndex].prefab
+        );
+        gameObject.transform.parent = terrainMesh.transform;
+        gameObject.transform.localPosition = obj.position;
+        gameObject.transform.rotation = randomRotation;
     }
 }
 

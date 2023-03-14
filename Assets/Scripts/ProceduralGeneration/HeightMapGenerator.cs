@@ -6,11 +6,11 @@ using UnityEngine;
 // Used by WorldBuilder to generate height maps for terrain chunks.
 public class HeightMapGenerator : NoiseGenerator
 {
-    public HeightMapSettings settings;
+    public TerrainSettings settings;
     readonly int width;
     readonly int height;
     public HeightMapGenerator(
-        HeightMapSettings settings,
+        TerrainSettings settings,
         int width,
         int height,
         int seed

@@ -70,7 +70,7 @@ public static class ObjectMapper
 public class ObjectPlacer
 {
     private readonly GameObject terrainMesh;
-    private readonly TextureSettings textureSettings;
+    private readonly LayerSettings textureSettings;
     private readonly float heightMultiplier;
     private readonly Vector2 heightMapOffSet;
     private readonly int numVertsPerLine;
@@ -82,7 +82,7 @@ public class ObjectPlacer
     public ObjectPlacer(
         GameObject terrainMesh,
         Vector2 heightMapOffSet,
-        TextureSettings textureSettings,
+        LayerSettings textureSettings,
         float heightMultiplier,
         int numVertsPerLine,
         int seed

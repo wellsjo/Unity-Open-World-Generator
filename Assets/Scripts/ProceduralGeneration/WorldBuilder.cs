@@ -25,8 +25,8 @@ public class WorldBuilder : MonoBehaviour
 
     void Start()
     {
-        mapSettings.biomeSettings.textureSettings.ApplyToMaterial(mapMaterial);
-        mapSettings.biomeSettings.textureSettings.UpdateMeshHeights(
+        mapSettings.biomeSettings.layerSettings.ApplyToMaterial(mapMaterial);
+        mapSettings.biomeSettings.layerSettings.UpdateMeshHeights(
             mapMaterial,
             mapSettings.MinHeight,
             mapSettings.MaxHeight

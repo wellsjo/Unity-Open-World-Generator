@@ -4,8 +4,8 @@ using System.Linq;
 [CreateAssetMenu()]
 public class BiomeSettings : UpdatableData
 {
-    public HeightMapSettings terrainSettings;
-    public TextureSettings textureSettings;
+    public TerrainSettings terrainSettings;
+    public LayerSettings layerSettings;
 
 #if UNITY_EDITOR
     protected override void OnValidate()
@@ -18,7 +18,7 @@ public class BiomeSettings : UpdatableData
 }
 
 [System.Serializable]
-public struct HeightMapSettings
+public struct TerrainSettings
 {
     public NoiseSettings noiseSettings;
     public AnimationCurve heightCurve;
@@ -54,12 +54,14 @@ public struct HeightMapSettings
 }
 
 [System.Serializable()]
-public class TextureSettings
+public class LayerSettings
 {
 
     const int textureSize = 512;
     const TextureFormat textureFormat = TextureFormat.RGB565;
 
+    // Water plane will be applied to the start height of the second layer
+    public GameObject waterPlane;
     public Layer[] layers;
 
     float savedMinHeight;
@@ -86,6 +88,14 @@ public class TextureSettings
 
         material.SetFloat("minHeight", minHeight);
         material.SetFloat("maxHeight", maxHeight);
+    }
+
+    public Vector3 WaterPlanePosition
+    {
+        get
+        {
+            return new Vector3(0, layers[1].startHeight, 0);
+        }
     }
 
     Texture2DArray GenerateTextureArray(Texture2D[] textures)
@@ -115,6 +125,7 @@ public class Layer
     public float textureScale;
     [Range(0, 1)]
     public float ObjectFrequency;
+    // List of prefabs and settings to spawn
     public LayerObjectSettings[] layerObjectSettings;
 }
 

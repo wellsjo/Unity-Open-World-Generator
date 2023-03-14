@@ -53,8 +53,8 @@ public class MapPreview : MonoBehaviour
         }
         else if (drawMode == Map.DrawMode.Terrain)
         {
-            mapSettings.biomeSettings.textureSettings.ApplyToMaterial(terrainMaterial);
-            mapSettings.biomeSettings.textureSettings.UpdateMeshHeights(terrainMaterial, mapSettings.MinHeight, mapSettings.MaxHeight);
+            mapSettings.biomeSettings.layerSettings.ApplyToMaterial(terrainMaterial);
+            mapSettings.biomeSettings.layerSettings.UpdateMeshHeights(terrainMaterial, mapSettings.MinHeight, mapSettings.MaxHeight);
             previewTerrain.SetActive(true);
 
             GeneratePreview(
@@ -119,7 +119,7 @@ public class MapPreview : MonoBehaviour
                 }
 
                 List<ObjectPlacement> objectPlacements = ObjectMapper.BuildObjectMap(
-                    mapSettings.biomeSettings.textureSettings.layers,
+                    mapSettings.biomeSettings.layerSettings.layers,
                     mapSettings.meshSettings.NumVertsPerLine,
                     newChunk.meshFilter.sharedMesh.vertices,
                     mapSettings.seed

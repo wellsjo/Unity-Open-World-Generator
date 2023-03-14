@@ -19,7 +19,7 @@ MonoBehaviour:
       persistance: 0.3
       octaves: 6
       scale: 30
-      lacunarity: 2
+      lacunarity: 1.5
     heightCurve:
       serializedVersion: 2
       m_Curve:
@@ -45,10 +45,11 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 4
     heightMultiplier: 30
-  textureSettings:
+  layerSettings:
+    waterPlane: {fileID: 3994922243036381878, guid: 3447961027a93fe4a9e1e1e61716fe1f, type: 3}
     layers:
     - texture: {fileID: 2800000, guid: aa701e5be2dbcd24aad4fb9c3ca284da, type: 3}
-      tint: {r: 0, g: 0.24035579, b: 0.8773585, a: 0}
+      tint: {r: 0, g: 0.071395345, b: 0.6132076, a: 0}
       tintStrength: 0
       startHeight: 0
       blendStrength: 0
@@ -56,32 +57,10 @@ MonoBehaviour:
       ObjectFrequency: 0
       layerObjectSettings: []
     - texture: {fileID: 2800000, guid: 59b577b39270af04abdc731059ae1a2b, type: 3}
-      tint: {r: 0, g: 0.4811321, b: 0.009710272, a: 0}
+      tint: {r: 0, g: 0.7169812, b: 0.021734716, a: 0}
       tintStrength: 0
-      startHeight: 0.044
+      startHeight: 0.063
       blendStrength: 0
       textureScale: 0
-      ObjectFrequency: 0.03
-      layerObjectSettings:
-      - density: 0.292
-        prefab: {fileID: 1528435694271650569, guid: 1bf94060ef0e0a949aac362e611da1b2, type: 3}
-      - density: 0.227
-        prefab: {fileID: 1847765470402659035, guid: e18d5a2b5ddeb1d47bf52e683cce67ef, type: 3}
-      - density: 0.393
-        prefab: {fileID: 2647866159854764944, guid: ec825ab1403985c499b6da0199d9ee2d, type: 3}
-      - density: 0.153
-        prefab: {fileID: 3583069345518350204, guid: a347c0dbf64bdc24b987537568e83eb0, type: 3}
-    - texture: {fileID: 2800000, guid: a87cbf62329d56d4681d92302095915c, type: 3}
-      tint: {r: 0.3490566, g: 0.19633858, b: 0.0049394714, a: 0}
-      tintStrength: 0
-      startHeight: 0.255
-      blendStrength: 0.197
-      textureScale: 0
-      ObjectFrequency: 0.175
-      layerObjectSettings:
-      - density: 0.75
-        prefab: {fileID: 5800906375986613077, guid: ae95750e4caabeb47993e78d5c6ba9f4, type: 3}
-      - density: 0.79
-        prefab: {fileID: 470123331780626262, guid: a5b864fe7ab693b4ebbfb3e1502aac7e, type: 3}
-      - density: 0.22
-        prefab: {fileID: 6659427257207180123, guid: dfe81af08cc57394489d52c5ab1a3316, type: 3}
+      ObjectFrequency: 0
+      layerObjectSettings: []

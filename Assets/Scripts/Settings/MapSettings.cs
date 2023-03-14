@@ -17,7 +17,6 @@ public class MapSettings : UpdatableData
 
     public void Awake()
     {
-        Debug.Log("Setting seed");
         Random.InitState(seed);
     }
 

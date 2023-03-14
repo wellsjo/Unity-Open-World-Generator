@@ -38,12 +38,13 @@ public class TerrainChunk
         this.objectPlacer = new ObjectPlacer(
             terrainMesh,
             heightMapOffSet,
-            mapSettings.biomeSettings.textureSettings,
+            mapSettings.biomeSettings.layerSettings,
             mapSettings.biomeSettings.terrainSettings.heightMultiplier,
             mapSettings.meshSettings.NumVertsPerLine,
             mapSettings.seed
         );
 
+        ApplyWater();
         SetVisible(false);
     }
 
@@ -66,6 +67,17 @@ public class TerrainChunk
     public void PlaceObjects(List<ObjectPlacement> objectPlacements)
     {
         this.objectPlacer.PlaceObjects(objectPlacements);
+    }
+
+    public void ApplyWater()
+    {
+        if (mapSettings.biomeSettings.layerSettings.waterPlane == null)
+        {
+            return;
+        }
+        UnityEngine.GameObject waterPlane = UnityEngine.GameObject.Instantiate(mapSettings.biomeSettings.layerSettings.waterPlane);
+        waterPlane.transform.parent = terrainMesh.transform;
+        waterPlane.transform.localPosition = mapSettings.biomeSettings.layerSettings.WaterPlanePosition * mapSettings.biomeSettings.terrainSettings.heightMultiplier;
     }
 }
 

@@ -38,8 +38,8 @@ public class TerrainChunk
         this.objectPlacer = new ObjectPlacer(
             terrainMesh,
             heightMapOffSet,
-            mapSettings.biomeSettings.layerSettings,
-            mapSettings.biomeSettings.terrainSettings.heightMultiplier,
+            mapSettings.terrainSettings.layerSettings,
+            mapSettings.terrainSettings.heightMultiplier,
             mapSettings.meshSettings.NumVertsPerLine,
             mapSettings.seed
         );
@@ -71,13 +71,13 @@ public class TerrainChunk
 
     public void ApplyWater()
     {
-        if (mapSettings.biomeSettings.layerSettings.waterPlane == null)
+        if (mapSettings.terrainSettings.layerSettings.waterPlane == null)
         {
             return;
         }
-        UnityEngine.GameObject waterPlane = UnityEngine.GameObject.Instantiate(mapSettings.biomeSettings.layerSettings.waterPlane);
+        UnityEngine.GameObject waterPlane = UnityEngine.GameObject.Instantiate(mapSettings.terrainSettings.layerSettings.waterPlane);
         waterPlane.transform.parent = terrainMesh.transform;
-        waterPlane.transform.localPosition = mapSettings.biomeSettings.layerSettings.WaterPlanePosition * mapSettings.biomeSettings.terrainSettings.heightMultiplier;
+        waterPlane.transform.localPosition = mapSettings.terrainSettings.layerSettings.WaterPlanePosition * mapSettings.terrainSettings.heightMultiplier;
     }
 }
 
@@ -95,12 +95,10 @@ public class DynamicTerrainChunk : TerrainChunk
     readonly MeshCollider meshCollider;
     readonly LODMesh[] lodMeshes;
     bool heightMapReceived;
-    bool vegetationMapReceived;
     readonly int colliderLODIndex;
     bool hasSetCollider;
     private readonly HeightMapGenerator heightMapGenerator;
     public HeightMap heightMap;
-    private bool vegetationLoaded = false;
 
     // A terrain chunk which updates its LOD based on the user's position.
     public DynamicTerrainChunk(

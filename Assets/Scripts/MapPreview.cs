@@ -39,7 +39,7 @@ public class MapPreview : MonoBehaviour
             }
 
             HeightMapGenerator heightMapGenerator = new(
-                mapSettings.biomeSettings.terrainSettings,
+                mapSettings.terrainSettings,
                 heightMapSize,
                 heightMapSize,
                 mapSettings.seed
@@ -53,8 +53,8 @@ public class MapPreview : MonoBehaviour
         }
         else if (drawMode == Map.DrawMode.Terrain)
         {
-            mapSettings.biomeSettings.layerSettings.ApplyToMaterial(terrainMaterial);
-            mapSettings.biomeSettings.layerSettings.UpdateMeshHeights(terrainMaterial, mapSettings.MinHeight, mapSettings.MaxHeight);
+            mapSettings.terrainSettings.layerSettings.ApplyToMaterial(terrainMaterial);
+            mapSettings.terrainSettings.layerSettings.UpdateMeshHeights(terrainMaterial, mapSettings.MinHeight, mapSettings.MaxHeight);
             previewTerrain.SetActive(true);
 
             GeneratePreview(
@@ -74,7 +74,7 @@ public class MapPreview : MonoBehaviour
     )
     {
         HeightMapGenerator terrainChunkHeightMapGenerator = new(
-            mapSettings.biomeSettings.terrainSettings,
+            mapSettings.terrainSettings,
             mapSettings.meshSettings.NumVertsPerLine,
             mapSettings.meshSettings.NumVertsPerLine,
             mapSettings.seed
@@ -119,7 +119,7 @@ public class MapPreview : MonoBehaviour
                 }
 
                 List<ObjectPlacement> objectPlacements = ObjectMapper.BuildObjectMap(
-                    mapSettings.biomeSettings.layerSettings.layers,
+                    mapSettings.terrainSettings.layerSettings.layers,
                     mapSettings.meshSettings.NumVertsPerLine,
                     newChunk.meshFilter.sharedMesh.vertices,
                     mapSettings.seed
@@ -159,16 +159,10 @@ public class MapPreview : MonoBehaviour
 
     void OnValidate()
     {
-
         if (mapSettings != null)
         {
             mapSettings.OnValuesUpdated -= OnValuesUpdated;
             mapSettings.OnValuesUpdated += OnValuesUpdated;
-            if (mapSettings.biomeSettings != null)
-            {
-                mapSettings.biomeSettings.OnValuesUpdated -= OnValuesUpdated;
-                mapSettings.biomeSettings.OnValuesUpdated += OnValuesUpdated;
-            }
         }
     }
 

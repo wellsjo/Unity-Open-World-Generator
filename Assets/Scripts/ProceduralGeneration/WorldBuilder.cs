@@ -21,12 +21,11 @@ public class WorldBuilder : MonoBehaviour
     readonly Dictionary<Vector2, DynamicTerrainChunk> terrainChunkDictionary = new();
     readonly List<DynamicTerrainChunk> visibleTerrainChunks = new();
     HeightMapGenerator heightMapGenerator;
-    // VegetationGenerator vegetationGenerator;
 
     void Start()
     {
-        mapSettings.biomeSettings.layerSettings.ApplyToMaterial(mapMaterial);
-        mapSettings.biomeSettings.layerSettings.UpdateMeshHeights(
+        mapSettings.terrainSettings.layerSettings.ApplyToMaterial(mapMaterial);
+        mapSettings.terrainSettings.layerSettings.UpdateMeshHeights(
             mapMaterial,
             mapSettings.MinHeight,
             mapSettings.MaxHeight
@@ -39,7 +38,7 @@ public class WorldBuilder : MonoBehaviour
         chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDst / meshWorldSize);
 
         heightMapGenerator = new HeightMapGenerator(
-            mapSettings.biomeSettings.terrainSettings,
+            mapSettings.terrainSettings,
             mapSettings.meshSettings.NumVertsPerLine,
             mapSettings.meshSettings.NumVertsPerLine,
             mapSettings.seed

@@ -12,13 +12,77 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3325b7d49796a7144920d5c5ab302cac, type: 3}
   m_Name: Map Settings
   m_EditorClassIdentifier: 
-  autoUpdate: 1
-  seed: 1
-  borderType: 1
-  fixedSize: 1
-  biomeSettings: {fileID: 11400000, guid: 1f6c52d6e42444845a55e8577424dd88, type: 2}
+  autoUpdate: 0
+  seed: 0
+  borderType: 0
+  fixedSize: 5
+  terrainSettings:
+    layerSettings:
+      waterPlane: {fileID: 3994922243036381878, guid: 3447961027a93fe4a9e1e1e61716fe1f, type: 3}
+      layers:
+      - texture: {fileID: 2800000, guid: aa701e5be2dbcd24aad4fb9c3ca284da, type: 3}
+        tint: {r: 0, g: 0.1547443, b: 0.8584906, a: 0}
+        tintStrength: 0
+        startHeight: 0
+        blendStrength: 0
+        textureScale: 0
+        ObjectFrequency: 0
+        layerObjectSettings: []
+      - texture: {fileID: 2800000, guid: 59b577b39270af04abdc731059ae1a2b, type: 3}
+        tint: {r: 0.022739422, g: 0.6886792, b: 0.06279992, a: 0}
+        tintStrength: 0
+        startHeight: 0.013
+        blendStrength: 0
+        textureScale: 0
+        ObjectFrequency: 0.137
+        layerObjectSettings:
+        - density: 0.189
+          prefab: {fileID: 1525006310277228511, guid: b21038d4ed41ccc4c92fe781cced5ecc, type: 3}
+        - density: 0.181
+          prefab: {fileID: 6701854341644293351, guid: 769aa2481766ca449b46e1aae467e749, type: 3}
+        - density: 0.192
+          prefab: {fileID: 3203996762319440513, guid: 7fb0aec6c60f8c84795881a112ce6495, type: 3}
+      - texture: {fileID: 2800000, guid: a87cbf62329d56d4681d92302095915c, type: 3}
+        tint: {r: 0.5, g: 0.32079995, b: 0, a: 0}
+        tintStrength: 0
+        startHeight: 0.213
+        blendStrength: 0
+        textureScale: 0
+        ObjectFrequency: 0
+        layerObjectSettings: []
+    noiseSettings:
+      startingOffset: {x: 0, y: 0}
+      persistance: 0.5
+      octaves: 12
+      scale: 50
+      lacunarity: 2
+    heightCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      - serializedVersion: 3
+        time: 1.2559108
+        value: 2.6229384
+        inSlope: 2
+        outSlope: 2
+        tangentMode: 0
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    heightMultiplier: 40
   meshSettings:
-    meshScale: 1
+    meshScale: 2
     useFlatShading: 0
     chunkSizeIndex: 2
     flatshadedChunkSizeIndex: 0

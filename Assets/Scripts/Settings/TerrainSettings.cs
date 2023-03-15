@@ -1,25 +1,10 @@
 ﻿using UnityEngine;
 using System.Linq;
 
-[CreateAssetMenu()]
-public class BiomeSettings : UpdatableData
+[System.Serializable()]
+public class TerrainSettings
 {
-    public TerrainSettings terrainSettings;
     public LayerSettings layerSettings;
-
-#if UNITY_EDITOR
-    protected override void OnValidate()
-    {
-        terrainSettings.Validate();
-        base.OnValidate();
-    }
-#endif
-
-}
-
-[System.Serializable]
-public struct TerrainSettings
-{
     public NoiseSettings noiseSettings;
     public AnimationCurve heightCurve;
     public float heightMultiplier;
@@ -56,7 +41,6 @@ public struct TerrainSettings
 [System.Serializable()]
 public class LayerSettings
 {
-
     const int textureSize = 512;
     const TextureFormat textureFormat = TextureFormat.RGB565;
 
@@ -111,7 +95,7 @@ public class LayerSettings
 
 }
 
-[System.Serializable]
+[System.Serializable()]
 public class Layer
 {
     public Texture2D texture;
@@ -131,7 +115,7 @@ public class Layer
 
 // algorith to randomly place objects with weights assigned to each object that dictate how relatively common it is
 
-[System.Serializable]
+[System.Serializable()]
 public struct LayerObjectSettings
 {
     [Range(0, 1)]

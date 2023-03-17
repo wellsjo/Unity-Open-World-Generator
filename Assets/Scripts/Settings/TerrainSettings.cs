@@ -110,13 +110,13 @@ public class Layer
     [Range(0, 1)]
     public float ObjectFrequency;
     // List of prefabs and settings to spawn
-    public LayerObjectSettings[] layerObjectSettings;
+    public ObjectSettings[] layerObjectSettings;
 }
 
 // algorith to randomly place objects with weights assigned to each object that dictate how relatively common it is
 
 [System.Serializable()]
-public struct LayerObjectSettings
+public struct ObjectSettings
 {
     [Range(0, 1)]
     public float density;

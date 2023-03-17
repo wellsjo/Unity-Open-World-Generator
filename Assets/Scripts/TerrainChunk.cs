@@ -34,11 +34,10 @@ public class TerrainChunk
         Vector2 position = chunkCoord * mapSettings.meshSettings.MeshWorldSize;
         terrainMesh.transform.position = new Vector3(position.x, 0, position.y);
 
-        Vector2 heightMapOffSet = chunkCoord * mapSettings.meshSettings.MeshWorldSize / mapSettings.meshSettings.meshScale;
         this.objectPlacer = new ObjectPlacer(
             terrainMesh,
-            heightMapOffSet,
             mapSettings.terrainSettings.layerSettings,
+            mapSettings.meshSettings.meshScale,
             mapSettings.terrainSettings.heightMultiplier,
             mapSettings.meshSettings.NumVertsPerLine,
             mapSettings.seed
@@ -71,13 +70,26 @@ public class TerrainChunk
 
     public void ApplyWater()
     {
+        if (chunkCoord.x != 0 || chunkCoord.y != 0)
+        {
+            return;
+        }
         if (mapSettings.terrainSettings.layerSettings.waterPlane == null)
         {
             return;
         }
         UnityEngine.GameObject waterPlane = UnityEngine.GameObject.Instantiate(mapSettings.terrainSettings.layerSettings.waterPlane);
         waterPlane.transform.parent = terrainMesh.transform;
-        waterPlane.transform.localPosition = mapSettings.terrainSettings.layerSettings.WaterPlanePosition * mapSettings.terrainSettings.heightMultiplier;
+        waterPlane.transform.localPosition = mapSettings.terrainSettings.layerSettings.WaterPlanePosition * mapSettings.terrainSettings.heightMultiplier * mapSettings.meshSettings.meshScale;
+        waterPlane.transform.localScale = new Vector3(50, 1, 50);
+    }
+
+    public Vector2 WorldOffset
+    {
+        get
+        {
+            return chunkCoord * mapSettings.meshSettings.MeshWorldSize / mapSettings.meshSettings.meshScale;
+        }
     }
 }
 

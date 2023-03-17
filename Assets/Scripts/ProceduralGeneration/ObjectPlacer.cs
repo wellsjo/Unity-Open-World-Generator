@@ -38,7 +38,7 @@ public static class ObjectMapper
                 }
                 for (int i = 0; i < layers.Length; i++)
                 {
-                    LayerObjectSettings[] settings = layers[i].layerObjectSettings;
+                    ObjectSettings[] settings = layers[i].layerObjectSettings;
                     if (settings.Length == 0)
                     {
                         continue;
@@ -71,8 +71,8 @@ public class ObjectPlacer
 {
     private readonly GameObject terrainMesh;
     private readonly LayerSettings textureSettings;
+    private readonly float meshScale;
     private readonly float heightMultiplier;
-    private readonly Vector2 heightMapOffSet;
     private readonly int numVertsPerLine;
 
     private List<ObjectPlacement> objectPlacements;
@@ -81,16 +81,16 @@ public class ObjectPlacer
     private bool done = false;
     public ObjectPlacer(
         GameObject terrainMesh,
-        Vector2 heightMapOffSet,
         LayerSettings textureSettings,
+        float meshScale,
         float heightMultiplier,
         int numVertsPerLine,
         int seed
     )
     {
         this.terrainMesh = terrainMesh;
-        this.heightMapOffSet = heightMapOffSet;
         this.textureSettings = textureSettings;
+        this.meshScale = meshScale;
         this.heightMultiplier = heightMultiplier;
         this.numVertsPerLine = numVertsPerLine;
         this.seed = seed;
@@ -156,15 +156,15 @@ public class ObjectPlacer
                 Layer layer = textureSettings.layers[i];
                 Layer nextLayer = textureSettings.layers[i + 1];
 
-                if (worldPos.y > layer.startHeight * heightMultiplier
-                    && worldPos.y < nextLayer.startHeight * heightMultiplier)
+                if (worldPos.y > layer.startHeight * heightMultiplier * meshScale
+                    && worldPos.y < nextLayer.startHeight * heightMultiplier * meshScale)
                 {
                     PlaceObject(objectPlacement, layer);
                 }
             }
 
             Layer lastLayer = textureSettings.layers[^1];
-            if (worldPos.y > lastLayer.startHeight * heightMultiplier)
+            if (worldPos.y > lastLayer.startHeight * heightMultiplier * meshScale)
             {
                 PlaceObject(objectPlacement, lastLayer);
             }

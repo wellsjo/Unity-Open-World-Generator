@@ -38,6 +38,7 @@ public static class ObjectMapper
                 }
                 for (int i = 0; i < layers.Length; i++)
                 {
+                    // TODO move the height checking logic here
                     ObjectSettings[] settings = layers[i].layerObjectSettings;
                     if (settings.Length == 0)
                     {
@@ -50,10 +51,13 @@ public static class ObjectMapper
                         weights[j] = settings[j].density;
                     }
 
+                    var objectIndex = RandomWeightedIndex.Get(weights, rng);
+
                     returnValues.Add(
                         new ObjectPlacement(
                             vertices[vertexIndex],
-                            RandomWeightedIndex.Get(weights, rng)
+                            settings[objectIndex].scatter,
+                            objectIndex
                         )
                     );
                 }
@@ -136,7 +140,6 @@ public class ObjectPlacer
         }
 
         List<ObjectPlacement> objectPlacements = (List<ObjectPlacement>)objectPlacementsList;
-        Debug.LogFormat("Vegetation Map Received {0}", objectPlacements.Count);
         this.objectPlacements = objectPlacements;
     }
 
@@ -189,14 +192,29 @@ public class ObjectPlacer
             return;
         }
 
+        var limit = 1;
+        if (obj.scatter)
+        {
+            limit = 10;
+        }
+        var origin = Random.Range(0, 360);
+        var position = obj.position;
 
-        var randomRotation = Quaternion.Euler(0, Random.Range(0, 360), 0);
+        // for (int i = 0; i < limit; i++)
+        // {
+        var randomRotation = Quaternion.Euler(0, origin, 0);
         UnityEngine.GameObject gameObject = UnityEngine.GameObject.Instantiate(
             layer.layerObjectSettings[obj.prefabIndex].prefab
         );
+
         gameObject.transform.parent = terrainMesh.transform;
-        gameObject.transform.localPosition = obj.position;
+        gameObject.transform.localPosition = position;
         gameObject.transform.rotation = randomRotation;
+
+        // origin += 5;
+        position.x += Random.Range(-1, 1);
+        position.y += Random.Range(-1, 1);
+        // }
     }
 }
 
@@ -204,11 +222,13 @@ public class ObjectPlacer
 public struct ObjectPlacement
 {
     public Vector3 position;
+    public bool scatter;
     public int prefabIndex;
 
-    public ObjectPlacement(Vector3 position, int prefabIndex)
+    public ObjectPlacement(Vector3 position, bool scatter, int prefabIndex)
     {
         this.position = position;
+        this.scatter = scatter;
         this.prefabIndex = prefabIndex;
     }
 }

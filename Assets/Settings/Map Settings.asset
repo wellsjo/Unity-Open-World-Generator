@@ -29,20 +29,24 @@ MonoBehaviour:
         ObjectFrequency: 0
         layerObjectSettings: []
       - texture: {fileID: 2800000, guid: 59b577b39270af04abdc731059ae1a2b, type: 3}
-        tint: {r: 0.15667674, g: 0.6901961, b: 0.02352939, a: 0}
-        tintStrength: 0.787
+        tint: {r: 0.53474844, g: 0.9528302, b: 0.4179868, a: 0}
+        tintStrength: 0.619
         startHeight: 0.02
         blendStrength: 0
         textureScale: 0
-        ObjectFrequency: 0.392
+        ObjectFrequency: 1
         layerObjectSettings:
-        - density: 0.189
+        - density: 0.052
+          scatter: 0
           prefab: {fileID: 1525006310277228511, guid: b21038d4ed41ccc4c92fe781cced5ecc, type: 3}
-        - density: 0.181
+        - density: 0.031
+          scatter: 0
           prefab: {fileID: 6701854341644293351, guid: 769aa2481766ca449b46e1aae467e749, type: 3}
-        - density: 0.192
+        - density: 0.038
+          scatter: 0
           prefab: {fileID: 3203996762319440513, guid: 7fb0aec6c60f8c84795881a112ce6495, type: 3}
-        - density: 0.984
+        - density: 0.99
+          scatter: 1
           prefab: {fileID: 6404268809379339476, guid: 9a32147e38101fd48876749fd208348d, type: 3}
       - texture: {fileID: 2800000, guid: a87cbf62329d56d4681d92302095915c, type: 3}
         tint: {r: 0.5, g: 0.32079995, b: 0, a: 0}
@@ -50,7 +54,7 @@ MonoBehaviour:
         startHeight: 0.213
         blendStrength: 0.207
         textureScale: 0
-        ObjectFrequency: 0
+        ObjectFrequency: 0.177
         layerObjectSettings: []
     noiseSettings:
       startingOffset: {x: 0, y: 0}
@@ -86,7 +90,7 @@ MonoBehaviour:
   meshSettings:
     meshScale: 2
     useFlatShading: 0
-    chunkSizeIndex: 4
+    chunkSizeIndex: 1
     flatshadedChunkSizeIndex: 0
   detailLevels:
   - lod: 0

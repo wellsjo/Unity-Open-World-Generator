@@ -120,6 +120,5 @@ public struct ObjectSettings
 {
     [Range(0, 1)]
     public float density;
-    public bool scatter;
     public GameObject prefab;
 }

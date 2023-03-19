@@ -63,10 +63,10 @@ public class TerrainChunk
         meshFilter.sharedMesh = mesh;
     }
 
-    public void PlaceObjects(List<ObjectPlacement> objectPlacements)
-    {
-        this.objectPlacer.PlaceObjects(objectPlacements);
-    }
+    // public void PlaceObjects(List<ObjectPlacement> objectPlacements)
+    // {
+    //     this.objectPlacer.PlaceObjects(objectPlacements);
+    // }
 
     public void ApplyWater()
     {

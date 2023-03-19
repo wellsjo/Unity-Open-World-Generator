@@ -5,76 +5,13 @@ using UnityEngine;
 public static class ObjectMapper
 {
     // Take in a list of layers, determine where to place objects based on the layer's settings, return a list of ObjectPlacements.
-    public static List<ObjectPlacement> BuildObjectMap(
-        Layer[] layers,
-        int numVertsPerLine,
-        Vector3[] vertices,
-        int seed
-    )
-    {
-        // TODO fix object placement + LOD
-        int levelOfDetail = 0;
-        int skipIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
-        System.Random rng = new(seed);
-
-        List<ObjectPlacement> returnValues = new();
-
-        int vertexIndex = 0;
-
-        for (int y = 0; y < numVertsPerLine; y++)
-        {
-            for (int x = 0; x < numVertsPerLine; x++)
-            {
-                bool isOutOfMeshVertex = y == 0 || y == numVertsPerLine - 1 || x == 0 || x == numVertsPerLine - 1;
-                bool isSkippedVertex = x > 2 && x < numVertsPerLine - 3 && y > 2 && y < numVertsPerLine - 3 && ((x - 2) % skipIncrement != 0 || (y - 2) % skipIncrement != 0);
-
-                if (isOutOfMeshVertex)
-                {
-                    continue;
-                }
-                else if (isSkippedVertex)
-                {
-                    continue;
-                }
-                for (int i = 0; i < layers.Length; i++)
-                {
-                    // TODO move the height checking logic here
-                    ObjectSettings[] settings = layers[i].layerObjectSettings;
-                    if (settings.Length == 0)
-                    {
-                        continue;
-                    }
-
-                    float[] weights = new float[settings.Length];
-                    for (int j = 0; j < settings.Length; j++)
-                    {
-                        weights[j] = settings[j].density;
-                    }
-
-                    var objectIndex = RandomWeightedIndex.Get(weights, rng);
-
-                    returnValues.Add(
-                        new ObjectPlacement(
-                            vertices[vertexIndex],
-                            settings[objectIndex].scatter,
-                            objectIndex
-                        )
-                    );
-                }
-
-                vertexIndex++;
-            }
-        }
-
-        return returnValues;
-    }
 }
 
 // Keeps track of the state of object request and spawn cycle.
 public class ObjectPlacer
 {
     private readonly GameObject terrainMesh;
-    private readonly LayerSettings textureSettings;
+    private readonly LayerSettings layerSettings;
     private readonly float meshScale;
     private readonly float heightMultiplier;
     private readonly int numVertsPerLine;
@@ -83,9 +20,10 @@ public class ObjectPlacer
     private bool objectsRequested = false;
     private readonly int seed;
     private bool done = false;
+
     public ObjectPlacer(
         GameObject terrainMesh,
-        LayerSettings textureSettings,
+        LayerSettings layerSettings,
         float meshScale,
         float heightMultiplier,
         int numVertsPerLine,
@@ -93,7 +31,7 @@ public class ObjectPlacer
     )
     {
         this.terrainMesh = terrainMesh;
-        this.textureSettings = textureSettings;
+        this.layerSettings = layerSettings;
         this.meshScale = meshScale;
         this.heightMultiplier = heightMultiplier;
         this.numVertsPerLine = numVertsPerLine;
@@ -122,13 +60,91 @@ public class ObjectPlacer
     {
         ThreadedDataRequester.RequestData(() =>
         {
-            return ObjectMapper.BuildObjectMap(
-                textureSettings.layers,
-                numVertsPerLine,
-                vertices,
-                seed
-            );
+            return BuildObjectMap(vertices);
         }, OnLoad);
+    }
+
+    // Needs to be thread safe
+    public List<ObjectPlacement> BuildObjectMap(Vector3[] vertices)
+    {
+        // TODO fix object placement + LOD
+        int levelOfDetail = 0;
+        int skipIncrement = (levelOfDetail == 0) ? 1 : levelOfDetail * 2;
+        System.Random rng = new(seed);
+
+        List<ObjectPlacement> returnValues = new();
+
+        int vertexIndex = 0;
+
+        for (int y = 0; y < numVertsPerLine; y++)
+        {
+            for (int x = 0; x < numVertsPerLine; x++)
+            {
+                bool isOutOfMeshVertex = y == 0 || y == numVertsPerLine - 1 || x == 0 || x == numVertsPerLine - 1;
+                bool isSkippedVertex = x > 2 && x < numVertsPerLine - 3 && y > 2 && y < numVertsPerLine - 3 && ((x - 2) % skipIncrement != 0 || (y - 2) % skipIncrement != 0);
+
+                if (isOutOfMeshVertex)
+                {
+                    continue;
+                }
+                else if (isSkippedVertex)
+                {
+                    continue;
+                }
+                Debug.Log("Adding Object Placement 1");
+
+                var vertex = vertices[vertexIndex];
+                var layer = GetLayerForVertex(vertex);
+                Debug.LogFormat("layer {0}", layer);
+
+                ObjectSettings[] settings = layer.layerObjectSettings;
+                if (settings.Length == 0)
+                {
+                    Debug.Log("No Settings");
+                    continue;
+                }
+
+                if (UnityEngine.Random.Range(0f, 1f) < (1 - layer.ObjectFrequency))
+                {
+                    Debug.Log("Continuing Ransom");
+                    continue;
+                }
+
+                float[] weights = new float[settings.Length];
+                for (int j = 0; j < settings.Length; j++)
+                {
+                    weights[j] = settings[j].density;
+                }
+
+                var objectIndex = RandomWeightedIndex.Get(weights, rng);
+                Debug.Log("Adding Object Placement 2");
+                returnValues.Add(
+                    new ObjectPlacement(vertex, objectIndex)
+                );
+
+                vertexIndex++;
+            }
+        }
+
+        return returnValues;
+    }
+
+    private Layer GetLayerForVertex(Vector3 vertex)
+    {
+        for (int i = 0; i < layerSettings.layers.Length - 1; i++)
+        {
+            Layer layer = layerSettings.layers[i];
+            Layer nextLayer = layerSettings.layers[i + 1];
+
+            if (vertex.y > layer.startHeight * heightMultiplier * meshScale
+                && vertex.y < nextLayer.startHeight * heightMultiplier * meshScale)
+            {
+                Debug.LogFormat("Found Layer {0}", i);
+                return layer;
+            }
+        }
+        Debug.LogFormat("Found Last Layer");
+        return layerSettings.layers[^1];
     }
 
     private void OnLoad(object objectPlacementsList)
@@ -151,57 +167,20 @@ public class ObjectPlacer
             {
                 continue;
             }
-
-            Vector3 worldPos = terrainMesh.transform.TransformPoint(objectPlacement.position);
-
-            for (int i = 0; i < textureSettings.layers.Length - 1; i++)
-            {
-                Layer layer = textureSettings.layers[i];
-                Layer nextLayer = textureSettings.layers[i + 1];
-
-                if (worldPos.y > layer.startHeight * heightMultiplier * meshScale
-                    && worldPos.y < nextLayer.startHeight * heightMultiplier * meshScale)
-                {
-                    PlaceObject(objectPlacement, layer);
-                }
-            }
-
-            Layer lastLayer = textureSettings.layers[^1];
-            if (worldPos.y > lastLayer.startHeight * heightMultiplier * meshScale)
-            {
-                PlaceObject(objectPlacement, lastLayer);
-            }
-
+            Debug.Log("Placeing Object in PlaceObjects");
+            PlaceObject(objectPlacement, GetLayerForVertex(objectPlacement.position));
         }
     }
+
+    // Take the object placement, plcae it on the terrain mesh, give it a random location.
     private void PlaceObject(
         ObjectPlacement obj,
         Layer layer
     )
     {
-        if (obj.prefabIndex > layer.layerObjectSettings.Length - 1)
-        {
-            return;
-        }
-        if (obj.prefabIndex == -1)
-        {
-            return;
-        }
-        if (UnityEngine.Random.Range(0f, 1f) < (1 - layer.ObjectFrequency))
-        {
-            return;
-        }
-
-        var limit = 1;
-        if (obj.scatter)
-        {
-            limit = 10;
-        }
         var origin = Random.Range(0, 360);
         var position = obj.position;
 
-        // for (int i = 0; i < limit; i++)
-        // {
         var randomRotation = Quaternion.Euler(0, origin, 0);
         UnityEngine.GameObject gameObject = UnityEngine.GameObject.Instantiate(
             layer.layerObjectSettings[obj.prefabIndex].prefab
@@ -210,11 +189,18 @@ public class ObjectPlacer
         gameObject.transform.parent = terrainMesh.transform;
         gameObject.transform.localPosition = position;
         gameObject.transform.rotation = randomRotation;
+    }
 
-        // origin += 5;
-        position.x += Random.Range(-1, 1);
-        position.y += Random.Range(-1, 1);
-        // }
+    private Vector3 GetPositionOnTerrain(Vector3 position)
+    {
+        int terrainLayerMask = 1 << LayerMask.NameToLayer(terrainMesh.transform.name); // Make sure your terrain has the layer "Terrain" assigned
+
+        if (Physics.Raycast(position, Vector3.down, out RaycastHit hit, Mathf.Infinity, terrainLayerMask))
+        {
+            return hit.point;
+        }
+
+        return position; // If there's no hit, return the original position
     }
 }
 
@@ -222,13 +208,11 @@ public class ObjectPlacer
 public struct ObjectPlacement
 {
     public Vector3 position;
-    public bool scatter;
     public int prefabIndex;
 
-    public ObjectPlacement(Vector3 position, bool scatter, int prefabIndex)
+    public ObjectPlacement(Vector3 position, int prefabIndex)
     {
         this.position = position;
-        this.scatter = scatter;
         this.prefabIndex = prefabIndex;
     }
 }

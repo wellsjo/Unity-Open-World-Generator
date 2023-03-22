@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class TerrainChunk
@@ -9,6 +10,7 @@ public class TerrainChunk
     public Vector2 chunkCoord;
     protected readonly GameObject terrainMesh;
     private readonly MeshRenderer meshRenderer;
+    protected MeshCollider meshCollider;
     public readonly MeshFilter meshFilter;
     protected readonly MapSettings mapSettings;
     protected readonly ObjectPlacer objectPlacer;
@@ -43,6 +45,7 @@ public class TerrainChunk
             mapSettings.seed
         );
 
+        SetLayer();
         ApplyWater();
         SetVisible(false);
     }
@@ -50,6 +53,25 @@ public class TerrainChunk
     public void SetVisible(bool visible)
     {
         terrainMesh.SetActive(visible);
+    }
+
+    private void SetLayer()
+    {
+        var layerName = "Default";
+        int layerIndex = LayerMask.NameToLayer(layerName);
+
+        if (layerIndex == -1)
+        {
+            Debug.LogError("Layer not found: " + layerName);
+            return;
+        }
+
+        terrainMesh.layer = layerIndex;
+    }
+
+    public void AddMeshCollider()
+    {
+        meshCollider = terrainMesh.AddComponent<MeshCollider>();
     }
 
     public void LoadFromHeightMap(HeightMap heightMap)
@@ -62,11 +84,6 @@ public class TerrainChunk
         Mesh mesh = meshData.CreateMesh();
         meshFilter.sharedMesh = mesh;
     }
-
-    // public void PlaceObjects(List<ObjectPlacement> objectPlacements)
-    // {
-    //     this.objectPlacer.PlaceObjects(objectPlacements);
-    // }
 
     public void ApplyWater()
     {
@@ -104,7 +121,6 @@ public class DynamicTerrainChunk : TerrainChunk
     public Bounds bounds;
     const float colliderGenerationDistanceThreshold = 5;
     int previousLODIndex = -1;
-    readonly MeshCollider meshCollider;
     readonly LODMesh[] lodMeshes;
     bool heightMapReceived;
     readonly int colliderLODIndex;
@@ -131,7 +147,7 @@ public class DynamicTerrainChunk : TerrainChunk
         Vector2 position = coord * mapSettings.meshSettings.MeshWorldSize;
         bounds = new Bounds(position, Vector2.one * mapSettings.meshSettings.MeshWorldSize);
 
-        meshCollider = meshObject.AddComponent<MeshCollider>();
+        AddMeshCollider();
 
         lodMeshes = new LODMesh[mapSettings.detailLevels.Length];
         for (int i = 0; i < mapSettings.detailLevels.Length; i++)
@@ -253,7 +269,7 @@ public class DynamicTerrainChunk : TerrainChunk
         {
             if (lodMeshes[colliderLODIndex].hasMesh)
             {
-                meshCollider.sharedMesh = lodMeshes[colliderLODIndex].mesh;
+                this.meshCollider.sharedMesh = lodMeshes[colliderLODIndex].mesh;
                 hasSetCollider = true;
             }
         }
@@ -264,7 +280,9 @@ public class DynamicTerrainChunk : TerrainChunk
         LODMesh lodMesh = lodMeshes[0];
         if (lodMesh.hasMesh)
         {
-            objectPlacer.CheckAndLoadObjectData(lodMesh.mesh.vertices);
+            // Debug.LogFormat("mesh {0}", lodMesh.mesh);
+            // Debug.LogFormat("matrix {0}", terrainMesh.transform.localToWorldMatrix);
+            objectPlacer.CheckAndLoadObjectData(lodMesh.mesh.vertices, terrainMesh.transform.localToWorldMatrix);
         }
     }
 

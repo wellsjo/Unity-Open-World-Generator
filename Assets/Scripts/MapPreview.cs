@@ -117,6 +117,7 @@ public class MapPreview : MonoBehaviour
                     continue;
                 }
 
+
                 var objectPlacer = new ObjectPlacer(
                     terrainChunkObject,
                     mapSettings.terrainSettings.layerSettings,
@@ -126,7 +127,12 @@ public class MapPreview : MonoBehaviour
                     mapSettings.seed
                 );
 
-                List<ObjectPlacement> objectPlacements = objectPlacer.BuildObjectMap(newChunk.meshFilter.sharedMesh.vertices);
+                List<ObjectPlacement> objectPlacements = objectPlacer.BuildObjectMap(
+                    newChunk.meshFilter.sharedMesh.vertices,
+                    terrainChunkObject.transform.localToWorldMatrix
+                );
+
+                newChunk.AddMeshCollider();
                 objectPlacer.PlaceObjects(objectPlacements);
             }
         }
@@ -159,7 +165,8 @@ public class MapPreview : MonoBehaviour
     {
         if (!Application.isPlaying)
         {
-            DrawMapInEditor();
+            // DrawMapInEditor();
+            Reset();
         }
     }
 

@@ -165,8 +165,7 @@ public class MapPreview : MonoBehaviour
     {
         if (!Application.isPlaying)
         {
-            // DrawMapInEditor();
-            Reset();
+            DrawMapInEditor();
         }
     }
 

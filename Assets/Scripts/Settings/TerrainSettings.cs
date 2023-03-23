@@ -107,18 +107,5 @@ public class Layer
     [Range(0, 1)]
     public float blendStrength;
     public float textureScale;
-    [Range(0, 1)]
-    public float ObjectFrequency;
-    // List of prefabs and settings to spawn
-    public ObjectSettings[] layerObjectSettings;
-}
-
-// algorith to randomly place objects with weights assigned to each object that dictate how relatively common it is
-
-[System.Serializable()]
-public struct ObjectSettings
-{
-    [Range(0, 1)]
-    public float density;
-    public GameObject prefab;
+    public ObjectSettings objectSettings;
 }

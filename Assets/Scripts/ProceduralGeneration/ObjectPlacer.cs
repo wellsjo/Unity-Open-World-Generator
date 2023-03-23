@@ -92,7 +92,7 @@ public class ObjectPlacer
 
                 vertexIndex++;
 
-                ObjectSettings[] settings = layer.layerObjectSettings;
+                ObjectSetting[] settings = layer.objectSettings.Settings;
                 if (settings.Length == 0)
                 {
                     continue;
@@ -101,7 +101,7 @@ public class ObjectPlacer
                 // Replicate UnityEngine.Random.Range
                 var min = 0f;
                 var max = 1f;
-                if ((float)(min + rng.NextDouble() * (max - min)) < (1 - layer.ObjectFrequency))
+                if ((float)(min + rng.NextDouble() * (max - min)) < (1 - layer.objectSettings.Frequency))
                 {
                     continue;
                 }
@@ -130,8 +130,7 @@ public class ObjectPlacer
             Layer layer = layerSettings.layers[i];
             Layer nextLayer = layerSettings.layers[i + 1];
 
-            if (worldPos.y > layer.startHeight * heightMultiplier * meshScale
-                && worldPos.y < nextLayer.startHeight * heightMultiplier * meshScale)
+            if (InBounds(worldPos.y, layer.startHeight, nextLayer.startHeight))
             {
                 return i;
             }
@@ -156,10 +155,6 @@ public class ObjectPlacer
     {
         foreach (ObjectPlacement objectPlacement in objectPlacements)
         {
-            // if (objectPlacement.prefabIndex == -1)
-            // {
-            //     continue;
-            // }
             PlaceObject(objectPlacement);
         }
     }
@@ -169,10 +164,16 @@ public class ObjectPlacer
     {
         var origin = UnityEngine.Random.Range(0, 360);
         var randomRotation = Quaternion.Euler(0, origin, 0);
+        var layer = layerSettings.layers[obj.layerIndex];
 
-        UnityEngine.GameObject gameObject = UnityEngine.GameObject.Instantiate(
-            layerSettings.layers[obj.layerIndex].layerObjectSettings[obj.prefabIndex].prefab
-        );
+        Layer nextLayer = null;
+        if (obj.layerIndex != layerSettings.layers.Length - 1)
+        {
+            nextLayer = layerSettings.layers[obj.layerIndex + 1];
+        }
+
+        var objectSettings = layer.objectSettings.Settings[obj.prefabIndex];
+        UnityEngine.GameObject gameObject = UnityEngine.GameObject.Instantiate(objectSettings.prefab);
 
         var positionXY = new Vector3(obj.position.x, meshScale * heightMultiplier, obj.position.z);
         var position = GetPositionOnTerrain(positionXY);
@@ -181,13 +182,55 @@ public class ObjectPlacer
         gameObject.transform.localPosition = position;
         gameObject.transform.rotation = randomRotation;
 
+        if (!objectSettings.hasChildren)
+        {
+            return;
+        }
+
+        // Fix the child positions
         for (int i = 0; i < gameObject.transform.childCount; i++)
         {
             GameObject child = gameObject.transform.GetChild(i).gameObject;
-            child.transform.position = GetPositionOnTerrain(child.transform.position);
+
+            // If the child is within the bounds of the current layer, try to place it on the terrain. otherwise destroy it.
+            if (nextLayer != null && !InBounds(child.transform.position.y, layer.startHeight, nextLayer.startHeight))
+            {
+                DestroyObject(child);
+                continue;
+            }
+
+            var newChildPos = GetPositionOnTerrain(child.transform.position);
+            if (newChildPos == Vector3.one)
+            {
+                DestroyObject(child);
+                continue;
+            }
+
+            child.transform.position = newChildPos;
         }
     }
 
+    private void DestroyObject(GameObject gameObject)
+    {
+        if (Application.isPlaying)
+        {
+            UnityEngine.GameObject.Destroy(gameObject);
+        }
+        else
+        {
+            UnityEngine.GameObject.DestroyImmediate(gameObject);
+        }
+    }
+
+    // Returns true if position is withint the bounds of the terrain mesh and layer.
+    private bool InBounds(float height, float layerStartHeight, float layerEndHeight)
+    {
+        return height > layerStartHeight * heightMultiplier * meshScale
+            && height < layerEndHeight * heightMultiplier * meshScale;
+    }
+
+    // Return the position of the object on the terrain mesh by raycasting down.
+    // Vector3.one is returned if no hit is found.
     private Vector3 GetPositionOnTerrain(Vector3 position)
     {
         int terrainLayerMask = 1 << LayerMask.NameToLayer("Default");
@@ -196,7 +239,7 @@ public class ObjectPlacer
             return hit.point;
         }
 
-        return position; // If there's no hit, return the original position
+        return Vector3.one;
     }
 }
 
@@ -213,4 +256,26 @@ public struct ObjectPlacement
         this.layerIndex = layerIndex;
         this.prefabIndex = prefabIndex;
     }
+}
+
+[System.Serializable()]
+public struct ObjectSettings
+{
+    // How often to spawn objects overall
+    [Range(0, 1)]
+    public float Frequency;
+    // Individual settings for each object
+    public ObjectSetting[] Settings;
+}
+
+[System.Serializable()]
+public struct ObjectSetting
+{
+    // Prefab to spawn
+    public GameObject prefab;
+    [Range(0, 1)]
+    // How often to spawn this object
+    public float density;
+    // Tells the object spawner to cull children outside bounds
+    public bool hasChildren;
 }

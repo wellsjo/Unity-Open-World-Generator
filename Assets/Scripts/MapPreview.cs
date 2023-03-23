@@ -92,7 +92,6 @@ public class MapPreview : MonoBehaviour
         {
             for (int y = (int)range.x; y <= range.y; y++)
             {
-                // TODO move this to biome.Spawn(chunkCoord)
                 Vector2 chunkCoord = new(x, y);
                 string gameObjectName = string.Format("Terrain Chunk {0}", chunkCoord.ToString());
 
@@ -118,14 +117,23 @@ public class MapPreview : MonoBehaviour
                     continue;
                 }
 
-                List<ObjectPlacement> objectPlacements = ObjectMapper.BuildObjectMap(
-                    mapSettings.terrainSettings.layerSettings.layers,
+
+                var objectPlacer = new ObjectPlacer(
+                    terrainChunkObject,
+                    mapSettings.terrainSettings.layerSettings,
+                    mapSettings.meshSettings.meshScale,
+                    mapSettings.terrainSettings.heightMultiplier,
                     mapSettings.meshSettings.NumVertsPerLine,
-                    newChunk.meshFilter.sharedMesh.vertices,
                     mapSettings.seed
                 );
 
-                newChunk.PlaceObjects(objectPlacements);
+                List<ObjectPlacement> objectPlacements = objectPlacer.BuildObjectMap(
+                    newChunk.meshFilter.sharedMesh.vertices,
+                    terrainChunkObject.transform.localToWorldMatrix
+                );
+
+                newChunk.AddMeshCollider();
+                objectPlacer.PlaceObjects(objectPlacements);
             }
         }
 
@@ -134,6 +142,10 @@ public class MapPreview : MonoBehaviour
     // Reset all the preview objects, clear out memory
     private void Reset()
     {
+        if (previewTerrain == null)
+        {
+            return;
+        }
         previewTerrain.SetActive(false);
         previewTexture.gameObject.SetActive(false);
         while (previewTerrain.transform.childCount > 0)

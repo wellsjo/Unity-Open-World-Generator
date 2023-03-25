@@ -57,7 +57,7 @@ public class TerrainChunk
 
     private void SetLayer()
     {
-        var layerName = "Default";
+        var layerName = "Environment";
         int layerIndex = LayerMask.NameToLayer(layerName);
 
         if (layerIndex == -1)

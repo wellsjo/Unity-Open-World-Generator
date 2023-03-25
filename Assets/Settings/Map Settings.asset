@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   autoUpdate: 0
   seed: 3
-  borderType: 0
+  borderType: 1
   fixedSize: 1
   terrainSettings:
     layerSettings:
@@ -26,32 +26,45 @@ MonoBehaviour:
         startHeight: 0
         blendStrength: 0
         textureScale: 0
-        ObjectFrequency: 0
-        layerObjectSettings: []
+        objectSettings:
+          Frequency: 0
+          Settings: []
+      - texture: {fileID: 2800000, guid: a87cbf62329d56d4681d92302095915c, type: 3}
+        tint: {r: 0.7924528, g: 0.71781987, b: 0.31772873, a: 0}
+        tintStrength: 1
+        startHeight: 0.01
+        blendStrength: 0
+        textureScale: 0
+        objectSettings:
+          Frequency: 0.477
+          Settings:
+          - prefab: {fileID: 5223245731654472536, guid: 496dfedd0f0106540a032eaa0d0acbfc, type: 3}
+            density: 0.134
+            hasChildren: 0
+          - prefab: {fileID: 2496219874687320041, guid: bffc605355d8fbf4a98e4c1131f49760, type: 3}
+            density: 0.147
+            hasChildren: 0
+          - prefab: {fileID: 2152798839327606758, guid: ab2c917d4ca684e46a7d6f1d7c10371c, type: 3}
+            density: 0.15
+            hasChildren: 0
+          - prefab: {fileID: 34582614418184306, guid: 19a01fb2ace04f94b98578cbab0c2c1c, type: 3}
+            density: 0.15
+            hasChildren: 0
       - texture: {fileID: 2800000, guid: 59b577b39270af04abdc731059ae1a2b, type: 3}
         tint: {r: 0.53474844, g: 0.9528302, b: 0.4179868, a: 0}
         tintStrength: 0.619
-        startHeight: 0.02
-        blendStrength: 0
+        startHeight: 0.015
+        blendStrength: 0.128
         textureScale: 0
-        ObjectFrequency: 1
-        layerObjectSettings:
-        - density: 0.052
-          prefab: {fileID: 1525006310277228511, guid: b21038d4ed41ccc4c92fe781cced5ecc, type: 3}
-        - density: 0.031
-          prefab: {fileID: 6701854341644293351, guid: 769aa2481766ca449b46e1aae467e749, type: 3}
-        - density: 0.038
-          prefab: {fileID: 3203996762319440513, guid: 7fb0aec6c60f8c84795881a112ce6495, type: 3}
-        - density: 0.99
-          prefab: {fileID: 2659296265342616741, guid: 8c15e66e3fc28434ebacdcb9a13ff669, type: 3}
-      - texture: {fileID: 2800000, guid: a87cbf62329d56d4681d92302095915c, type: 3}
-        tint: {r: 0.5, g: 0.32079995, b: 0, a: 0}
-        tintStrength: 0
-        startHeight: 0.213
-        blendStrength: 0.207
-        textureScale: 0
-        ObjectFrequency: 0.177
-        layerObjectSettings: []
+        objectSettings:
+          Frequency: 1
+          Settings:
+          - prefab: {fileID: 2659296265342616741, guid: 8c15e66e3fc28434ebacdcb9a13ff669, type: 3}
+            density: 1
+            hasChildren: 1
+          - prefab: {fileID: 1525006310277228511, guid: b21038d4ed41ccc4c92fe781cced5ecc, type: 3}
+            density: 0.069
+            hasChildren: 0
     noiseSettings:
       startingOffset: {x: 0, y: 0}
       persistance: 0.4

@@ -182,6 +182,17 @@ public class ObjectPlacer
         gameObject.transform.localPosition = position;
         gameObject.transform.rotation = randomRotation;
 
+        var layerName = "Environment";
+        int layerIndex = LayerMask.NameToLayer(layerName);
+
+        if (layerIndex == -1)
+        {
+            Debug.LogError("Layer not found: " + layerName);
+            return;
+        }
+
+        terrainMesh.layer = layerIndex;
+
         if (!objectSettings.hasChildren)
         {
             return;
@@ -233,7 +244,7 @@ public class ObjectPlacer
     // Vector3.one is returned if no hit is found.
     private Vector3 GetPositionOnTerrain(Vector3 position)
     {
-        int terrainLayerMask = 1 << LayerMask.NameToLayer("Default");
+        int terrainLayerMask = 1 << LayerMask.NameToLayer("Terrain");
         if (Physics.Raycast(position, Vector3.down, out RaycastHit hit, Mathf.Infinity, terrainLayerMask))
         {
             return hit.point;

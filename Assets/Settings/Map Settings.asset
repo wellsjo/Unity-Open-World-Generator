@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   autoUpdate: 0
   seed: 3
-  borderType: 1
-  fixedSize: 1
+  borderType: 0
+  fixedSize: 3
   terrainSettings:
     layerSettings:
       waterPlane: {fileID: 3994922243036381878, guid: 3447961027a93fe4a9e1e1e61716fe1f, type: 3}
@@ -67,7 +67,7 @@ MonoBehaviour:
             hasChildren: 0
     noiseSettings:
       startingOffset: {x: 0, y: 0}
-      persistance: 0.4
+      persistance: 0.3
       octaves: 12
       scale: 50
       lacunarity: 2

@@ -11,7 +11,7 @@ public class ObjectPlacer
     private readonly float heightMultiplier;
     private readonly int numVertsPerLine;
 
-    private List<ObjectPlacement> objectPlacements;
+    // private List<ObjectPlacement> objectPlacements;
     private bool objectsRequested = false;
     private readonly int seed;
     private bool done = false;
@@ -44,12 +44,6 @@ public class ObjectPlacer
             objectsRequested = true;
             LoadAsync(vertices, localToWorldMatrix);
             return;
-        }
-        if (objectPlacements != null)
-        {
-            PlaceObjects(objectPlacements);
-            objectPlacements = null;
-            done = true;
         }
     }
 
@@ -148,7 +142,10 @@ public class ObjectPlacer
         }
 
         List<ObjectPlacement> objectPlacements = (List<ObjectPlacement>)objectPlacementsList;
-        this.objectPlacements = objectPlacements;
+        // this.objectPlacements = objectPlacements;
+        PlaceObjects(objectPlacements);
+        // objectPlacements = null;
+        done = true;
     }
 
     public void PlaceObjects(List<ObjectPlacement> objectPlacements)

@@ -154,11 +154,7 @@ public class DynamicTerrainChunk : TerrainChunk
         {
             lodMeshes[i] = new LODMesh(mapSettings.detailLevels[i].lod);
             lodMeshes[i].UpdateCallback += UpdateTerrainChunk;
-            // TODO this seems like a bug, should be i < colliderLODIndex
-            // if (i == colliderLODIndex)
-            // {
             lodMeshes[i].UpdateCallback += UpdateCollisionMesh;
-            // }
         }
 
         maxViewDst = mapSettings.detailLevels[^1].visibleDstThreshold;
@@ -269,21 +265,21 @@ public class DynamicTerrainChunk : TerrainChunk
         {
             if (lodMeshes[colliderLODIndex].hasMesh)
             {
-                this.meshCollider.sharedMesh = lodMeshes[colliderLODIndex].mesh;
+                var mesh = lodMeshes[colliderLODIndex].mesh;
+                this.meshCollider.sharedMesh = mesh;
                 hasSetCollider = true;
+                UpdateObjects(mesh);
             }
         }
     }
 
-    public void UpdateObjects()
+    public void UpdateObjects(Mesh mesh)
     {
-        LODMesh lodMesh = lodMeshes[0];
-        if (lodMesh.hasMesh)
-        {
-            // Debug.LogFormat("mesh {0}", lodMesh.mesh);
-            // Debug.LogFormat("matrix {0}", terrainMesh.transform.localToWorldMatrix);
-            objectPlacer.CheckAndLoadObjectData(lodMesh.mesh.vertices, terrainMesh.transform.localToWorldMatrix);
-        }
+        // LODMesh lodMesh = lodMeshes[0];
+        // if (lodMesh.hasMesh)
+        // {
+        objectPlacer.CheckAndLoadObjectData(mesh.vertices, terrainMesh.transform.localToWorldMatrix);
+        // }
     }
 
     public bool IsVisible()

@@ -162,24 +162,22 @@ public class ObjectPlacer
     // Take the object placement, plcae it on the terrain mesh, give it a random location.
     private void PlaceObject(ObjectPlacement obj)
     {
-        var origin = UnityEngine.Random.Range(0, 360);
-        var randomRotation = Quaternion.Euler(0, origin, 0);
-        var layer = layerSettings.layers[obj.layerIndex];
-
-        Layer nextLayer = null;
-        if (obj.layerIndex != layerSettings.layers.Length - 1)
+        var positionXY = new Vector3(obj.position.x, meshScale * heightMultiplier, obj.position.z);
+        var position = GetPositionOnTerrain(positionXY);
+        if (position == Vector3.one)
         {
-            nextLayer = layerSettings.layers[obj.layerIndex + 1];
+            return;
         }
 
+        var layer = layerSettings.layers[obj.layerIndex];
         var objectSettings = layer.objectSettings.Settings[obj.prefabIndex];
         UnityEngine.GameObject gameObject = UnityEngine.GameObject.Instantiate(objectSettings.prefab);
 
-        var positionXY = new Vector3(obj.position.x, meshScale * heightMultiplier, obj.position.z);
-        var position = GetPositionOnTerrain(positionXY);
-
         gameObject.transform.parent = terrainMesh.transform;
         gameObject.transform.localPosition = position;
+
+        var origin = UnityEngine.Random.Range(0, 360);
+        var randomRotation = Quaternion.Euler(0, origin, 0);
         gameObject.transform.rotation = randomRotation;
 
         var layerName = "Environment";
@@ -191,11 +189,17 @@ public class ObjectPlacer
             return;
         }
 
-        terrainMesh.layer = layerIndex;
+        gameObject.layer = layerIndex;
 
         if (!objectSettings.hasChildren)
         {
             return;
+        }
+
+        Layer nextLayer = null;
+        if (obj.layerIndex != layerSettings.layers.Length - 1)
+        {
+            nextLayer = layerSettings.layers[obj.layerIndex + 1];
         }
 
         // Fix the child positions
@@ -244,7 +248,7 @@ public class ObjectPlacer
     // Vector3.one is returned if no hit is found.
     private Vector3 GetPositionOnTerrain(Vector3 position)
     {
-        int terrainLayerMask = 1 << LayerMask.NameToLayer("Terrain");
+        int terrainLayerMask = 1 << LayerMask.NameToLayer("Default");
         if (Physics.Raycast(position, Vector3.down, out RaycastHit hit, Mathf.Infinity, terrainLayerMask))
         {
             return hit.point;

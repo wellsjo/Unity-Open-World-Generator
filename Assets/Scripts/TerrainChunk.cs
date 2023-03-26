@@ -57,7 +57,7 @@ public class TerrainChunk
 
     private void SetLayer()
     {
-        var layerName = "Environment";
+        var layerName = "Default";
         int layerIndex = LayerMask.NameToLayer(layerName);
 
         if (layerIndex == -1)
@@ -155,10 +155,10 @@ public class DynamicTerrainChunk : TerrainChunk
             lodMeshes[i] = new LODMesh(mapSettings.detailLevels[i].lod);
             lodMeshes[i].UpdateCallback += UpdateTerrainChunk;
             // TODO this seems like a bug, should be i < colliderLODIndex
-            if (i == colliderLODIndex)
-            {
-                lodMeshes[i].UpdateCallback += UpdateCollisionMesh;
-            }
+            // if (i == colliderLODIndex)
+            // {
+            lodMeshes[i].UpdateCallback += UpdateCollisionMesh;
+            // }
         }
 
         maxViewDst = mapSettings.detailLevels[^1].visibleDstThreshold;
